@@ -1178,7 +1178,7 @@ Exit status: 1 (a problem Dockingbird printed).
 
 ### HOME_NOT_EMPTY
 
-When: The folder Dockingbird would keep its files in already has files it didn't make, so it leaves it alone. The message lists what it found.
+When: The folder Dockingbird would keep its files in already has files it didn't make, so it leaves it alone. The message lists what it found. Your own `instructions` and `vaults` folders, your `versions.toml`, `config.toml`, `browser-solver.json`, `hosts.toml` and `fleet.toml`, the hidden file Finder leaves in a folder it has shown, and the empty `logs` folder `dockingbird clean --all` keeps don't count: a folder holding only those is used.
 
 ```text
 {folder} already has files Dockingbird didn't make, so it won't use it.
@@ -20431,7 +20431,7 @@ Exit status: 0 (done).
 
 ### FLEET_WHY_HOST
 
-When: `dockingbird fleet why` of a waiting workload: for each host of the pool, the first thing that keeps the workload off it, with its figures: a gate line past its bound, what the host has against what the workload needs, a home's room, or a lease of the same kind running there.
+When: `dockingbird fleet why` of a waiting workload: for each host of the pool, the first thing that keeps the workload off it, with its figures: a gate line past its bound, what the host has against what the workload needs, a home's room, a lease of the same kind running there, or a home that links no checkout of the swarm's repository, as of the host's last sample.
 
 ```text
 {host}: {hold}
@@ -20471,6 +20471,12 @@ Or:
 
 ```text
 {host}: {hold}, a {kind} lease runs there
+```
+
+Or:
+
+```text
+{host}: the home {home} links no checkout of the repository, as of the host's last sample
 ```
 
 Next step: none; it only informs.
@@ -20605,7 +20611,7 @@ Exit status: 0 (done).
 
 ### FLEET_NO_CHECKOUT
 
-When: `dockingbird fleet why` or `fleet queue` of a swarm whose start was held: its home has no checkout of the swarm's repository on its branch, or more than one, or the checkout its agents started in is no longer linked there or left the branch; the fleet never clones, moves or guesses. Put that one checkout right, then release the swarm.
+When: `dockingbird fleet why` or `fleet queue` of a swarm whose start was held: its home has no checkout of the swarm's repository on its branch, or more than one, or the checkout its agents started in is no longer linked there or left the branch; or, where the home's `clones` folder in `hosts.toml` lets the fleet fetch the branch into a clone of its own, the home links no checkout of the repository with an `origin` to fetch from, or making that clone or fetching into it failed, with git's last line or the folder's error. The fleet never moves or guesses a checkout. Put it right, then release the swarm.
 
 ```text
 No checkout of {repo} on branch {branch} is linked in the home {home} on {host}.
@@ -20629,8 +20635,22 @@ Link it there again, then: dockingbird fleet release {id}
 Or:
 
 ```text
-The checkout {folder} this swarm started in, in the home {home} on {host}, is no longer on branch {branch}.
+The checkout {folder} of this swarm, in the home {home} on {host}, is no longer on branch {branch}.
 Put it back on {branch}, then: dockingbird fleet release {id}
+```
+
+Or:
+
+```text
+The home {home} on {host} links no checkout of {repo} to fetch branch {branch} from.
+Link one checkout of {repo} there, on any branch, then: dockingbird fleet release {id}
+```
+
+Or:
+
+```text
+Fetching {repo} on branch {branch} into {folder}, for the home {home} on {host}, failed: {git}
+Fix it (is the branch pushed? can the host's git reach the remote?), then: dockingbird fleet release {id}
 ```
 
 Next step: dockingbird fleet release {id}
