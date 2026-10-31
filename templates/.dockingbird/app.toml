@@ -1,0 +1,48 @@
+# A template: copy it to .dockingbird/app.toml in your repo. It names two files
+# of yours beside it, .dockingbird/skills/review.md (skill) and
+# .dockingbird/review-role.md (instructions); write them, or leave those keys
+# out. The operator guide's "Your own commands (configs)" has every key.
+#
+# .dockingbird/app.toml: adds dockingbird review in this checkout. Every key is optional.
+
+# The command: dockingbird review "...", agents review-1, review-2. Default: the file's name, app.
+command = "review"
+# Its one line in dockingbird -h and config list, and for your own harness through dockingbird mcp. Default: none.
+summary = "Review this branch and list what to fix"
+# true: dockingbird start with no --command runs review in this checkout. Default: false.
+default = false
+# On the bus, this file's text, with $TASK replaced by the task, is the first turn. Default: none.
+skill = "skills/review.md"
+# Role text, given to the agent after Dockingbird's own rules. Default: none.
+instructions = "review-role.md"
+# claude or codex. Default: claude. Set here, it is fixed: a start's --harness can't change it.
+harness = "claude"
+# repo: a copy of this repo; scratch: an empty folder of its own, no git repo needed (an added config's command then runs from any folder). Default: repo.
+workspace = "repo"
+# bus: in the background, through messages; terminal: at your terminal. Default: bus. Set, it is fixed.
+mode = "bus"
+# true: load the repo's own Claude Code or Codex settings, hooks and MCP servers, once trusted. Default: false.
+repo_settings = false
+# Its tools: "bus" (messages and files), "default" (claims and commits) or "full" (both). Default: "bus".
+tools = "bus"
+# allowlist: through a proxy of its own, its tool's hosts and those of allow; models: its tool's hosts alone; none: no network, not even its model's API; full: its own network, open to the internet. Default: full, or what dockingbird egress set.
+egress = "allowlist"
+# With allowlist, what else it may reach: the presets registries (package registries) and github (GitHub's content), or hosts such as "docs.python.org" and "*.corp.example". Default: the list dockingbird egress set, else nothing beyond its tool's own hosts.
+allow = ["registries", "github"]
+# Fixed arguments for the tool, such as its model. Default: none.
+harness_args = ["--model", "claude-haiku-5-5"]
+# mise's environments for its agents, comma-separated: "ci" makes mise read mise.ci.toml over mise.toml (MISE_ENV). Default: none.
+mise_env = "ci"
+
+# Variables the agent's tool sees: settings, never secrets. Default: none.
+[env]
+REVIEW_STYLE = "short"
+
+# Bounds on an agent that works on the bus.
+[limits]
+# A turn that runs longer is interrupted and reported; at least 1.
+# Default: no turn deadline (a stuck turn ends with the session).
+turn_minutes = 20
+# The agent stops itself after this many hours; at least 1, and at most
+# the installation's maximum (168 by default). Default: 12.
+session_hours = 4

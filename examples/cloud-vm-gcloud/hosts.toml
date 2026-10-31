@@ -1,0 +1,5 @@
+[[host]]
+name = "cloud"
+gcloud = "cloud-1"
+zone = "europe-west1-b"
+project = "example-project"

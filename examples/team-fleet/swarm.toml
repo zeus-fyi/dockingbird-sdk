@@ -1,0 +1,47 @@
+# A swarm definition: dockingbird fleet submit swarm.toml queues it on the pool.
+schema = 1
+# The project your fleet.toml's role submits for.
+project = "example"
+# A repeat of this key answers the swarm it queued first.
+key = "example-feature-1"
+priority = "P2"
+
+# The repository and branch the agents work on, linked in each home below.
+[source]
+repository = "example-org/example-app"
+branch = "feature/example"
+
+# The pool's hosts in order of preference, each with the home its agents
+# start in, spelled as that host's hosts.toml lists the home.
+[placement]
+hosts = ["lab", "cloud"]
+home.lab = "/opt/dockingbird/homes/team-1"
+home.cloud = "/opt/dockingbird/homes/team-1"
+
+# The agents. Each role's brief is a Markdown file of yours, in this folder;
+# reviews and tests name the roles whose commits this one reviews or tests.
+[[role]]
+name = "reviewer"
+harness = "claude"
+model = "sonnet"
+effort = "high"
+count = 1
+brief = "briefs/reviewer.md"
+reviews = ["builder"]
+
+[[role]]
+name = "tester"
+harness = "claude"
+model = "sonnet"
+effort = "high"
+count = 1
+brief = "briefs/tester.md"
+tests = ["builder"]
+
+[[role]]
+name = "builder"
+harness = "claude"
+model = "opus"
+effort = "high"
+count = 2
+brief = "briefs/builder.md"
