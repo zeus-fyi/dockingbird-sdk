@@ -70,7 +70,7 @@ Explanation pages. No commands to run, one diagram each (section E).
 
 | Path | Status | Covers |
 |---|---|---|
-| `fleet-scheduler.md`, `control-plane.md` | new | section K |
+| `fleet-scheduler.md`, `control-plane.md` | new | section J |
 | `observability.md` | new | the three metric sources, their freshness, what they never hold (section I) |
 | `architecture.md` | new | a host runs the CLI and one or more homes; a home runs agent containers; the agents' commits come back over sync; nothing from the computer mounts into an agent unless connected by name |
 | `glossary.md` | new | home, agent, the bus, a turn, a delivery, a question row, config, connection, host, pool, swarm, role, workload, the control plane, seat, computer |
@@ -106,7 +106,7 @@ the message ids a reader may meet and the page that explains each.
 | `clean-and-uninstall.md` | split | free disk, delete stopped agents, remove everything and give the seat back, uninstall the tool | `clean`, `clean NAME`, `clean --all`, `uv tool uninstall` |
 | `backup-and-restore.md` | new | what the home holds, the Docker volumes that hold sign-ins, what to copy before replacing a computer, what a restored home needs | `homes`, `status` |
 | `networking.md`, `tailscale.md`, `other-networks.md`, `cloud-vms.md`, `github.md`, `mcp-and-services.md`, `databases.md`, `secrets-vault.md` | new | section H | see section H |
-| `fleet-scheduler.md`, `changing-a-running-swarm.md`, `control-plane.md` | split and new, "for teams" | section K | `fleet submit`, `fleet run`, `cp init`, `node join` |
+| `fleet-scheduler.md`, `changing-a-running-swarm.md`, `control-plane.md` | split and new, "for teams" | section J | `fleet submit`, `fleet run`, `cp init`, `node join` |
 | `metrics.md`, `prometheus.md`, `grafana.md` | new | section I | `fleet scrape`, `fleet probe`, `fleet queue --metrics` |
 | `data-and-privacy.md` | new | what leaves the computer (licence check-ins, the model API traffic of the agent's own tool, nothing from a repo to the publisher), what is kept where, how to see it | `license status`, `egress` |
 
@@ -133,7 +133,7 @@ Lookup pages, generated where the product can generate them, so they cannot drif
 | `integration/compatibility.md` | exists; add `org.toml` and exits 69, 77, 78 | the promise |
 | `integration/exit-codes.md` | new | 0, 1, 2, the tool's own, 69, 77, 78 in one table with what a script does on each |
 | `environment-variables.md` | new | every `DOCKINGBIRD_<NAME>` setting a customer may set, with its default |
-| `fleet-tools.md`, `files/fleet-store.md` | new | the ten fleet tools; the store's schemas and roles (section K) |
+| `fleet-tools.md`, `files/fleet-store.md` | new | the ten fleet tools; the store's schemas and roles (section J) |
 | `ports-and-hosts.md` | new | every port and interface the product uses (section H) |
 | `metrics.md` | new, generated | every metric family with type, labels, unit and help line (section I) |
 | `limits.md` | new | turn and session bounds, the idle stop, the hosts list cap, the activations list cap, message sizes |
@@ -449,7 +449,7 @@ losses, API retries, unreadable homes).
 Out of the docs: the publisher's own Grafana and Prometheus deployment, its hosts, its recording rules, any
 cAdvisor or node exporter wiring, the development VM, and any figure the product keeps for its own tests.
 
-## K. Fleet scheduling and the control plane
+## J. Fleet scheduling and the control plane
 
 Two features share the word "fleet". The fleet scheduler is a pool of hosts on an organisation's PostgreSQL store that
 queues swarms and admits each where it fits. The control plane is a home of its own that other computers join, so an
@@ -480,7 +480,7 @@ work queue); the guide pages list the ones their steps meet, the scheduler's ref
 login of the wrong kind, a host not in the pool), then the control plane's (a label in use, a bundle too large, a
 version mismatch, a name too long).
 
-## L. Practices the set adopts, and the evidence for each
+## K. Practices the set adopts, and the evidence for each
 
 A web review of developer documentation research and the best-regarded developer docs (2026-11-04) found measured
 support for three practices and convention with strong precedent for the rest. The set adopts the fifteen below. Each
@@ -518,7 +518,7 @@ release, while a command and its printed line do not.
    refusals (the three gaps and the eleven half-documented journey steps).
 4. The concepts pages with their diagrams, and the glossary.
 5. The guide split of the operator guide, one section per pull request, with the generated command reference.
-6. The fleet scheduler and control plane pages with their three cookbooks (section K), the networking and integration guides (section H) and the observability set with the exporter, the Prometheus
+6. The fleet scheduler and control plane pages with their three cookbooks (section J), the networking and integration guides (section H) and the observability set with the exporter, the Prometheus
    file, the dashboard and the queries page (section I).
 7. The cookbooks marked priority 2, the FAQ, the reference pages for files, the embeddings tier.
 8. Pending decisions: `SUPPORT.md`, `LICENSE`, the legal pages, the GUI channel, the hosted paradigms. Each is a page
