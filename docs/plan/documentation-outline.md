@@ -12,8 +12,8 @@ Codex) that a customer points at these docs to do the set-up.
 Three rules hold for every page:
 
 1. The docs are the single source of the customer's commands. A cookbook shows the command a reference page already
-   prints, with the done line that page prints. The onboarding check runs the documents' own commands, so a page that
-   drifts from the product fails that check.
+   prints, with the done line that page prints. A planned onboarding check (build order, step 2) will run the
+   documents' own commands, so a page that drifts from the product will fail that check.
 2. Every step names its done line: the exact line the product prints when the step worked, or the message id when it
    did not. A reader, or an agent, can tell at each step whether to go on.
 3. Nothing internal. Section G is the boundary. The export that writes this repository refuses part of it by code;
@@ -196,7 +196,7 @@ compatibility promise covers them. The plan keeps the page and adds four things.
    their "When:" line and a link to the entry: install, Docker and licensing (65 entries); homes, the checkout and
    toolchains (110); agents, status, sync and clean (300); the bus (70); configs, connections and host resources
    (197); the fleet, swarms and the work queue (210); benchmark jobs (51); sign-ins and the org store (91); updates
-   (43); the GUI and the MCP server (27). Two entries are developer-only and leave the public set.
+   (43); the GUI and the MCP server (27). Two entries are developer-only; the catalogue generator skips them in the exported copy.
 2. A "when it fails" block at the end of every guide page: the ids a reader may meet on that page, in the order the
    steps meet them, each with one line and a link. The onboarding journey's order sets the getting-started pages' lists.
 3. Three narrative pages for the failures a first-week reader meets as a sequence rather than as one message: an
@@ -265,7 +265,7 @@ All Mermaid, in the page they explain, with a text alternative under each. One t
 | A swarm's life | guides/swarms.md | a definition's roles, `fleet submit`, placement on a host, the coordinator role, the roles' `send_to`, the end |
 | A rolling update | guides/updates.md | `dockingbird update` on a home with running agents: each agent takes the release at its next stopping point; nothing is killed mid-turn |
 | The fleet | guides/fleet.md | the control plane's home, member computers joined with `node join`, the scheduler's pool and placement order |
-| Licensing per computer | guides/licensing.md | a key, seats, a computer id, activate and release; what runs offline and for how long |
+| Seats and computers | guides/licensing.md | a key, a seat per person, up to three computers per seat, a computer id, activate and release; what runs offline and for how long |
 | The integration surface | integration/README.md | the three doors: `--json` envelopes, the MCP host tools, the files a customer writes; the compatibility promise covers these and nothing else |
 | Network egress | guides/security-and-network.md | the agent container's egress modes (full, allowlist, models, none); which hosts each mode reaches |
 
@@ -348,7 +348,7 @@ row says what the evidence is, so a later reader knows which rules to keep when 
 | # | Practice | Evidence | How this set applies it |
 |---|---|---|---|
 | 1 | Complete, copy-and-paste examples with real output and no placeholders | Study. Meng, Steinhardt and Schubert (2018, 2020): developers scan a page for the code first, and placeholders blocked reuse; a follow-up found fewer errors and faster work from guideline-optimised docs. Postman 2020 (n above 13,500): missing docs is the top obstacle at 54.3%, better examples the top request at 66.4%. SlashData 2023 (n 16,831): examples 41%, accuracy 43%. | Rule 2 above: every step has its done line. Examples name `example-org/example-app`, never a bracketed placeholder. |
-| 2 | Docs accurate at every release | Study. SlashData 2023: accurate and up to date is the first property asked of docs (43%). DORA 2023: documentation quality raises team performance by about 25% and amplifies other practices. GitBook's State of Docs 2026 (n 1,131): 30% name keeping docs in sync as their biggest problem. | The export runs from the product repository at each release; the onboarding check runs the documents' commands; the search build fails on a dead link or an unknown message id. |
+| 2 | Docs accurate at every release | Study. SlashData 2023: accurate and up to date is the first property asked of docs (43%). DORA 2023: documentation quality raises team performance by about 25% and amplifies other practices. GitBook's State of Docs 2026 (n 1,131): 30% name keeping docs in sync as their biggest problem. | The export runs from the product repository at each release; the planned onboarding check will run the documents' commands; the search build fails on a dead link or an unknown message id. |
 | 3 | A quickstart that ends in a visible result inside 15 minutes | Convention. Cloudflare's style guide requires each product to have an Overview and a Get started that "state and show the working outcome". Sequin moved tutorials first after watching readers. | The quickstart ends with an agent's commit on the reader's branch; the first start's 5-minute build is stated up front. |
 | 4 | A pointer to the page index on every page | Vendor report. Mintlify, 2,400 agent runs on 20 sites: failed requests per task fell from 2.23 on HTML to 0.11 on Markdown with an `llms.txt` link, with 26 to 60% fewer tokens. Ahrefs (137,210 domains): crawlers never probe for the file, so the link has to be on the page. | `llms.txt` at the root; a one-line pointer to it at the top of every page; `docs/manifest.json` for tools (section F). |
 | 5 | Clean Markdown at a stable URL | Vendor reports. Cloudflare: one post at 16,180 tokens as HTML and 3,150 as Markdown. Mintlify: 83.7% of agent requests use a machine route. | The repository is Markdown; the hosted site serves each page's `.md` twin at the same path and answers `Accept: text/markdown`. |
@@ -370,8 +370,9 @@ release, while a command and its printed line do not.
 ## Build order
 
 1. Fix the leak lines and the two example faults at the source, so the next export is clean (one pull request).
-2. Write `llms.txt`, `docs/manifest.json`, the search build and the CI workflow (section F, tiers 1 and 2). From here on
-   every later page is findable the day it lands.
+2. Write `llms.txt`, `docs/manifest.json`, the search build and the CI workflow (section F, tiers 1 and 2), and the
+   onboarding check that runs the quickstart's commands against a fresh install. From here on every later page is
+   findable the day it lands, and a command that drifts fails a check.
 3. The getting-started pages, the licensing guide and the two narrative troubleshooting pages for install and licence
    refusals (the three gaps and the eleven half-documented journey steps).
 4. The concepts pages with their diagrams, and the glossary.
