@@ -70,6 +70,8 @@ Explanation pages. No commands to run, one diagram each (section E).
 
 | Path | Status | Covers |
 |---|---|---|
+| `fleet-scheduler.md`, `control-plane.md` | new | section K |
+| `observability.md` | new | the three metric sources, their freshness, what they never hold (section I) |
 | `architecture.md` | new | a host runs the CLI and one or more homes; a home runs agent containers; the agents' commits come back over sync; nothing from the computer mounts into an agent unless connected by name |
 | `glossary.md` | new | home, agent, the bus, a turn, a delivery, a question row, config, connection, host, pool, swarm, role, workload, the control plane, seat, computer |
 | `agents-and-the-bus.md` | new | how a task reaches an agent, how its answer comes back, what `wait`, `inbox`, `read`, `send` and `results` each move, what a question row is and why a start can block on one |
@@ -103,6 +105,9 @@ the message ids a reader may meet and the page that explains each.
 | `mcp-server.md` | split | let your own Claude Code or Codex start agents through `dockingbird mcp`; install into the harness; the eleven tools in one table | `mcp install`, `mcp install --check` |
 | `clean-and-uninstall.md` | split | free disk, delete stopped agents, remove everything and give the seat back, uninstall the tool | `clean`, `clean NAME`, `clean --all`, `uv tool uninstall` |
 | `backup-and-restore.md` | new | what the home holds, the Docker volumes that hold sign-ins, what to copy before replacing a computer, what a restored home needs | `homes`, `status` |
+| `networking.md`, `tailscale.md`, `other-networks.md`, `cloud-vms.md`, `github.md`, `mcp-and-services.md`, `databases.md`, `secrets-vault.md` | new | section H | see section H |
+| `fleet-scheduler.md`, `changing-a-running-swarm.md`, `control-plane.md` | split and new, "for teams" | section K | `fleet submit`, `fleet run`, `cp init`, `node join` |
+| `metrics.md`, `prometheus.md`, `grafana.md` | new | section I | `fleet scrape`, `fleet probe`, `fleet queue --metrics` |
 | `data-and-privacy.md` | new | what leaves the computer (licence check-ins, the model API traffic of the agent's own tool, nothing from a repo to the publisher), what is kept where, how to see it | `license status`, `egress` |
 
 The operator guide stays in the repository as the long form until each of these pages exists; each new page links to
@@ -128,6 +133,9 @@ Lookup pages, generated where the product can generate them, so they cannot drif
 | `integration/compatibility.md` | exists; add `org.toml` and exits 69, 77, 78 | the promise |
 | `integration/exit-codes.md` | new | 0, 1, 2, the tool's own, 69, 77, 78 in one table with what a script does on each |
 | `environment-variables.md` | new | every `DOCKINGBIRD_<NAME>` setting a customer may set, with its default |
+| `fleet-tools.md`, `files/fleet-store.md` | new | the ten fleet tools; the store's schemas and roles (section K) |
+| `ports-and-hosts.md` | new | every port and interface the product uses (section H) |
+| `metrics.md` | new, generated | every metric family with type, labels, unit and help line (section I) |
 | `limits.md` | new | turn and session bounds, the idle stop, the hosts list cap, the activations list cap, message sizes |
 
 ### `docs/troubleshooting/`
@@ -181,6 +189,12 @@ with the first public version; 2 within the next two releases; 3 when its featur
 | 17 | Join a second computer to a control plane | the control plane's home, a token per computer, join, status, remove | `cp init`, `cp token`, `node join`, `cp status`, `cp remove` | new | 2 |
 | 18 | Uninstall completely | stop, clean everything, give the seat back, remove the tool, prune the builder | `stop`, `clean --all`, `uv tool uninstall`, `docker builder prune` | exists in the quickstart | 1 |
 | 19 | The GUI | install, open, the tabs, copy out, detach | `ui --install`, `ui` | not yet | 3 |
+| 21 | A fleet on a tailnet | the control plane's tailnet address, the served hub port, the grant for a tagged VM, one join per computer | `cp init --hub-address`, `tailscale serve`, `cp token`, `node join` | new | 2 |
+| 22 | A host behind a bastion | a `ProxyJump` entry, the host set over it, the `--path` fix | `fleet hosts set --ssh` | new | 2 |
+| 23 | Prometheus and Grafana for a fleet | the exporter on each host, the two scrape jobs, the default dashboard imported, one alert | `fleet scrape`, `fleet probe --json`, `fleet queue --metrics` | new | 1 |
+| 24 | Run a test suite under a lease | a lease of cores and memory, the wait for a host, the command's environment | `fleet run --cores --memory --bound` | new | 2 |
+| 25 | Join, remove and rejoin a computer | the bundle, the join, a removal, a new bundle | `cp token`, `node join`, `cp remove`, `node leave` | new | 2 |
+| 26 | Change a running swarm | add two agents of a role, retire one, prune after a merge | `fleet add`, `fleet retire`, `fleet prune` | new | 2 |
 | 20 | Sign in to a hosted store | the login the publisher issues, the pointer, the TLS settings | `org login` | not yet | 3 |
 
 Every Python example reads the envelope's `id` and `fields` and never its `lines`, uses the standard library only, and
@@ -264,9 +278,13 @@ All Mermaid, in the page they explain, with a text alternative under each. One t
 | An agent's life | concepts/agents.md | start, turns, a question row, a stop; which commands move it between states |
 | A swarm's life | guides/swarms.md | a definition's roles, `fleet submit`, placement on a host, the coordinator role, the roles' `send_to`, the end |
 | A rolling update | guides/updates.md | `dockingbird update` on a home with running agents: each agent takes the release at its next stopping point; nothing is killed mid-turn |
+| A workload's life | guides/fleet-scheduler.md | submitted, pending, held, admitted, starting, running, paused, done or cancelled, and the command that moves it |
+| A member joins | guides/control-plane.md | the bundle from `cp token` to `node join`, the hub port, the fleet session a start opens, the fleet inbox beside the agent's own |
 | The fleet | guides/fleet.md | the control plane's home, member computers joined with `node join`, the scheduler's pool and placement order |
 | Seats and computers | guides/licensing.md | a key, a seat per person, up to three computers per seat, a computer id, activate and release; what runs offline and for how long |
 | The integration surface | integration/README.md | the three doors: `--json` envelopes, the MCP host tools, the files a customer writes; the compatibility promise covers these and nothing else |
+| The metrics path | guides/prometheus.md | an agent's `/metrics` inside its container network; the host's `fleet scrape` rendering it; the exporter; Prometheus; Grafana; nothing published from the container |
+| A fleet on a tailnet | guides/tailscale.md | the control plane's hub port served on the tailnet; members joining over it; ssh routes over the same tailnet |
 | Network egress | guides/security-and-network.md | the agent container's egress modes (full, allowlist, models, none); which hosts each mode reaches |
 
 ## F. Search plan: pre-computed and static
@@ -329,6 +347,7 @@ These never appear in this repo:
 - Source code of the product: no module names, no function names, no line numbers, no internals of the bus, the scheduler, the switcher or the licence client.
 - The work queue, skills, agent definitions, native-mode documentation, test fixtures, the licence inventory with its internal columns.
 - A secret, a key prefix, a token, a signing key, a hostname of an internal machine, a tailnet address.
+- The publisher's own monitoring: its Grafana, Prometheus, exporters, recording rules, hosts and dashboards; any metric the product keeps for its own tests.
 - Unreleased features: a page documents what the released version prints; a feature behind a disabled gate is marked "not yet" or left out.
 
 These appear, and the page states the reason each time:
@@ -338,8 +357,130 @@ These appear, and the page states the reason each time:
 - The files a customer writes and every key: the customer owns them.
 - The image's prerequisites and what the first build does (time, disk): the customer waits for it.
 - The egress modes and the hosts each reaches: the customer's network team asks.
+- Metric family names, labels and the general queries: a customer's Prometheus reads them, and the generated reference lists them.
 - Debug output a customer sends to support: `status --json`, `inspect`, the logs folder's layout.
-## H. Practices the set adopts, and the evidence for each
+## H. Networking and integrations
+
+Customers reach their hosts over a private network they already run. The docs name the setups the product was built
+against and show the one thing each needs. Internal addresses, device names and policies stay out; placeholders
+stand in.
+
+| Page | Covers | Commands and files |
+|---|---|---|
+| `guides/networking.md` | the product's three network uses: the CLI reaching a host over ssh or gcloud; member computers reaching the control plane's hub on its TCP port; agents reaching the internet through the egress modes. What each needs open, what nothing else needs. | `fleet hosts set --ssh`, `fleet hosts set --gcloud`, `cp init --hub-address`, `egress` |
+| `guides/tailscale.md` | a tailnet as the fleet's network: the control plane's tailnet IPv4 as the hub address; `tailscale serve` to expose the hub port from loopback; the ACL grant a tagged cloud member needs; ssh over the tailnet with MagicDNS names in `hosts.toml`; what the tailnet makes unnecessary (no public ports, no VPN); Tailscale SSH as an alternative to keys | `tailscale ip -4`, `tailscale serve --bg --tcp 4222 tcp://127.0.0.1:4222`, the policy grant line, `fleet hosts set lab --ssh lab` |
+| `guides/other-networks.md` | the same three uses on a plain VPN or a cloud VPC: a WireGuard mesh, a bastion with `ProxyJump` in `~/.ssh/config`, a cloud VM reached by `gcloud compute ssh` with no public IP, an AWS instance over Session Manager; what to put in `hosts.toml` for each | `~/.ssh/config` entries, `fleet hosts set --ssh`, `fleet hosts set --gcloud --zone --project` |
+| `guides/cloud-vms.md` | a Linux VM as a host: the arm64 image, Docker Engine with buildx, uv, git; a stopped VM that an admitter starts; disk sizing for the image and homes; the `--path` fix when the login shell differs | `fleet hosts set --gcloud`, `fleet hosts add --power gcloud`, `fleet probe` |
+| `guides/github.md` | agents working on GitHub repositories: a deploy key or an ssh agent, a branch, known hosts; grants to one agent or a role; what the agent can and cannot push | `connect NAME --github OWNER/REPO --key PATH`, `connect --agent`, `connect --branch`, `connections`, `revoke` |
+| `guides/mcp-and-services.md` | giving agents an MCP server by URL, a local program as a service with typed arguments, a browser in its own container; serving them as yourself on a schedule | `connect --mcp URL`, `connect --service FILE`, `connect --browser chrome`, `serve`, `serve --unit` |
+| `guides/databases.md` | a brokered database connection: the password stays with the host, the agent gets a name; read and write grants; the connection file's keys | `connect NAME --database URL --password --writes`, `connect --to-role`, `connect --revoke` |
+| `guides/secrets-vault.md` | a password store as the source of logins and TOTP for a browser session | `connect --vault gopass --store NAME --login ...` |
+| `reference/ports-and-hosts.md` | every port the product opens or expects and on which interface: the hub's port on loopback, the agent's metrics port inside its container network, the admitter's metrics port, the ssh and gcloud routes; the hosts an allowlist preset covers | none |
+
+Cookbooks added to section B, priority 2: "A fleet on a tailnet" (the control plane, two Macs and a tagged cloud VM, the
+grant, one `node join` per computer) and "A host behind a bastion" (a `ProxyJump` entry, `fleet hosts set`, the
+`--path` fix).
+
+Out of scope for the docs: any company's own tailnet, device names, ACL files, exporter hosts or VM names. The
+examples use `tag:lab`, `control-plane.example`, `lab.example`.
+
+## I. Observability: metrics, Prometheus and Grafana
+
+Every agent container serves `GET /metrics` in the Prometheus text format on a fixed port inside its own container
+network, labelled on the container so a pod monitor would find it. On Docker no port is published; the host renders
+the same figures with `dockingbird fleet scrape`, read from the home's status, with the labels `profile`, `agent`,
+`session` and `tool` (plus `team` and `role` for a swarm's agent). The host's own figures come from
+`dockingbird fleet probe --json`; the fleet scheduler's admitter serves its families on its own port, and
+`dockingbird fleet queue --metrics` prints them.
+
+| Page or file | Covers |
+|---|---|
+| `concepts/observability.md` | the three sources (an agent's `/metrics`, the host probe, the admitter), which figures each holds, how fresh each is (an agent's figures update at its turn's end), and what none of them hold (no message text, no repository content, no names a program printed) |
+| `guides/metrics.md` | read the figures by hand: `fleet scrape`, `fleet probe`, `fleet read-home`, `fleet queue --metrics`, `status --json`; the labels; the `--json` forms for a script |
+| `guides/prometheus.md` | collect them: a small exporter the customer runs on each host (standard-library Python, one HTTP port, runs `fleet probe --json` and `fleet scrape` per home on an interval and serves one page), a `prometheus.yml` with one job per host and the admitter as a second job, scrape intervals that match the figures' freshness (30 s for the host, 60 s per home), a `up`-style gauge per home so an unreadable home shows as such |
+| `guides/grafana.md` | import the default dashboard, point it at the Prometheus datasource, the rows it has, how to add a host, how to alert on the three signals most worth an alert (an agent's context near its compact point, a host over its load line, the queue's oldest wait) |
+| `reference/metrics.md` | generated: every family with its type, labels, unit and help line, the agent families first, the fleet families second, the exporter's meta gauges last |
+| `examples/observability/exporter.py` | the exporter above; standard library only; reads the envelope's `fields`, never its `lines` |
+| `examples/observability/prometheus.yml` | two jobs, placeholders for host names and ports |
+| `examples/observability/dashboard.json` | the default Grafana dashboard, datasource uid as a variable, hosts and homes as template variables |
+| `examples/observability/queries.md` | the general queries below, each with one line on what it answers |
+
+Metric families the docs cover, all customer-facing:
+
+- Agent gauges (`dockingbird_agent_` prefix): `info` (model, effort, state as labels), `turns`, `turn_running`,
+  `last_turn` (state as a label), `last_turn_timestamp_seconds`, `context_used_tokens`, `context_window_tokens`,
+  `compact_at_tokens`, `compactions`, `changed_paths`, `untracked_paths`, `changing`, `screen_held`,
+  `sign_in_retry`, `token_failed`, `bus_losses`, `api_retries`, `model_tokens` (labels `model`, `type` in input,
+  output, cache_read, cache_creation), `model_cost_usd` (label `model`), and the last result's `result_input_tokens`,
+  `result_output_tokens`, `result_cache_read_tokens`, `result_cache_creation_tokens`,
+  `result_reasoning_output_tokens`, `result_cost_usd`, `result_duration_seconds`, `result_turns`.
+- Fleet families (`fleet_` prefix, from the admitter): `queue_depth` by priority, `reserved_millicores` and
+  `reserved_mib` per host, `headroom_millicores` and `headroom_mib` per host, `gate_red`, `host_stale`,
+  `interrupted`, `holds` by reason, `agent_cap`, and the counters `admissions_total`, `starts_total`,
+  `queue_wait_seconds_total` per host and `agent_seconds_total` and `agent_idle_seconds_total` per role and host.
+- Host figures from the probe, exported by the example exporter: cores, load against the load line, idle cores,
+  free memory, swap, Docker's CPUs and memory, containers running, and per kind of process its CPU and memory.
+
+The generated reference is the authority for the names; the list above is what the docs explain.
+
+General queries the dashboard and the queries page ship (every one works on any installation; none names a host):
+
+| Question | Query shape |
+|---|---|
+| How full is each agent's context? | `dockingbird_agent_context_used_tokens / dockingbird_agent_context_window_tokens` by `agent` |
+| Which agents are near their compact point? | `dockingbird_agent_context_used_tokens / dockingbird_agent_compact_at_tokens > 0.9` |
+| How many agents are in each state? | `count by (state) (dockingbird_agent_info)` |
+| What does each model cost per hour? | `sum by (model) (rate(dockingbird_agent_model_cost_usd[1h])) * 3600` |
+| Token throughput by type | `sum by (type) (rate(dockingbird_agent_model_tokens[15m]))` |
+| Turns in the last hour per agent | `increase(dockingbird_agent_turns[1h])` |
+| Agents whose sign-in is failing | `dockingbird_agent_sign_in_retry > 0 or dockingbird_agent_token_failed > 0` |
+| Agents silent for over an hour | `time() - dockingbird_agent_last_turn_timestamp_seconds > 3600` |
+| Queue depth by priority | `fleet_queue_depth` |
+| Mean queue wait per host | `rate(fleet_queue_wait_seconds_total[1h]) / rate(fleet_admissions_total[1h])` |
+| Headroom per host | `fleet_headroom_millicores`, `fleet_headroom_mib` |
+| Idle share per role | `rate(fleet_agent_idle_seconds_total[1h]) / rate(fleet_agent_seconds_total[1h])` |
+| Homes the exporter could not read | the exporter's `up`-style gauge `== 0` |
+
+The default dashboard's rows, top to bottom: fleet (queue depth, headroom per host, holds by reason, oldest wait);
+hosts (load against the line, memory, containers); agents (a table of every agent with state, model, context fill,
+last turn age, cost); cost (per model per hour, cumulative today); health (sign-in retries, token failures, bus
+losses, API retries, unreadable homes).
+
+Out of the docs: the publisher's own Grafana and Prometheus deployment, its hosts, its recording rules, any
+cAdvisor or node exporter wiring, the development VM, and any figure the product keeps for its own tests.
+
+## K. Fleet scheduling and the control plane
+
+Two features share the word "fleet". The fleet scheduler is a pool of hosts on an organisation's PostgreSQL store that
+queues swarms and admits each where it fits. The control plane is a home of its own that other computers join, so an
+agent on one computer can message an agent on another. A team uses either alone or both together. The docs give each
+its own concept page, guide, reference rows and cookbook.
+
+| Page | Status | Covers | Commands and files |
+|---|---|---|---|
+| `concepts/fleet-scheduler.md` | new | the pool and its hosts (cores, memory, a load line, a rank, an agent cap, a power setting for a stopped VM); a workload (a swarm or a lease) with a priority P0 to P3, a reservation and an age; the gate (green or red per host); admission by priority then age; holds and why a workload waits; the worker and the admitter as the two long-running services; what a host's sample is and how often it is published (30 s) | none |
+| `guides/fleet-scheduler.md` | split, "for teams" | the install order: the store on PostgreSQL 18, the admin role, `org create` for the schemas, one login role per worker and per person, `org login` on each computer as its kind, the linked checkout per home with a `fleet-link` agent; then submit, describe, queue, why, the controls (hold, release, pause, resume, cancel, done, set priority), a check run under a lease, draining and policy per host, and `fleet update` across the pool in rank order | `org login`, `org create`, `fleet hosts add --os --cores --memory --line --rank --agent-cap --power`, `fleet hosts policy`, `fleet hosts drain`, `fleet worker --host`, `fleet admitter`, `start --as fleet-link`, `fleet submit`, `fleet describe`, `fleet queue`, `fleet why`, `fleet ledger`, `fleet hold`, `fleet release`, `fleet pause`, `fleet resume`, `fleet cancel`, `fleet done`, `fleet set --priority`, `fleet run --cores --memory --bound`, `fleet update --release --host` |
+| `guides/changing-a-running-swarm.md` | new | add agents of a role, retire or replace one, reassign a reviewer or tester, prune after a merge; what each does to the agents still working (each stops after its running turn) | `fleet add ID ROLE --count`, `fleet retire ID NAME`, `fleet replace ID NAME --fresh`, `fleet assign ID NAME --reviewer --tester`, `fleet prune ID --merged SHA`, `swarm list`, `swarm add`, `swarm role`, `swarm assign` |
+| `concepts/control-plane.md` | new | one control plane home and the computers that join it; the hub on its TCP port, on loopback until served to the private network; a bundle per computer, shown once; a member's agents get a fleet name (label, dash, name) and a fleet inbox; what the control plane keeps (a public key and a token digest per computer) and what it never holds | none |
+| `guides/control-plane.md` | split | initialise the control plane with the hub's address on the private network; serve the port (section H); add a computer and paste its bundle into `node join` on that computer's home; status; remove and rejoin a computer; turn the control plane off; what happens after a restart (the first `cp status` starts it again, members reconnect); the update order (control plane first, members next, `NODE_VERSION_MISMATCH` until they match); the five conditions for a member in a cloud; the limits (label length, name length, the overview's row cap, the bundle size, the call timeout) | `cp init --hub-address`, `cp token --host --platform`, `node join`, `node leave`, `cp status`, `cp status --json`, `cp remove`, `cp off`, `status` |
+| `reference/fleet-tools.md` | new | the ten fleet tools an agent on a joined home gets beside its bus tools: `fleet_send`, `fleet_inbox`, `fleet_read`, `fleet_ack`, `fleet_wait`, `fleet_thread`, `fleet_withdraw`, `fleet_artifact_put`, `fleet_artifact_get`, `fleet_whoami`; each with its arguments and who it can reach (a fleet agent by fleet name, an agent of the control plane's home, or the operator) | none |
+| `reference/files/fleet-store.md` | new | the store's three schemas (fleet, org, work) by purpose, the role groups (`fleet_admin`, `fleet_worker`, `fleet_submitter_<project>`), the one migration order rule (control plane and workers after the admin's `org create`), the older-workers table | none |
+| `reference/exit-codes.md` | add | 69 (the store unreachable), 77 (a login outside `fleet_admin` on an admin command), 78 (a fleet refusal) | none |
+
+Cookbooks added to section B: "Run a test suite under a lease" (`fleet run --cores 4 --memory 8g --bound 30m -- make
+test`, the wait, the environment variables the command sees, priority 2), "Join, remove and rejoin a computer"
+(`cp token`, `node join`, `cp remove`, `node leave`, a new bundle, priority 2) and "Change a running swarm" (add two
+graders, retire one, prune after a merge, priority 2). Diagrams added to section E: "A workload's life" (submitted,
+pending, held, admitted, starting, running, paused, done or cancelled, with the command that moves it) and "A member
+joins" (the bundle's path from `cp token` to `node join`, the hub port, the fleet session a start opens, the fleet
+inbox).
+
+Messages the pages end with: the fleet domain of the catalogue holds 210 entries (fleet, swarm, control plane, node,
+work queue); the guide pages list the ones their steps meet, the scheduler's refusals first (a definition's check, a
+login of the wrong kind, a host not in the pool), then the control plane's (a label in use, a bundle too large, a
+version mismatch, a name too long).
+
+## L. Practices the set adopts, and the evidence for each
 
 A web review of developer documentation research and the best-regarded developer docs (2026-11-04) found measured
 support for three practices and convention with strong precedent for the rest. The set adopts the fifteen below. Each
@@ -377,6 +518,8 @@ release, while a command and its printed line do not.
    refusals (the three gaps and the eleven half-documented journey steps).
 4. The concepts pages with their diagrams, and the glossary.
 5. The guide split of the operator guide, one section per pull request, with the generated command reference.
-6. The cookbooks marked priority 2, the FAQ, the reference pages for files, the embeddings tier.
-7. Pending decisions: `SUPPORT.md`, `LICENSE`, the legal pages, the GUI channel, the hosted paradigms. Each is a page
+6. The fleet scheduler and control plane pages with their three cookbooks (section K), the networking and integration guides (section H) and the observability set with the exporter, the Prometheus
+   file, the dashboard and the queries page (section I).
+7. The cookbooks marked priority 2, the FAQ, the reference pages for files, the embeddings tier.
+8. Pending decisions: `SUPPORT.md`, `LICENSE`, the legal pages, the GUI channel, the hosted paradigms. Each is a page
    already named above; it ships when its decision lands.
