@@ -10,7 +10,7 @@ JSON object on stdout:
     {"status": [...], "hosts": [...], "fleet": {"local": [...], "lab": [...]}}
 
 each list holding every envelope a command printed, by its id, exit_code
-and fields, never its lines (docs/integration/json.md): "hosts" is fleet
+and fields, never its lines (docs/reference/integration/json.md): "hosts" is fleet
 hosts', so a hosts file Dockingbird refuses shows there, and a host that
 could not be read has its refusal's envelope in its list, as fleet agents
 gives it. A line that is no envelope goes to stderr. Standard library

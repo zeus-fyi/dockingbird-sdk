@@ -7,7 +7,7 @@ against BASE (main unless given) with your own git, hands it to a one-shot
 Claude agent, dockingbird --json claude -p, on its standard input, and
 prints the agent's review: a one-shot prints only the tool's answer on
 stdout, and Dockingbird's own lines come as envelopes on stderr
-(docs/integration/json.md), of which the script prints each problem's
+(docs/reference/integration/json.md), of which the script prints each problem's
 lines, and any other line on stderr as it came. Standard library only.
 
 Exit status: the one-shot's own (Claude's, once it started; 1 when

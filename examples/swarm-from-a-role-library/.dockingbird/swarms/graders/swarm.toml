@@ -1,0 +1,38 @@
+schema = 1
+project = "example"
+priority = "P2"
+# key left out: each submit is a new swarm named graders-<time>; --key K names one.
+
+[source]
+repository = "example-org/example-app"
+branch = "main"
+
+[params]
+N      = { type = "int", default = 4, min = 1, max = 8 }     # graders at the start, within the role's max below
+x      = { type = "int", default = 1, min = 1, max = 1 }     # main agents per grader container (the note below)
+y      = { type = "int", default = 4, min = 0 }              # helpers running at once in a grader; the harness's limit bounds it
+batch  = { type = "int", default = 10, min = 1, max = 100 }  # ideas a grader takes per claim
+effort = { type = "choice", default = "xhigh", choice = ["high", "xhigh", "max"] }  # narrows the harness's words; may not widen them
+model  = { type = "text", default = "opus" }
+
+[[role]]
+name = "coord"
+use = "dockingbird/coordinator"       # the shipped library role; after `dockingbird init`, "coordinator" names the project's copy
+harness = "claude"                    # or leave it to the project file's [roles.coordinator] table, which init writes
+model = "{{model}}"
+effort = "max"
+count = 1
+send_to = ["grader"]
+
+[[role]]
+name = "grader"
+use = "grader"                        # .dockingbird/roles/grader.toml, overridden field by field below
+model = "{{model}}"
+effort = "{{effort}}"
+count = "{{N}}"
+min = 1
+max = 8
+send_to = ["coord"]                   # a grader reaches the coordinator and parent; never another grader
+
+[role.subagents.helper]
+max = "{{y}}"

@@ -1,0 +1,29 @@
+# Two jobs for a Dockingbird fleet. Replace the placeholder targets.
+#
+# dockingbird_hosts: the exporter (exporter.py) on each host, one target a host.
+# It runs the host probe every 30 s and each home's scrape every 60 s, so a
+# 30 s interval sees every new host figure and every second pass sees new agent
+# figures. The host label names the computer; the dashboard's host variable
+# reads it.
+#
+# dockingbird_fleet: the fleet scheduler's admitter, which serves its own
+# families on the port FLEET_SCHED_METRICS_PORT names, at the org pointer's
+# database host. Its families refresh with each admission pass, so 60 s is
+# enough. Leave this job out when the organisation runs no fleet scheduler.
+global:
+  scrape_interval: 60s
+  scrape_timeout: 20s
+
+scrape_configs:
+  - job_name: dockingbird_hosts
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["lab.example:9105"]
+        labels:
+          host: lab
+      # A second host: copy this entry with its own address and name.
+
+  - job_name: dockingbird_fleet
+    scrape_interval: 60s
+    static_configs:
+      - targets: ["control-plane.example:9107"]

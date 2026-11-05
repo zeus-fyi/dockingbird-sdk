@@ -1,0 +1,15 @@
+# A grader: takes ideas, researches each with its helpers and the web, scores it, writes the score.
+harness = "claude"
+brief = "grader/brief.md"             # the first task; {{N}}, {{x}}, {{y}} and {{batch}} expand in it
+instructions = "grader/rules.md"      # appended after Dockingbird's layers and the project's rules; never replaces them
+workspace = "repo"
+tools = "full"
+compact_at = "300k"
+session_hours = 24
+connections = ["search", "scores", "insert-score", "next-ideas"]
+
+[subagents.helper]                    # the helper the grader may run, as Claude Code's own subagent definition
+model = "sonnet"
+effort = "xhigh"
+max = 4                               # running at once; the harness's session cap
+instructions = "grader/helper.md"     # the helper's system prompt

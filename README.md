@@ -1,67 +1,117 @@
+---
+title: Dockingbird
+summary: Dockingbird runs Claude Code and Codex side by side on your git repo, each agent in its own container.
+audience: first-day
+commands:
+  - uv tool install
+  - dockingbird --version
+  - dockingbird license activate
+  - dockingbird license trial
+  - dockingbird license status
+  - dockingbird init
+  - dockingbird claude
+  - dockingbird codex
+  - dockingbird status
+  - dockingbird sync
+  - dockingbird stop
+  - dockingbird clean
+---
+
+> Part of the Dockingbird customer docs. The index for agents is [llms.txt](llms.txt).
+
 # Dockingbird
 
-**Reliable coordination for independent coding agents.** A Zeusfyi product.
+Dockingbird runs Claude Code and Codex side by side on your git repo, each in its own container.
+Agents never overwrite each other and never touch your Mac.
+Each agent works on its own copy of your branch, and its work comes back to you as commits through `dockingbird sync`.
+Zeusfyi makes it, and it runs on an Apple silicon Mac or on arm64 Linux.
 
-Dockingbird runs Claude Code and Codex side by side on your git repo, each in its own container, so they never overwrite each other or touch your Mac. Their work comes back to you as commits. You need an Apple silicon Mac (or arm64 Linux), Docker Desktop (it includes the buildx plugin; Docker Engine on Linux needs Docker's `docker-buildx-plugin` package) and uv.
+## Prerequisites
+
+Dockingbird needs four tools and a license key. [Prerequisites](docs/getting-started/prerequisites.md) gives the check for each.
+
+- An Apple silicon Mac or arm64 Linux. Intel Macs, x86 Linux and Windows are not supported.
+- Docker Desktop, which includes the buildx plugin. Docker Engine on Linux needs Docker's `docker-buildx-plugin` package.
+- [uv](https://docs.astral.sh/uv/). On a Mac, `brew install uv` installs it.
+- git at `/usr/bin/git`.
+- A license key from your purchase email, or no key and a trial.
 
 ## Install
 
-One line installs it (no [uv](https://docs.astral.sh/uv/) yet? `brew install uv`). With a license key, from Zeusfyi's release index: copy the key from your purchase email, then run this line, which hands it to uv as the index's password without it reaching your shell's history:
+On a Mac, copy the key from your purchase email, then run this line.
+It hands the key to uv as the index's password, so the key never reaches your shell history or a command line.
 
 ```bash
-UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeusfyi.com/simple/
+UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeus.fyi/simple/
 ```
 
-Then `dockingbird license activate` gives this computer its seat; from then on `dockingbird update` needs no key. The index serves an active license only, so a trial can't install from it.
+On Linux, read the key with `read -rs`, which does not echo it, and clear it afterwards.
 
-`dockingbird completion --install` for tab completion; open a new terminal. If `dockingbird` is not found afterwards, run `uv tool update-shell` and open a new terminal. Never a bare `uv tool install dockingbird`: that PyPI name is not ours. The first run downloads about 1 GB, once, and the first start of each tool fetches its latest release. The one-page walk-through is the [quickstart](docs/quickstart.md).
+```bash
+read -rs UV_INDEX_ZEUSFYI_PASSWORD
+UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$UV_INDEX_ZEUSFYI_PASSWORD" uv tool install dockingbird --index zeusfyi=https://license.zeus.fyi/simple/
+unset UV_INDEX_ZEUSFYI_PASSWORD
+```
+
+Check the install with `dockingbird --version`, then run `dockingbird license activate` to give this computer its seat.
+Never run a bare `uv tool install dockingbird`. That name on PyPI is not this product.
+The index serves an active license only, so a trial cannot install from it.
+[Install](docs/getting-started/install.md) has the details and the failures.
 
 ## Use it
 
-```
-Work        cd ~/code/myapp
-            dockingbird claude                    Claude Code works on this repo
-            dockingbird codex                     Codex too, in another terminal
+| Command | What it does |
+|---|---|
+| `cd your-repo` then `dockingbird init` | Makes the repo ready: project file, rules, example swarm, skills |
+| `dockingbird claude` | Starts Claude Code on the repo you are in, in its own container |
+| `dockingbird codex` | Starts Codex on the same repo, in another terminal |
+| `dockingbird status` | Shows who is working on what, and what needs you |
+| `dockingbird sync` | Takes the agents' commits and sends them yours |
+| `dockingbird login claude` | Signs in again; `dockingbird login claude --api-key` uses an API key instead |
+| `dockingbird update` | Gets the latest Dockingbird, Claude Code and Codex |
+| `dockingbird clean` | Frees disk space |
+| `dockingbird stop` | Turns everything off; nothing is lost |
+| `dockingbird egress` | Shows or sets what agents can reach |
+| `dockingbird start "fix the flaky test"` | Hands an agent a task; it works without a terminal |
+| `dockingbird wait claude-1` | Shows the agent's next message as it comes |
+| `dockingbird inbox` | Lists what waits for you, numbered |
+| `dockingbird read 1` | Shows one message and the files it names |
+| `dockingbird send claude-1 "yes"` | Answers a question, or sends a new task |
+| `dockingbird results claude-1` | Saves the files the agent attached |
+| `dockingbird watch claude-1` | Shows the agent's browser, when its config asks for one |
+| `dockingbird config add agents/triage.toml` | Adds a command of your own, usable in every repo |
+| `dockingbird config list` | Lists your configs and this repo's |
+| `dockingbird trust --off` | Keeps this repo's own settings, hooks and MCP servers off |
+| `dockingbird license activate` | Asks for your key, hidden, and takes a seat for this computer |
+| `dockingbird license trial` | Starts this computer's trial instead |
+| `dockingbird license status` | Shows the plan, its seats and the day the term ends |
+| `dockingbird clean --all` | Removes everything Dockingbird made |
+| `uv tool uninstall dockingbird` | Removes the command; run it after `clean --all` |
 
-Check       dockingbird status                    who is working on what
+Every command explains itself with `dockingbird -h`, and `-h` after a command shows that command's help.
 
-Take work   dockingbird sync                      take their commits, send yours
+## How the first start works
 
-Sometimes   dockingbird login claude|codex        sign in again
-            dockingbird login claude --api-key    or use an API key
-            dockingbird update                    get the latest versions
-            dockingbird clean                     free disk space
-            dockingbird stop                      turn it all off; nothing is lost
-            dockingbird egress                    see or choose what agents can reach
+There is nothing to configure.
+The first `dockingbird claude` checks your branch, builds the image, starts Dockingbird and copies the branch for the agents.
+A branch holding files the agents do not take is refused in seconds, with each file named and nothing set up.
+Such files are a symlink leaving the repo, a submodule or a Git LFS file.
+The build takes about 5 minutes and downloads about 1 GB, once.
+Each tool then uses the login already on your Mac, or shows a sign-in link once, inside Docker.
+Every agent works in its own container. Nothing on your Mac is mounted into an agent unless you connect a folder by name.
+To leave an agent working, close its window.
+Dockingbird turns itself off after 30 minutes with no agent, and the next command turns it back on.
 
-Delegate    dockingbird start "fix the flaky test"   an agent works on it without a terminal
-            dockingbird start --terminal          or in this terminal
-            dockingbird start --as claude-2 "more"   continue an agent that ended
-            dockingbird wait claude-1             its next message, as it comes
-            dockingbird inbox                     what waits for you, numbered
-            dockingbird read 1                    one message and the files it names
-            dockingbird send claude-1 "yes"       answer its question, or a new task
-            dockingbird results claude-1          save the files it attached
-            dockingbird watch claude-1            watch its browser, when its config asks for one
+## Exit codes
 
-Configs     dockingbird config add agents/triage.toml   commands of your own, in every repo
-            dockingbird config list               yours and this repo's (guide: "Your own commands")
-            dockingbird trust --off               keep this repo's own settings off
+Exit codes are 0 for done, 1 for a problem with its next step printed, and 2 for a usage error.
+`dockingbird claude` and `dockingbird codex` exit with the tool's own status.
+[Exit codes](docs/reference/integration/exit-codes.md) lists every code.
 
-Harbor      dockingbird harbor baseline           oracle must score 1, nop 0 (run it in the task folder)
-            dockingbird harbor run -a claude-code one real trial with your own login
-            dockingbird harbor jobs|results JOB   what ran, and each trial's reward
-            dockingbird harbor clean [--all]      remove its jobs and leftovers; --all Harbor itself
+## Where to go next
 
-License     dockingbird license activate          paste your key when asked; this computer takes a seat
-            dockingbird license trial             or start this computer's trial
-            dockingbird license status            the plan, its seats and the day it ends
-
-Uninstall   dockingbird clean --all               remove everything it made
-            uv tool uninstall dockingbird         then remove the command
-```
-
-There is nothing to configure. The first `dockingbird claude` checks the branch you are on (one holding files the agents don't take, such as a symlink leaving the repo, a submodule or a Git LFS file, is refused in seconds, each such file named, and nothing is set up), then builds the image, starts Dockingbird and copies the branch for the agents; each tool then uses the login already on your Mac (Claude Code's or Codex's own), or signs in once, with its own sign-in, inside Docker. Every agent works in its own container on its own copy, and its work reaches you only as commits, through `dockingbird sync`. To leave an agent working, close its window. Nothing on your Mac is mounted into an agent unless you connect a folder by name (read-only, unless a config gives it write access); with a scratch config you need no git repo at all. Your Mac's own Claude and Codex logins are read to follow them, a copy kept without the refresh token, and never written. Every command explains itself (`dockingbird -h`), and every message it prints is in [troubleshooting](docs/troubleshooting.md). The [operator guide](docs/operator-guide.md) covers the rest: sign-ins and API keys, update and clean, licensing (a seat is one computer running Dockingbird), what lives where (`DOCKINGBIRD_HOME`, by default `~/.local/share/dockingbird`, and the Docker volumes), and what stays open (egress among it).
-
-Exit codes: 0 done, 1 a problem it printed with its next step, 2 usage; `claude` and `codex` exit with the tool's own status.
-
+- [Quickstart](docs/quickstart.md) is the one-page path from install to a first commit.
+- [Prerequisites](docs/getting-started/prerequisites.md), [install](docs/getting-started/install.md), [activate](docs/getting-started/activate.md), [first run](docs/getting-started/first-run.md) and [choose a topology](docs/getting-started/choose-a-topology.md): one page for each step of the set-up.
+- [Troubleshooting](docs/troubleshooting.md) lists every message Dockingbird prints, by its id, with the next step.
+- [Operator guide](docs/operator-guide.md) is the long form, with sign-ins, update, clean, licensing and what lives where.
+- [llms.txt](llms.txt) indexes every page, one line each, for a coding agent.

@@ -1,15 +1,28 @@
+---
+title: Rules for the agents in this repository
+summary: A template AGENTS.md for your own repository, which every agent Dockingbird runs there reads after Dockingbird's own rules.
+audience: first-day
+commands:
+  - dockingbird claude --agent-md
+  - dockingbird codex --agent-md
+  - dockingbird start --agent-md
+---
+
+> Part of the Dockingbird customer docs. The index for agents is [llms.txt](../llms.txt).
+
 # Rules for the agents in this repository
 
 <!--
-A template: copy it to your repository's root as AGENTS.md and fill in each part in your own words; delete this
-comment. Claude Code and Codex read AGENTS.md when they start, so every agent Dockingbird runs on this repository
-reads it after Dockingbird's own rules. `dockingbird claude --agent-md FILE` (and `codex`, `start`) gives one agent
-another file in its place, without touching your checkout.
+Copy this file to the root of your repository as AGENTS.md. Delete the front matter, the line that starts with ">"
+and this comment. Then fill in each part for your project. Claude Code and Codex read AGENTS.md when they start, and
+so does every agent Dockingbird runs on your repository, after Dockingbird's own rules. To give one agent a different
+file and leave your checkout as it is, start it with `dockingbird claude --agent-md FILE` (or `codex`, or `start`).
+For each rule, say what the agent should do and which command shows that it did.
 -->
 
 ## The project
 
-What this repository builds, for whom, and where its documents are (one short paragraph).
+What this repository builds, who it is for, and where its documents are, in one short paragraph.
 
 ## Before you change anything
 
@@ -23,21 +36,22 @@ What this repository builds, for whom, and where its documents are (one short pa
 - Test: the command that runs the tests, and how to run only the ones a change touches.
 - Check: the formatter, the linter and the type checker, each with its command.
 
-Write the failing test first, then the change, then run the tests again. Never skip, weaken or delete a test to make
-it pass.
+Write the failing test first, then the change, then run the tests again. A test stays as it is: change the code
+until it passes, and never skip, weaken or delete a test to get there.
 
 ## Code
 
 - The style this repository follows, and where its guide is.
-- No secrets in code, logs, tests or commits: read them from the environment the project names.
+- Read secrets from the environment the project names, so none lands in code, logs, tests or commits.
 - Keep each change small and each function about one thing.
 
 ## Commits
 
-- One commit per finished step, its message saying what changed and why.
-- Never rewrite history that others have: no force push, no rebase of a shared branch.
-- Your commits reach the repository's owner as commits only, and the owner reviews each one.
+- Commit once per finished step. The message says what changed and why.
+- Add new commits on top of shared history. Do not force push or rebase a shared branch.
+- Your work reaches the repository's owner only as commits, and the owner reviews every one.
 
 ## When you are done
 
-Say what you changed, what you ran to check it and what it printed, and what you could not check.
+Say what you changed, what you ran to check it and what it printed, and what you could not check. You are done when
+every check named under "Build and test" has run on your change and its output is in your report.

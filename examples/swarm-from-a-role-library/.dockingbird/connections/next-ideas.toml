@@ -1,0 +1,10 @@
+uses = ["scores"]                      # PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD for this one run
+checkout = "/srv/example-app"          # the program's checkout on the home's host, pinned to a commit
+commit = "0123456789abcdef0123456789abcdef01234567"
+timeout_s = 60
+[call]
+python = ".venv/bin/python"            # relative to the checkout
+module = "example_app.scores"
+function = "next_ideas"                # def next_ideas(n): the ideas no grader has scored yet, at most n
+[arguments]
+n = { type = "int", minimum = 1, maximum = 100 }

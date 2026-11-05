@@ -1,0 +1,53 @@
+# A template: copy it to .dockingbird/connections/example-service.toml in your
+# repo and register it:
+#   dockingbird connect example-service --service .dockingbird/connections/example-service.toml
+# Agents whose role or config names example-service may then ask to run the
+# program with the arguments below. A request runs here, as you, while you run
+#   dockingbird serve example-service
+# The file must be yours, readable by you alone (chmod 600), not a link and not
+# inside DOCKINGBIRD_HOME. connect checks every key, that argv uses each argument
+# below and that the checkout is at its commit, and runs nothing. The role and
+# connection files reference, docs/reference/files/roles-and-connections.md, has
+# every key.
+
+# The program that runs, by its absolute path.
+program = "/srv/example-app/bin/example-tool"
+# The program's checkout and the commit it must be at: give both or neither.
+# serve refuses to run the program once the checkout moved.
+checkout = "/srv/example-app"
+commit = "0123456789abcdef0123456789abcdef01234567"
+# The most seconds one run may take; then it is stopped.
+timeout_s = 600
+# The program's words: {output} stands once for the folder it writes its result
+# to, and each {NAME} for the argument of that name below.
+argv = ["--pages", "{pages}", "--mode", "{mode}", "--title", "{title}", "{output}"]
+# A database connection of the home, one name, whose credential each run gets
+# as PGHOST, PGPORT, PGDATABASE, PGUSER and PGPASSWORD, never in a file, a log
+# or an agent. Left out here.
+# uses = ["example-db"]
+
+# In place of argv, a [call] table names a Python function in the checkout. A
+# run calls it with the checked arguments as keyword arguments, and its return
+# value, as JSON, is the run's result.json. Left out here.
+# [call]
+# python = ".venv/bin/python"     # the interpreter, relative to the checkout
+# module = "example_app.tool"     # the module that holds the function
+# function = "run"                # the function a run calls
+
+# A whole number from 1 to 500: type int, with minimum and maximum.
+[arguments.pages]
+type = "int"
+minimum = 1
+maximum = 500
+
+# One of these words: type choice, with choices.
+[arguments.mode]
+type = "choice"
+choices = ["fast", "best"]
+
+# Text of at most max_chars characters: type text. It reaches the program as the
+# agent typed it, so declare choice or int where the program takes a path, a
+# name or a mode.
+[arguments.title]
+type = "text"
+max_chars = 200

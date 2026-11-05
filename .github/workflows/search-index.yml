@@ -1,0 +1,55 @@
+# Builds the docs' search files, docs/manifest.json, llms.txt and the troubleshooting index pages, then runs the
+# regression queries of search/queries.txt. A pull request is only checked. A push to main also commits what the
+# build wrote, with the GitHub Actions bot as author; that push starts no second run of this workflow.
+name: search-index
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: search-index-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # Exits 1 on a broken page, after writing every file, so the steps below still run and report.
+      - name: Build the search files, manifest, llms.txt and troubleshooting index pages
+        run: python .github/scripts/build_index.py
+
+      - name: Copy the search command beside its index
+        if: ${{ !cancelled() }}
+        run: cp .github/scripts/search.py search/search.py
+
+      - name: Check that each query keeps its page in the top 3
+        if: ${{ !cancelled() }}
+        run: python .github/scripts/check_queries.py
+
+      # Runs only when every step above passed.
+      - name: Commit the generated files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add llms.txt docs/manifest.json docs/troubleshooting search
+          if git diff --cached --quiet; then
+            echo "The generated files are current; nothing to commit."
+          else
+            git commit -m "Rebuild the docs search files, manifest, llms.txt and troubleshooting index pages"
+            git push origin HEAD:main
+          fi

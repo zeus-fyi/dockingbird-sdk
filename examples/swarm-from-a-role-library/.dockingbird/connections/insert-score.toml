@@ -1,0 +1,13 @@
+uses = ["scores"]                      # PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD for this one run
+checkout = "/srv/example-app"          # the program's checkout on the home's host, pinned to a commit
+commit = "0123456789abcdef0123456789abcdef01234567"
+timeout_s = 60
+[call]
+python = ".venv/bin/python"            # relative to the checkout
+module = "example_app.scores"
+function = "insert_score"              # def insert_score(idea, score, rationale, agent): the raw SQL is in its body
+[arguments]
+idea      = { type = "int", minimum = 1 }
+score     = { type = "int", minimum = 0, maximum = 100 }
+rationale = { type = "text", max_chars = 1024 }
+agent     = { type = "text", max_chars = 63 }
