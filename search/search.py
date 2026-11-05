@@ -17,9 +17,10 @@ score, the heading path and the section's first line. Python 3.9 or later. The r
    under them. A query names an id when one of its words is an id, or when two or more of its words joined by "_"
    spell an id whole or without its first part: "seats full" names LICENSE_SEATS_FULL.
 4. BM25 per field, each field's score multiplied by its boost and summed: ids, commands, flags and tools 5, headings 2,
-   the text 1. "-" and "_" stay inside a word, and ids and tool names are also indexed split at "_". A command is
-   indexed whole and by its subcommand, the word after "dockingbird", so "sync" matches "dockingbird sync" and
-   "install" does not match "dockingbird mcp install". --audience doubles the score of sections for that reader.
+   the text 1. "-" and "_" stay inside a word, and ids and tool names are also indexed split at "_". Flags and
+   commands count where a bash block shows them; a mention in the text is plain text. A command is indexed whole
+   and by its subcommand, the word after "dockingbird", so "sync" matches "dockingbird sync" and "install" does not
+   match "dockingbird mcp install". --audience doubles the score of sections for that reader.
 5. Ties go to page order in docs/manifest.json, then to the section's place on its page. A long section cut into
    several chunks is listed once, at its best chunk.
 

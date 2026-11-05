@@ -1,6 +1,6 @@
 ---
 title: Limits
-summary: The bounds on sessions, files, names, licences and fleet calls that the Dockingbird guide states, one row each with its figure.
+summary: The bounds on sessions, files, names, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
 audience: daily
 commands: []
 ---
@@ -37,7 +37,7 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | First image build | about 1 GB, about 5 minutes | the download of the first `dockingbird claude`, once | [first-run.md](../getting-started/first-run.md) |
 | Ubuntu package pool | 441 MB | the folder the first build fills, once per snapshot | [first-run.md](../getting-started/first-run.md) |
 
-## Licence
+## License
 
 | Bound | Figure | What it limits | Explained in |
 |---|---|---|---|

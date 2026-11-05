@@ -90,7 +90,7 @@ dockingbird homes
 ```
 
 ```text
-default (default): Dockingbird stopped, version 0.11.1, this home
+default (default): Dockingbird stopped, version 0.15.3, this home
 ```
 
 Message id `HOMES_ROW`. A connection's catalog in `connections/` names each key's path. The key's copy lives in a Docker volume, not in that folder, so the folder alone does not carry it.

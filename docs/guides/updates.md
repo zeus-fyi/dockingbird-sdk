@@ -47,17 +47,17 @@ dockingbird update
 `update` upgrades the command, puts the release's code in the home's code store, and rebuilds the image only when the image's base changed: its operating system, its toolchains, its locked Python packages or its launcher. Then it fetches the latest of each tool you have used. A tool you never used is not fetched. The lines run in this order.
 
 ```text
-Getting the latest Dockingbird ... done (0.11.1 -> 0.11.2)
+Getting the latest Dockingbird ... done (0.15.2 -> 0.15.3)
 Rebuilding Dockingbird (about 5 min) ... done (4 min)
 Claude Code 2.1.296 is the latest.
-Dockingbird 0.11.2 is installed and takes over now. Your repos, history and your saved Claude API key are kept.
+Dockingbird 0.15.3 is installed and takes over now. Your repos, history and your saved Claude API key are kept.
 ```
 
 Done when the last line prints, or `Up to date.` when nothing changed (`UPDATE_DONE`). Message ids `UPDATE_GETTING`, `UPDATE_REBUILDING`, `UPDATE_TOOLS` and `UPDATE_ROLLING`. The rebuild line appears only when the image's base changed. A tool that `update` had to fetch says `Got Claude Code 2.1.296.` instead. When the new release changes Dockingbird's records, `update` first says so, because there is no way back.
 
 ```text
 This update changes Dockingbird's records.
-Once it takes over, it can't go back to 0.11.1.
+Once it takes over, it can't go back to 0.15.2.
 ```
 
 On a Mac, `update` then tries to put the Dockingbird GUI in place. The GUI is not yet available to customers, so this step can fail after Dockingbird itself updated. `update` says so, ends with the GUI message and exits 1. The update is done. See [the GUI](gui.md).
@@ -73,11 +73,11 @@ dockingbird update
 The new code takes over at once and Dockingbird's coordinator is replaced in the background. Your agents keep working through it. Done when the line names them.
 
 ```text
-Dockingbird 0.11.2 is installed and takes over now.
+Dockingbird 0.15.3 is installed and takes over now.
 claude-1 and codex-1 take it at their next stopping point.
 ```
 
-Message id `UPDATE_ROLLING`. An agent switches in place: the same container, session and conversation, with its deliveries and open questions kept. Before its next prompt, at no cost of a turn, its tool is told `Dockingbird updated from 0.11.1 to 0.11.2 and resumed your conversation. Continue where you were.` A command you run meanwhile waits for the switch, minutes at most, and prints `Switching Dockingbird to 0.11.2 ...` (`UPDATE_SWITCHING`).
+Message id `UPDATE_ROLLING`. An agent switches in place: the same container, session and conversation, with its deliveries and open questions kept. Before its next prompt, at no cost of a turn, its tool is told `Dockingbird updated from 0.15.2 to 0.15.3 and resumed your conversation. Continue where you were.` A command you run meanwhile waits for the switch, minutes at most, and prints `Switching Dockingbird to 0.15.3 ...` (`UPDATE_SWITCHING`).
 
 ### When an agent switches
 
@@ -92,9 +92,9 @@ Message id `UPDATE_ROLLING`. An agent switches in place: the same container, ses
 `dockingbird status` says how far the roll got and what holds each agent back.
 
 ```text
-Dockingbird 0.11.2 is taking over: claude-1 and codex-1 take it at their next stopping point.
-claude-1 takes 0.11.2 at the end of its turn (asked 2 min ago).
-claude-2 on 0.11.1 keeps its own until its terminal closes.
+Dockingbird 0.15.3 is taking over: claude-1 and codex-1 take it at their next stopping point.
+claude-1 takes 0.15.3 at the end of its turn (asked 2 min ago).
+claude-2 on 0.15.2 keeps its own until its terminal closes.
 ```
 
 Message ids `STATUS_UPDATE_ROLLING` and `STATUS_UPDATE_STRAGGLERS`. An idle agent that does not answer its ask in 10 minutes is left on its code. The roll waits for such agents, its stragglers, up to 24 hours, then ends, and `status` names the ones still running. A later `dockingbird update` asks the bus and screen stragglers again. To move an agent at a terminal, stop it and start it again.
@@ -107,7 +107,7 @@ dockingbird claude --as claude-2
 Done when `update`, run again for the same version, prints this line.
 
 ```text
-Dockingbird 0.11.2 is in place, and no agent is waiting to take it.
+Dockingbird 0.15.3 is in place, and no agent is waiting to take it.
 ```
 
 An update that changes Dockingbird's engine, the image's base, also rolls. Each bus or screen agent moves to a new container at its next stopping point, keeping its name, session and conversation, and `update` names those agents apart. The cookbook [update with agents running](../../examples/update-with-agents-running/README.md) runs this end to end.
@@ -117,7 +117,7 @@ An update that changes Dockingbird's engine, the image's base, also rolls. Each 
 `status` shows it under "Needs your attention" with the fix.
 
 ```text
-Dockingbird didn't switch to 0.11.2, so 0.11.1 still runs.
+Dockingbird didn't switch to 0.15.3, so 0.15.2 still runs.
 See why and try again: dockingbird update
 ```
 
@@ -128,8 +128,8 @@ Message id `UPDATE_SWITCH_FAILED`. Run `dockingbird update` again. A roll stops 
 A home whose running Dockingbird predates rolling updates waits once, for its first update to a release that rolls. The agents keep their code until they end.
 
 ```text
-Dockingbird here is too old to take 0.11.2 while agents run,
-so claude-1 on 0.10.3 keeps its own until it ends.
+Dockingbird here is too old to take 0.15.3 while agents run,
+so claude-1 on 0.15.2 keeps its own until it ends.
 ```
 
 Message id `UPDATE_NO_ROLL_FLOOR`. `status` says what waits (`STATUS_UPDATE_STAGED`). Once the last agent ends, Dockingbird switches by itself, with no command typed. After that, updates reach working agents at their stopping points.
@@ -162,7 +162,7 @@ dockingbird inspect swarm
 `homes` prints one line per home on this computer.
 
 ```text
-default (default): Dockingbird running, version 0.11.1, this home
+default (default): Dockingbird running, version 0.15.3, this home
 ```
 
 Message id `HOMES_ROW`. `inspect swarm` reads one home's agents and who may message whom, without starting, updating or locking anything.
@@ -186,24 +186,24 @@ dockingbird init --check
 `init --check` writes nothing and exits 1 when an installed file is not the running release's.
 
 ```text
-myapp is not set up for Dockingbird 0.11.2: init would change it.
+myapp is not set up for Dockingbird 0.15.3: init would change it.
 To change it: dockingbird init
 ```
 
-Message id `INIT_OUT_OF_DATE`. Run `dockingbird init`: a file you edited is kept and named, and `--force` replaces it. Done when the check prints `myapp is set up for Dockingbird 0.11.2: nothing to change.` (`INIT_CURRENT`).
+Message id `INIT_OUT_OF_DATE`. Run `dockingbird init`: a file you edited is kept and named, and `--force` replaces it. Done when the check prints `myapp is set up for Dockingbird 0.15.3: nothing to change.` (`INIT_CURRENT`).
 
 ## 7. Move a fleet to a release
 
 For a team whose computers form a pool, an admin moves every host with one command.
 
 ```bash
-dockingbird fleet update --release 0.11.2
+dockingbird fleet update --release 0.15.3
 ```
 
 Only a member of `fleet_admin` may run it; any other login ends 77. Each host needs a live worker and a `repoint` line in its `[[host]]` table of `hosts.toml`: your own command that restarts that host's Dockingbird services and returns without waiting. See [the hosts file](../reference/files/hosts-file.md). The command installs the release host by host, updates each home, moves the services and waits for the worker to report the release. Done when the last line prints.
 
 ```text
-Dockingbird 0.11.2 runs on lab and local.
+Dockingbird 0.15.3 runs on lab and local.
 ```
 
 Message id `FLEET_UPDATE_DONE`. A step that fails stops the command with the host and its words, exit 1, and leaves later hosts as they are. Fix it and run the same command again: hosts done are skipped. `--host NAME` moves one host. Before a release that needs a newer store, an admin runs `dockingbird org create`; a worker or admitter of the new release refuses to start against an older store (`FLEET_STORE_BEHIND`) until then.

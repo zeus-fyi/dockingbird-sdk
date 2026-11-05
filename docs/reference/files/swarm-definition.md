@@ -44,10 +44,10 @@ Each `[[role]]` is one kind of agent.
 | `use` | string | none | `"NAME"` names `.dockingbird/roles/NAME.toml`; `"dockingbird/NAME"` names a shipped role |
 | `instructions` | path | none | text the agents get after Dockingbird's rules and the project's |
 | `connections` | list of names | none | the home's connections the agents are granted at start; each must name an enabled connection at submit |
-| `[role.subagents.<name>]` | table | none | one helper kind: `instructions` (required), `model`, `effort`, `max`, `tools` |
+| `[role.subagents.<name>]` | table | none | one helper kind: `instructions` (required), `model`, `effort`, `max`, `tools` (accepted by the product; the guide names model, effort, instructions and max) |
 | `send_to` | list of role names | any agent of the project | the roles the agents may message beside their parent; `[]` allows the parent alone |
 | `workspace`, `egress`, `allow`, `env` | as in a config | as in a config | session settings, as [`app.toml`](app-config.md) takes them |
-| `tools` | `bus`, `full` or a list | as in a config | must keep every bus tool, else `refused: role[N].tools: drops a tool of the bus set` |
+| `tools` | `bus`, `full` or a list | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool; a list that drops a bus tool gives `refused: role[N].tools: drops a tool of the bus set` |
 | `compact_at` | `500000`, `500k` or `auto` | `500000` for a fleet-started agent | the point at which the agent's context compacts |
 | `session_hours` | integer, 1 to 168 | 48 for a fleet-started agent | how long each agent may run |
 | `needs` | cpus, memory and pids, each with `request` and `limit` | measured | the role's resource reservation |

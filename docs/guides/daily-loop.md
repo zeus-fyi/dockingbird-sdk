@@ -52,7 +52,7 @@ dockingbird status
 `status` only looks. It starts nothing and waits at most 10 seconds for Docker. Its first line names the version and the sign-ins.
 
 ```text
-Dockingbird 0.11.1, signed in to Claude and Codex
+Dockingbird 0.15.3, signed in to Claude and Codex
 ```
 
 Each repo and branch lists its agents, how long each has worked, how far behind you are and the step that fixes it. An agent that asks you something shows "asks you" with the count; answer it as [delegating tasks](delegating-tasks.md) says. An agent that reported on its task shows idle until you run `dockingbird stop NAME`. The last line is the done line.

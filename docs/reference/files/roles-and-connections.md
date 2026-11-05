@@ -23,7 +23,8 @@ A role library holds the settings a swarm role reuses, and a service connection 
 | `instructions` | path | text added after Dockingbird's rules and the project's, never in place of them |
 | `connections` | list of names | the home's connections its agents are granted at start |
 | `subagents` | tables | helper kinds, one `[subagents.NAME]` each |
-| `workspace`, `tools`, `egress`, `allow`, `env` | as in a config | session settings |
+| `workspace`, `egress`, `allow`, `env` | as in a config | session settings |
+| `tools` | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool |
 | `needs` | cpus, memory, pids | the role's resource reservation |
 | `compact_at` | `500000`, `500k` or `auto` | the point at which the agent's context compacts |
 | `session_hours` | integer, 1 to 168 | how long each agent may run |

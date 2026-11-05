@@ -127,7 +127,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [The home folder layout](docs/reference/files/home-layout.md): What lives where under a Dockingbird home, which files you may edit, and how a second home by name works.
 - [The fleet store](docs/reference/files/fleet-store.md): The three schemas of the organisation's PostgreSQL 18 store, its role groups, the order of a migration and which migrations need older workers restarted first.
 - [Environment variables](docs/reference/environment-variables.md): The DOCKINGBIRD_ variables you may set, how Dockingbird treats a setting, and the variables of other tools it reads.
-- [Limits](docs/reference/limits.md): The bounds on sessions, files, names, licences and fleet calls that the Dockingbird guide states, one row each with its figure.
+- [Limits](docs/reference/limits.md): The bounds on sessions, files, names, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
 - [Ports and hosts](docs/reference/ports-and-hosts.md): Every port and route Dockingbird opens or expects, on which interface, with the timeouts of each and the hosts an egress preset reaches.
 - [Metrics reference](docs/reference/metrics.md): Every metric family Dockingbird serves, with its type, labels and unit, the agent families first, the fleet families second and the exporter's own gauges last.
 - [Fleet tools](docs/reference/fleet-tools.md): The ten fleet tools an agent on a joined home gets beside its bus tools, with who each can reach.

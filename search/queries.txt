@@ -39,3 +39,7 @@ start a trial without a key	docs/guides/licensing.md|docs/getting-started/activa
 add a second mac over ssh	examples/two-macs-ssh/README.md|docs/guides/hosts.md
 update while agents are running	examples/update-with-agents-running/README.md|docs/guides/updates.md
 uninstall everything and give the seat back	examples/uninstall-completely/README.md|docs/guides/clean-and-uninstall.md
+
+# Rows added after the review of the first build: a flag of a running agent, and a reference page
+--compact-at	docs/guides/delegating-tasks.md#8-change-its-model-or-effort
+which ports does the control plane open	docs/reference/ports-and-hosts.md

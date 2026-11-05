@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Build the docs' search files, manifest, llms.txt and troubleshooting index pages. Run from anywhere in the repo.
+"""Build the docs' search files, manifest, llms.txt and troubleshooting index pages, from anywhere in the repo.
 
 Reads README.md, the .md files under docs/ (not docs/plan/), examples/*/README.md and templates/*.md, with front matter
-(title, summary, audience, commands; the catalogue docs/troubleshooting.md uses CATALOGUE_META). Writes
-docs/troubleshooting/<domain>.md (each id of a domain, NATIVE_ ids left out, with its "When:" line and a link to its
-entry), docs/manifest.json and llms.txt in PAGE_GROUPS order, search/chunks.jsonl (a chunk per section cut at H2 and
-H3 and to about CAP words, one per catalogue entry) and search/index.json.gz (BM25 term counts per chunk and field).
-It prints one line per failed check, naming the page: no or broken front matter, a link to a missing file, a code
-fence never closed, a catalogue link whose anchor or text is no id, a backticked UPPER_SNAKE name one edit off an id.
-It writes every output anyway, so the query check still runs, then exits 1, and CI commits nothing. Output is
-deterministic (sorted keys, gzip with no timestamp, chunk ids hashed from path and heading). Standard library only.
+(title, summary, audience, commands; the catalogue docs/troubleshooting.md uses CATALOGUE_META). Writes a page per
+domain, docs/troubleshooting/<domain>.md (per id: the id, its "When:" line's first sentence, a link; NATIVE_ left out),
+docs/manifest.json and llms.txt in PAGE_GROUPS order, search/chunks.jsonl (chunks cut at H2, H3 and about CAP words;
+one per catalogue entry, headed by its domain) and search/index.json.gz (BM25 term counts per chunk and field; flags
+and commands count only where a bash block shows them). One line per failed check names the page: broken or missing
+front matter, a link to a missing file, an unclosed code fence, a catalogue link whose anchor or text is no id, a
+backticked UPPER_SNAKE name one edit off an id. Every output is written anyway, so the query check still runs; then
+it exits 1 and CI commits nothing. Output is deterministic (sorted keys, gzip with no timestamp). Standard library only.
 """
 import csv
 import functools
@@ -17,7 +17,6 @@ import gzip
 import hashlib
 import importlib.util
 import io
-import itertools
 import json
 import re
 import sys
@@ -65,6 +64,7 @@ DOMAINS = (
      "the GUI, the MCP server and shell completion", "GUI UI COMPLETION MCP"),
 )
 DOMAIN_OF = {prefix: domain[0] for domain in DOMAINS for prefix in domain[4].split()}
+DOMAIN_TITLES = {domain[0]: domain[1][:1].upper() + domain[1][1:] for domain in DOMAINS}
 DOMAIN_NOTES = {"gui-and-mcp": "The Dockingbird GUI is not yet available to customers."}
 
 
@@ -116,6 +116,7 @@ TOOL = re.compile(r"(?<![A-Za-z0-9_])(?:agent|fleet)_[a-z0-9_]*[a-z0-9](?![A-Za-
 COMMAND_WORD = re.compile(r"[a-z][a-z-]*[a-z]")
 ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=")
 BOILERPLATE = re.compile(r"^> Part of the Dockingbird customer docs\.")
+SHELL_SPLIT = re.compile(r"&&|\|\||[;|]")
 
 _spec = importlib.util.spec_from_file_location("docs_search", Path(__file__).with_name("search.py"))
 _spec.loader.exec_module(S := importlib.util.module_from_spec(_spec))
@@ -171,20 +172,26 @@ def meta_errors(meta):
 
 
 def code_mask(lines):
-    """Per line, True inside a fenced block (its fence lines too); and the index of a fence left open, or None."""
-    mask, fence, opened = [], None, None
+    """Per line, False or its fenced block's language word ("code" if none); and the index of a fence left open."""
+    mask, fence, opened, word = [], None, None, False
     for n, line in enumerate(lines):
         match = FENCE.match(line)
         if fence is None:
             if match:
-                fence, opened = match.group(1), n
-            mask.append(match is not None)
+                fence, opened, word = match.group(1), n, (line[match.end():].split() or ["code"])[0].lower()
+            mask.append(word if match else False)
             continue
-        mask.append(True)
+        mask.append(word)
         closing = match and match.group(1)[0] == fence[0] and len(match.group(1)) >= len(fence)
         if closing and not line[match.end():].strip():
             fence = None
     return mask, opened if fence is not None else None
+
+
+def first_sentence(text):
+    """The text up to its first period followed by a space or its end; a period inside `code` does not count."""
+    end = re.search(r"\.(?=\s|$)", INLINE.sub(lambda m: "x" * len(m.group(0)), text))
+    return text[:end.end()] if end else text
 
 
 def slug(text, seen):
@@ -206,12 +213,8 @@ def sections(lines, mask, title):
             anchor = slug(text, seen)
             if level <= 3:
                 out.append(current)
-                if level == 1:
-                    h1, h2, path = text, None, [text]
-                elif level == 2:
-                    h2, path = text, [h1 or title, text]
-                else:
-                    path = [h1 or title] + ([h2] if h2 else []) + [text]
+                h1, h2 = (text, None) if level == 1 else (h1, text) if level == 2 else (h1, h2)
+                path = [h1 or title] + ([h2] if h2 and level > 1 else []) + ([text] if level == 3 else [])
                 current = {"path": path, "anchor": anchor, "lines": [], "mask": []}
                 continue
         if not BOILERPLATE.match(line):
@@ -279,30 +282,33 @@ def command(span):
 
 
 def make_chunk(page, section, text, part, ids, entry):
-    """One chunk with its fields, and its term counts per field."""
-    body, path = S.tokenize(text), section["path"]
-    commands = [found for found in map(command, INLINE.findall(text) + text.split("\n")) if found]
+    """One chunk with its fields and its term counts per field; a catalogue entry is headed by its domain."""
+    path = [DOMAIN_TITLES[entry["domain"]], entry["id"]] if entry else section["path"]
+    heading, lines = " > ".join(path), text.split("\n")
+    mask = code_mask(lines)[0]
+    shell = [piece for line, word in zip(lines, mask) if word == "bash" and not FENCE.match(line)
+             for piece in SHELL_SPLIT.split(line)]  # flags and commands count where a bash block shows them
+    commands = [found for found in map(command, shell) if found]
     named = ([entry["id"]] if entry else []) + [name for name in UPPER.findall(text) if name in ids]
-    tools = TOOL.findall(text)
-    terms = {"body": body, "heading": S.tokenize(" ".join(path)), "flags": [t for t in body if t.startswith("--")],
+    tools, flags = TOOL.findall(text), [t for t in S.tokenize(" ".join(shell)) if t.startswith("--")]
+    terms = {"body": S.tokenize(text), "heading": S.tokenize(heading), "flags": flags,
              "ids": [t for name in named for t in S.split_name(name)],
              "commands": [t for found in commands for t in [found] + found.split()[1:2]],
              "tools": [t for name in tools for t in S.split_name(name)]}
-    heading, lines = " > ".join(path), text.split("\n")
-    lead = entry["when"] if entry else next((line.strip() for line, code in zip(lines, code_mask(lines)[0])
+    lead = entry["when"] if entry else next((line.strip() for line, code in zip(lines, mask)
                                              if not code and line.strip()[:1] not in ("", "|", "#")), "")
     chunk = {"chunk_id": hashlib.sha1(f"{page['path']}\n{heading}\n{part}".encode()).hexdigest()[:16],
              "path": page["path"], "heading": heading, "anchor": section["anchor"], "text": text,
-             "commands": sorted(set(commands)), "flags": sorted(set(terms["flags"])), "ids": sorted(set(named)),
+             "commands": sorted(set(commands)), "flags": sorted(set(flags)), "ids": sorted(set(named)),
              "tools": sorted(set(tools)), "audience": page["meta"].get("audience", ""),
-             "summary": SENTENCE.split(lead, maxsplit=1)[0]}
+             "summary": first_sentence(lead)}
     if entry:
         chunk.update({key: entry[key] for key in ("id", "when", "exit_status", "domain")})
     return chunk, {field: Counter(tokens) for field, tokens in terms.items() if tokens}
 
 
 def catalogue_entries(text):
-    """The catalogue's `### ID` entries: id, group, "When:" line, exit status and domain; and the errors."""
+    """The catalogue's `### ID` entries: id, "When:" line, exit status and domain; and the errors."""
     lines, entries, errors = text.split("\n"), [], []
     for section in sections(lines, code_mask(lines)[0], "Troubleshooting"):
         if len(section["path"]) != 3:
@@ -314,8 +320,8 @@ def catalogue_entries(text):
         if not re.fullmatch(r"[A-Z][A-Z0-9_]*", name) or not when or not status or not domain:
             errors.append(f"{CATALOGUE}: {name} lacks an id, a When:, an Exit status: or a prefix in DOMAINS")
             continue
-        entries.append({"id": name, "group": section["path"][1], "when": " ".join(when.group(1).split()),
-                        "exit_status": status.group(1), "domain": domain})
+        entries.append({"id": name, "when": " ".join(when.group(1).split()), "exit_status": status.group(1),
+                        "domain": domain})
     return entries, errors
 
 
@@ -331,11 +337,9 @@ def domain_page(domain, entries):
             "every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id "
             "links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the "
             f"exit status. This page holds the {len(listed)} ids about {about}.")]
-    out += ["", DOMAIN_NOTES[name]] if name in DOMAIN_NOTES else []
-    for group, members in itertools.groupby(listed, key=lambda entry: entry["group"]):
-        out += ["", f"## {group}", "", "| Id | When it appears |", "|---|---|"]
-        out += [f"| [`{e['id']}`](../troubleshooting.md#{e['id'].lower()}) | {when} |"
-                for e in members for when in [e["when"].replace("|", "\\|")]]
+    out += (["", DOMAIN_NOTES[name]] if name in DOMAIN_NOTES else []) + ["", "| Id | When it appears |", "|---|---|"]
+    out += [f"| [`{e['id']}`](../troubleshooting.md#{e['id'].lower()}) | {when} |"
+            for e in listed for when in [first_sentence(e["when"]).replace("|", "\\|")]]
     return "\n".join(out) + "\n", len(listed)
 
 
@@ -376,11 +380,9 @@ def load_page(path, ids):
     except ValueError as error:
         meta, body = None, text
         errors.append(f"{path}: {error}")
-    if meta is None and path == CATALOGUE:
-        meta = dict(CATALOGUE_META)
-    elif meta is None:
-        meta = {}
-        errors += [] if errors else [f"{path}: no front matter (title, summary, audience, commands)"]
+    if meta is None:
+        meta = dict(CATALOGUE_META) if path == CATALOGUE else {}
+        errors += [] if errors or meta else [f"{path}: no front matter (title, summary, audience, commands)"]
     else:
         errors += [f"{path}: {error}" for error in meta_errors(meta)]
     lines, offset = body.split("\n"), text[:len(text) - len(body)].count("\n")
@@ -420,8 +422,7 @@ def order_pages(found):
 
 def write(path, data):
     (target := ROOT / path).parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(data.encode("utf-8") if isinstance(data, str) else data)
-    return target.stat().st_size
+    return target.write_bytes(data.encode("utf-8") if isinstance(data, str) else data)
 
 
 def llms_txt(pages, group_of):
@@ -471,9 +472,8 @@ def main():
     write("llms.txt", llms_txt(pages, group_of))
     write("search/chunks.jsonl", "".join(dumps(chunk) + "\n" for chunk in chunks))
     vocab = sorted({term for counter in counters for field in counter.values() for term in field})
-    number, df = {term: n for n, term in enumerate(vocab)}, Counter()
-    for counter in counters:
-        df.update(set().union(*counter.values()))
+    number = {term: n for n, term in enumerate(vocab)}
+    df = Counter(term for counter in counters for term in set().union(*counter.values()))
     index_chunks = [{"chunk_id": c["chunk_id"], "audience": c["audience"], "catalogue": c["path"] == CATALOGUE,
                      "order": c["order"], "tf": {field: [x for t, n in sorted(terms.items()) for x in (number[t], n)]
                                                  for field, terms in sorted(counter.items())}}

@@ -39,14 +39,14 @@ A newer Dockingbird is out. Get it: dockingbird update
 dockingbird update
 ```
 
-The new code goes into the home's code store and Dockingbird's coordinator is replaced in the background. Your agents keep working while it restarts. If the release changes Dockingbird's records, `update` first prints `This update changes Dockingbird's records.` and `Once it takes over, it can't go back to 0.11.1.` The step is done when the product names the agents that will take the release.
+The new code goes into the home's code store and Dockingbird's coordinator is replaced in the background. Your agents keep working while it restarts. If the release changes Dockingbird's records, `update` first prints `This update changes Dockingbird's records.` and `Once it takes over, it can't go back to 0.15.2.` The step is done when the product names the agents that will take the release.
 
 ```text
-Dockingbird 0.11.2 is installed and takes over now.
+Dockingbird 0.15.3 is installed and takes over now.
 claude-1 and codex-1 take it at their next stopping point.
 ```
 
-Message id `UPDATE_ROLLING`. A command you run meanwhile waits for the coordinator's switch with `Switching Dockingbird to 0.11.2 ...`, minutes at most, and never waits for the agents. On a Mac, `update` last tries to install the GUI, which is not yet available to customers. If that fails, Dockingbird is already updated, and `update` ends with the GUI message and exit 1.
+Message id `UPDATE_ROLLING`. A command you run meanwhile waits for the coordinator's switch with `Switching Dockingbird to 0.15.3 ...`, minutes at most, and never waits for the agents. On a Mac, `update` last tries to install the GUI, which is not yet available to customers. If that fails, Dockingbird is already updated, and `update` ends with the GUI message and exit 1.
 
 ## 3. Watch the switch
 
@@ -57,16 +57,16 @@ dockingbird status
 `status` says how far the roll got and what holds each agent back. The step is done when each agent is accounted for.
 
 ```text
-Dockingbird 0.11.2 is taking over: claude-1 and codex-1 take it at their next stopping point.
-claude-1 takes 0.11.2 at the end of its turn (asked 2 min ago).
-codex-1 was asked to take 0.11.2 2 min ago and hasn't answered yet.
-claude-2 on 0.11.1 keeps its own until its terminal closes.
+Dockingbird 0.15.3 is taking over: claude-1 and codex-1 take it at their next stopping point.
+claude-1 takes 0.15.3 at the end of its turn (asked 2 min ago).
+codex-1 was asked to take 0.15.3 2 min ago and hasn't answered yet.
+claude-2 on 0.15.2 keeps its own until its terminal closes.
 ```
 
 Message ids `STATUS_UPDATE_ROLLING` and `STATUS_UPDATE_STRAGGLERS`. An agent switches only between two turns, never inside a turn or a tool call, and no turn is ended for it. A Claude agent whose background work still runs waits up to 30 minutes for it. An idle agent that has not answered its ask in 10 minutes is left on its old code. When an agent switches, its tool is told before its next prompt.
 
 ```text
-Dockingbird updated from 0.11.1 to 0.11.2 and resumed your conversation. Continue where you were.
+Dockingbird updated from 0.15.2 to 0.15.3 and resumed your conversation. Continue where you were.
 ```
 
 ## 4. Finish the agent at a terminal
@@ -78,7 +78,7 @@ dockingbird stop claude-2
 dockingbird claude --as claude-2
 ```
 
-The pick-up starts `claude-2` on the new code with its conversation resumed. The step is done when `dockingbird status` no longer lists `claude-2` on `0.11.1`.
+The pick-up starts `claude-2` on the new code with its conversation resumed. The step is done when `dockingbird status` no longer lists `claude-2` on `0.15.2`.
 
 ## 5. Confirm that nothing waits
 
@@ -89,7 +89,7 @@ dockingbird update
 Run again for the same version, `update` changes nothing. The step is done when it prints this line.
 
 ```text
-Dockingbird 0.11.2 is in place, and no agent is waiting to take it.
+Dockingbird 0.15.3 is in place, and no agent is waiting to take it.
 ```
 
 Message id `UPDATE_ROLLING`. The roll waits for its stragglers up to 24 hours, then ends, and `status` names the ones still running. A later `dockingbird update` asks the bus stragglers again.
@@ -99,11 +99,11 @@ Message id `UPDATE_ROLLING`. The roll waits for its stragglers up to 24 hours, t
 A home whose Dockingbird predates rolling updates waits once, until its agents end.
 
 ```text
-Dockingbird here is too old to take 0.11.2 while agents run,
-so claude-1 on 0.10.3 keeps its own until it ends.
+Dockingbird here is too old to take 0.15.3 while agents run,
+so claude-1 on 0.15.2 keeps its own until it ends.
 ```
 
-Message id `UPDATE_NO_ROLL_FLOOR`. `status` says `Dockingbird 0.11.2 is installed and takes over when claude-1 on 0.10.3 ends` (`STATUS_UPDATE_STAGED`). Once the last agent ends, Dockingbird switches by itself and stays off after a `dockingbird stop` until you next use it. Later updates reach working agents at their stopping points. See [updates](../../docs/guides/updates.md).
+Message id `UPDATE_NO_ROLL_FLOOR`. `status` says `Dockingbird 0.15.3 is installed and takes over when claude-1 on 0.15.2 ends` (`STATUS_UPDATE_STAGED`). Once the last agent ends, Dockingbird switches by itself and stays off after a `dockingbird stop` until you next use it. Later updates reach working agents at their stopping points. See [updates](../../docs/guides/updates.md).
 
 ## When it fails
 

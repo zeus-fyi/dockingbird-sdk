@@ -23,7 +23,7 @@ python3 search/search.py "trust" --top 1
 ```
 
 ```text
-1. docs/guides/trust-and-repo-settings.md#1-mark-a-checkout-untrusted  score 40.36
+1. docs/guides/trust-and-repo-settings.md#1-mark-a-checkout-untrusted  score 55.21
    Trust and repo settings > 1. Mark a checkout untrusted
    dockingbird trust --off
 ```
@@ -71,9 +71,9 @@ The workflow fails when one of those pages drops out of its query's top 3.
 
 1. A word the docs never use becomes the closest word they do use, at most two letters off. The output prints each correction on its own line, above the results.
 2. A section that holds a query of three or more words, word for word, comes first. A line copied from the screen therefore lands on its message's entry.
-3. A message id, a command, a flag or an MCP tool name scores five times a plain word. A word in a heading scores twice a word in the text.
+3. A message id, an MCP tool name, and a command or flag shown in a `bash` block score five times a plain word. A word in a heading scores twice a word in the text.
 4. A flag keeps its dashes and a tool name keeps its underscores, so each stays one word. Ids also split at `_`, so `completion already` finds `COMPLETION_ALREADY`.
-5. A command counts by its subcommand, so `trust` finds every section that shows `dockingbird trust`.
+5. A command counts by its subcommand, so `trust` finds every section whose `bash` block runs `dockingbird trust`.
 6. When the query names a message id, that id's entry in the [catalogue](troubleshooting.md) ranks above every guide. Words that spell an id with spaces count as naming it. Otherwise the guides and the other pages rank above the catalogue.
 7. With `--audience`, sections written for that reader score twice as high as the rest.
 8. Equal scores follow the reading order of `manifest.json`, from getting started to reference.

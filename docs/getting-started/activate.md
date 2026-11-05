@@ -59,7 +59,7 @@ This computer is activated: {plan}, {seats}, {term}.
 You use Dockingbird under its terms: {link}
 ```
 
-The link is the address of Zeusfyi's end-user licence agreement.
+The link is the address of Zeusfyi's end-user license agreement.
 Activating again on a computer that is already linked keeps its link.
 
 ## 2. Read the status

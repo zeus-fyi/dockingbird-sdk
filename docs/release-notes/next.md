@@ -10,4 +10,8 @@ commands:
 
 # Next release, draft
 
-The notes of the next release appear here as its changes land. Each released version keeps its own file beside this one, named by its tag.
+| | |
+|---|---|
+| Entries | none yet |
+| Released versions | one file per tag in this folder; the first is [v0.6.5.md](v0.6.5.md) |
+| Changelog | [CHANGELOG.md](../../CHANGELOG.md) |

@@ -37,6 +37,15 @@ Two features come together on a team. The [fleet scheduler](../concepts/fleet-sc
 - Each pool host reachable from the admin's computer. Check with `dockingbird fleet hosts`, set up as in [Hosts](hosts.md).
 - For the control plane, a private network between the computers, such as [Tailscale](tailscale.md).
 
+Step 1 needs the server to take password logins over TCP, so edit its two settings files first. Restart PostgreSQL after the first edit and reload it after the second.
+
+```text
+postgresql.conf: listen_addresses = '<loopback address>,<address your hosts use>'
+pg_hba.conf: host dockingbird_fleet all <address/mask> scram-sha-256
+```
+
+Give `pg_hba.conf` one such line for each of the two addresses.
+
 ## 1. Make the store
 
 As the cluster's superuser, make the admin role and the database. A role with `CREATEROLE` makes and grants the fleet's groups itself, so nothing more is asked of the superuser.
@@ -47,7 +56,7 @@ psql -c 'CREATE DATABASE dockingbird_fleet OWNER fleet_admin;'
 psql -c '\password fleet_admin'
 ```
 
-The roles log in over TCP with passwords. Set `listen_addresses` in `postgresql.conf` to the loopback address and the address your hosts use, then restart PostgreSQL. Add `host` lines for `dockingbird_fleet` to `pg_hba.conf`, from both addresses, with the method `scram-sha-256`, then reload it. Psql confirms the first two commands with `CREATE ROLE` and `CREATE DATABASE`.
+Psql confirms the first two commands with `CREATE ROLE` and `CREATE DATABASE`.
 
 ## 2. Log in as the admin and make the schemas
 
@@ -124,19 +133,13 @@ Given no task, the agent waits and runs no turn, and stopping it keeps the link.
 refused: source: no home of the placement links a checkout of the repository, as of its host's last sample
 ```
 
-## 6. Run the worker and the admitter as services
+## 6. Start the worker and the admitter
 
-Each pool host runs one worker, `dockingbird fleet worker --host lab`. One host that stays awake runs the admitter, `dockingbird fleet admitter`. Each connects as its kind's role and runs until stopped, so each belongs under the machine's service manager. That is a LaunchAgent on a Mac, or a systemd user unit on Linux with `loginctl enable-linger` so it runs while nobody is logged in.
+Each pool host runs one worker. One host that stays awake runs the admitter. Each runs under the host's service manager, as the Services section below sets out.
 
-Dockingbird prints no unit for these two commands, because `serve --unit` covers `serve --all` only. Write each unit for your own service manager. It starts `installs/current/bin/dockingbird` under the host's data root, `~/.local/share/dockingbird/installs/`, with `fleet worker --host lab` or `fleet admitter` as arguments. Make `installs/current` a link beside the release folders. `fleet update` moves it from then on.
-
-The worker reads the `hosts.toml` of its home. A `[[home]]` table, such as `name = "team-1"`, names each home it starts agents in. The optional `clones` key, an absolute folder such as `/srv/dockingbird/clones`, is where it keeps one clone per repository and branch.
-
-On the computer that runs `fleet update`, each `[[host]]` table also needs a `repoint` line. It restarts that host's services and must return without waiting for them to stop. The first form is for a Mac and the second for Linux.
-
-```text
-repoint = "launchctl kickstart -k gui/$UID/<label>"
-repoint = "systemctl --user restart --no-block <unit>"
+```bash
+dockingbird fleet worker --host lab
+dockingbird fleet admitter
 ```
 
 The step is done when `fleet hosts` lists both processes. A worker started against a store that lacks a migration refuses with `FLEET_STORE_BEHIND`, so run `org create` first.
@@ -209,6 +212,21 @@ After the control plane's computer restarts, the first `dockingbird cp status` o
 ## 10. Update in order
 
 Update the admin's store first with `org create`, then the control plane's home, then each member and each worker with `dockingbird update`. Until a member matches the control plane, its fleet frames are refused with `NODE_VERSION_MISMATCH` and its agents keep working without the fleet. `fleet update` moves the pool's hosts in rank order and is the admin's alone, as [the fleet scheduler guide](fleet-scheduler.md#update-the-pool) shows.
+
+## Services
+
+Each of the two commands connects as its kind's role and runs until stopped, so each belongs under the machine's service manager. That is a LaunchAgent on a Mac, or a systemd user unit on Linux with `loginctl enable-linger` so it runs while nobody is logged in.
+
+Dockingbird prints no unit for these two commands, because `serve --unit` covers `serve --all` only. Write each unit for your own service manager. It starts `installs/current/bin/dockingbird` under the host's data root, `~/.local/share/dockingbird/installs/`, with `fleet worker --host lab` or `fleet admitter` as arguments. Make `installs/current` a link beside the release folders. `fleet update` moves it from then on.
+
+The worker reads the `hosts.toml` of its home. A `[[home]]` table, such as `name = "team-1"`, names each home it starts agents in. The optional `clones` key, an absolute folder such as `/srv/dockingbird/clones`, is where it keeps one clone per repository and branch.
+
+On the computer that runs `fleet update`, each `[[host]]` table also needs a `repoint` line. It restarts that host's services and must return without waiting for them to stop. The first form is for a Mac and the second for Linux.
+
+```text
+repoint = "launchctl kickstart -k gui/$UID/<label>"
+repoint = "systemctl --user restart --no-block <unit>"
+```
 
 ## A computer in a cloud
 

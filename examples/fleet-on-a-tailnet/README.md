@@ -47,7 +47,7 @@ dockingbird cp init --hub-address <ipv4>
 
 ```text
 This home is now the fleet's control plane, at <ipv4>:4222.
-Make a bundle for each computer that joins:
+Make a bundle for each computer that joins.
 dockingbird cp token --host LABEL --platform PLATFORM
 ```
 
@@ -77,7 +77,7 @@ dockingbird cp token --host lab --platform linux
 
 ```text
 lab is enrolled as node NODE_ID (linux).
-Its bundle is the next line, shown once and not kept here:
+Its bundle is the next line, shown once and not kept here.
 paste it into dockingbird node join on that computer.
 ```
 

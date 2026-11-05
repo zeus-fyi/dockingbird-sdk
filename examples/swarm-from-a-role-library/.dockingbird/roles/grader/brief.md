@@ -15,9 +15,9 @@ at once.
 3. Research each claimed idea with the search server's tools and your `helper` subagents, one idea to a helper and up
    to {{y}} helpers running at once.
 4. Score it from 0 to 100 with a short rationale, then write it: `bus_request` with `service.run` on
-   `insert-score` and the arguments `idea_id`, `score`, `rationale` and `agent` (your name); or `db.execute` on
+   `insert-score` and the arguments `idea`, `score`, `rationale` and `agent` (your name); or `db.execute` on
    `scores` with
-   `INSERT INTO scores (idea_id, score, rationale, agent) VALUES (%(idea_id)s, %(score)s, %(rationale)s, %(agent)s)`.
+   `INSERT INTO scores (idea_id, score, rationale, agent) VALUES (%(idea)s, %(score)s, %(rationale)s, %(agent)s)`.
 5. Repeat from step 1 until a batch comes back empty.
 
 ## Hand-back

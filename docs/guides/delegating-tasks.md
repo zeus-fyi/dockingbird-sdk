@@ -25,7 +25,7 @@ Give an agent a task, then do something else. The agent runs in its own containe
 
 ## Before you start
 
-- Dockingbird is set up and Docker Desktop is running. `dockingbird status` prints a first line such as `Dockingbird 0.11.1, signed in to Claude and Codex`.
+- Dockingbird is set up and Docker Desktop is running. `dockingbird status` prints a first line such as `Dockingbird 0.15.3, signed in to Claude and Codex`.
 - The tool you delegate to has a sign-in or a saved API key. An agent without a terminal cannot sign in, so `start` refuses a tool that has neither (`SIGNIN_NEEDED`). Fix it with [sign-in and API keys](sign-in-and-api-keys.md).
 - You stand in a git repository with a commit. The agent starts from your last commit.
 

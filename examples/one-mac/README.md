@@ -28,6 +28,14 @@ Desktop, uv and a git repo of yours, `~/code/myapp` below, and you edit no file 
 Dockingbird prints when the step is done. The [troubleshooting](../../docs/troubleshooting.md) catalogue holds every
 such line under its message id.
 
+## Before you start
+
+- An Apple silicon Mac. `uname -m` prints `arm64`.
+- Docker Desktop, running. `docker info` prints the server section without an error.
+- uv. `uv --version` prints a version.
+- A git repo of yours with a branch checked out. `git -C ~/code/myapp status` prints the branch name.
+- The license key from your purchase email, copied to the clipboard.
+
 ## 1. Install
 
 Copy the license key from your purchase email. The first line passes it to uv in two environment variables, so the
@@ -40,7 +48,7 @@ dockingbird completion --install
 ```
 
 `dockingbird license activate` asks for the key again at a hidden prompt and links this Mac to your seat. It is done
-when it prints the plan, the seats and the term:
+when it prints the plan, the seats and the term.
 
 ```text
 This computer is activated: {plan}, {seats}, {term}.
@@ -58,7 +66,7 @@ cd ~/code/myapp
 dockingbird status
 ```
 
-Before the first run it sets nothing up and says so:
+Before the first run it sets nothing up and says so.
 
 ```text
 Dockingbird isn't set up yet. Start here: dockingbird claude
@@ -105,7 +113,7 @@ myapp (main): 1 new commit from the agents
 Updated your main to <commit>. Review it: git log -p <commit>..<commit>
 ```
 
-and when there is nothing new either way:
+With nothing new either way, it prints this.
 
 ```text
 myapp (main): up to date.
@@ -118,3 +126,11 @@ installed.` and exits 1, and [the GUI](../../docs/guides/gui.md) says what that 
 
 The [operator guide](../../docs/operator-guide.md) has the rest: sign-ins and API keys, update and clean, and what
 lives where. `dockingbird stop` turns it all off, and nothing is lost.
+
+## When it fails
+
+| Message id | What it means | Entry |
+|---|---|---|
+| `SIGNIN_NEEDED` | The tool is not signed in. Run `dockingbird login` for it, as the message says, or use an API key. | [catalogue](../../docs/troubleshooting.md#signin_needed) |
+| `HOME_NOT_EMPTY` | The folder for Dockingbird's files holds files it did not make. Unset `DOCKINGBIRD_HOME` or point it at an empty or new folder. | [catalogue](../../docs/troubleshooting.md#home_not_empty) |
+| `GUI_MISSING` | `dockingbird ui` found no GUI on this computer. The GUI is not yet available to customers. | [catalogue](../../docs/troubleshooting.md#gui_missing) |

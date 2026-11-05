@@ -43,9 +43,9 @@ A key or a table outside this list is refused, and the refusal names the key.
 | `version` | `1` | `1` | the file's format; another number is refused |
 | `slug` | lowercase letters, digits and `-` | `--project SLUG`, else the name of the repo's `origin` remote, else its folder's | the project's name in your organisation's store |
 | `release` | text | the release that ran `init` | the release whose `init` wrote the file and its skills |
-| `[org] ops_repository` | `owner/name` | empty | optional: the organisation's operations repository |
-| `[checks] runner_host` | a host name of `hosts.toml` | empty | optional: the host where the project's merge checks run |
-| `[checks] runner_script` | a path in the repo | empty | optional: the script that runner runs |
+| `[org] ops_repository` | `owner/name` | empty | written empty by `init`; leave it empty |
+| `[checks] runner_host` | a host name of `hosts.toml` | empty | written empty by `init`; leave it empty |
+| `[checks] runner_script` | a path in the repo | empty | written empty by `init`; leave it empty |
 | `[rules] file` | a path in the repo | `.dockingbird/rules.md` | the project's rules file, read at every start; a file that is missing, a link, not UTF-8 text or holding a Dockingbird credential stops the start |
 | `[roles.NAME] harness` | `claude` or `codex` | `claude` | the tool a bus agent of the role `NAME` runs; one table for each shipped role |
 | `[roles.NAME] model` | the tool's model word | empty | empty means the organisation's store row for that kind of role, else `fleet submit` refuses the role |

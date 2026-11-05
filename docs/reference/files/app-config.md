@@ -39,7 +39,7 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `mode` | `bus` or `terminal` | `bus` | in the background through messages, or at your terminal; once set it is fixed, and `--terminal` cannot change it |
 | `context` | `kept` or `fresh` | `kept` | bus only: one conversation for every delivery, or a new conversation for each task delivery under the same rules |
 | `repo_settings` | `true` or `false` | `false` | load the repo's own Claude Code or Codex settings, hooks and MCP servers, once the checkout is trusted |
-| `tools` | `bus`, `default` or `full` | `bus` | `bus` moves messages and files and shares no commits; `default` adds claims and commits; `full` is both, so its commits reach you through `dockingbird sync` |
+| `tools` | `bus`, `default` or `full` | `bus` | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool. Commits made under `default` or `full` reach you through `dockingbird sync` |
 | `egress` | `allowlist`, `models`, `none` or `full` | `full`, or what `dockingbird egress` set | what the agent may reach on the network |
 | `allow` | list of hosts and presets | the list `dockingbird egress` set, else nothing beyond the tool's own hosts | with `allowlist`, the presets `registries` and `github`, or hosts such as `docs.python.org` and `*.corp.example` |
 | `harness_args` | list of words | none | fixed arguments for the tool: Claude takes `--model`, `--fallback-model`, `--max-turns` and `--effort` (`low`, `medium`, `high`, `xhigh` or `max`); Codex takes `--model`, `-m` and `-c model_reasoning_effort=LEVEL`; anything else is refused |

@@ -11,7 +11,7 @@ commands: []
 
 This page lists each port and route Dockingbird opens or expects, the interface it is on, and the hosts an egress mode reaches. [Networking](../guides/networking.md) explains the three routes.
 
-## Ports and routes
+## Ports the control plane and the agents open
 
 | Port or route | Interface | Opened by | Reached by | Guide |
 |---|---|---|---|---|

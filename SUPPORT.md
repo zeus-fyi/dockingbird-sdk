@@ -13,7 +13,7 @@ Two places take questions and problem reports.
 
 | What you have | Where it goes |
 |---|---|
-| A question the docs do not answer | an issue on this repository, once it is public; until then, a reply to the email that carried your licence key |
+| A question the docs do not answer | an issue on this repository, once it is public; until then, a reply to the email that carried your license key |
 | A problem on screen | the same place, with the three items below attached |
 
 Attach these three things to a problem report. They hold numbers and names only, never your repository's content.

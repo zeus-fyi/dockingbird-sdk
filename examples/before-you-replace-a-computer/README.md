@@ -74,7 +74,7 @@ dockingbird homes
 `homes` lists every Dockingbird home on this computer, so you know which folders to copy.
 
 ```text
-default (default): Dockingbird stopped, version 0.11.1, this home
+default (default): Dockingbird stopped, version 0.15.3, this home
 ```
 
 Message id `HOMES_ROW`. Copy these from each home's folder into `../save`: `hosts.toml`, `fleet.toml`, `versions.toml`, `config.toml`, the `instructions/` folder and any `vaults/`. The step is done when the files are in the save folder. `hosts.toml` names the other computers you reach, so the new computer reads them the same way. Sign-ins live in Docker volumes and are not in these files: you sign in again.

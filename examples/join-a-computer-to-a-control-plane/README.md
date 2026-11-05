@@ -38,7 +38,7 @@ The second line is for a tailnet, the network the product is built against. [Oth
 
 ```text
 This home is now the fleet's control plane, at {host}:{port}.
-Make a bundle for each computer that joins:
+Make a bundle for each computer that joins.
 dockingbird cp token --host LABEL --platform PLATFORM
 ```
 
@@ -57,7 +57,7 @@ The step is done when `cp token` prints the three lines below and the bundle fol
 
 ```text
 lab is enrolled as node {node_id} (macos).
-Its bundle is the next line, shown once and not kept here:
+Its bundle is the next line, shown once and not kept here.
 paste it into dockingbird node join on that computer.
 ```
 
