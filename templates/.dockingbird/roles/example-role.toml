@@ -1,0 +1,58 @@
+# A template: copy it to .dockingbird/roles/example-role.toml in your repo. A
+# swarm definition's [[role]] takes it with use = "example-role", and a key that
+# role gives replaces the one here. Paths are relative to .dockingbird/roles/.
+# It names three files of yours, example-role/brief.md, example-role/rules.md
+# and example-role/helper.md: write them, or leave those keys out. The role and
+# connection files reference, docs/reference/files/roles-and-connections.md,
+# has every key.
+#
+# A swarm's own keys stay in the definition's [[role]]: use, count, min, max,
+# send_to, reviews, tests, kind and args. The keys system_prompt,
+# append_system_prompt and developer_instructions are refused.
+
+# claude or codex: the tool its agents run.
+harness = "claude"
+# Its agents' model and effort. Default: the project file's [roles.<kind>] for
+# this harness, else your organisation's store.
+model = "opus"
+effort = "high"
+# The Markdown file of the first task; {{name}} in it expands a parameter of the
+# swarm definition.
+brief = "example-role/brief.md"
+# Text its agents get after Dockingbird's rules and the project's, never in
+# place of them.
+instructions = "example-role/rules.md"
+# The home's connections its agents are granted at start, by name.
+connections = ["example-service"]
+# repo: a copy of the repository; scratch: an empty folder of its own.
+workspace = "repo"
+# "bus" (messages and files) or "full" (messages, files, claims and commits).
+# A swarm refuses a value that drops a tool of the bus.
+tools = "full"
+# allowlist: its tool's hosts and those of allow, through a proxy of its own;
+# models: its tool's hosts alone; none: no network, not even its model's API;
+# full: its own network, open to the internet.
+egress = "allowlist"
+# With allowlist, what else it may reach: the presets registries (package
+# registries) and github (GitHub's content), or hosts such as "docs.python.org".
+allow = ["registries", "github"]
+# Compact an agent's context at this many tokens: 500000, 500k or auto.
+compact_at = "500k"
+# Hours each agent may run, 1 to 168.
+session_hours = 24
+# needs: the role's resource reservation, cpus, memory and pids, each with a
+# request and a limit. Default: measured. Left out here.
+
+# Variables its agents' tool sees: settings, never secrets.
+[env]
+EXAMPLE_STYLE = "short"
+
+# One kind of helper the role's harness runs, as Claude Code's own subagent.
+[subagents.helper]
+# The helper's text; its first line is the helper's description.
+instructions = "example-role/helper.md"
+# The helper's model and effort.
+model = "sonnet"
+effort = "high"
+# How many helpers run at once.
+max = 4

@@ -1,66 +1,211 @@
+---
+title: Quickstart
+summary: The one-page path from a fresh computer to a first agent, a daily loop and a clean uninstall.
+audience: first-day
+commands:
+  - dockingbird --version
+  - dockingbird completion --install
+  - dockingbird license activate
+  - dockingbird init
+  - dockingbird claude
+  - dockingbird codex
+  - dockingbird login claude --api-key
+  - dockingbird login codex --api-key
+  - dockingbird status
+  - dockingbird sync
+  - dockingbird stop
+  - dockingbird update
+  - dockingbird clean
+  - dockingbird start
+  - dockingbird wait
+  - dockingbird inbox
+  - dockingbird read
+  - dockingbird search
+  - dockingbird send
+  - dockingbird results
+  - dockingbird clean --all
+---
+
+> Part of the Dockingbird customer docs. The index for agents is [llms.txt](../llms.txt).
+
 # Dockingbird quickstart
 
-Dockingbird runs Claude Code and Codex side by side on your git repo, each in its own container, so they never overwrite each other or touch your Mac. Their work comes back to you as commits. You need an Apple silicon Mac (or arm64 Linux), Docker Desktop (it includes the buildx plugin; Docker Engine on Linux needs Docker's `docker-buildx-plugin` package) and uv.
+This page takes you from a fresh computer to a running agent, then through the daily loop and a clean uninstall.
+Each step ends with the line Dockingbird prints when it worked, and each step links to its own page for detail.
 
-## Install
+Dockingbird runs Claude Code and Codex side by side on your git repo, each in its own container.
+They never overwrite each other or touch your Mac, and their work comes back to you as commits.
+
+## Before you start
+
+You need all five of these. [Prerequisites](getting-started/prerequisites.md) gives the check for each.
+
+- An Apple silicon Mac or arm64 Linux. Intel Macs, x86 Linux and Windows are not supported.
+- Docker Desktop, which includes the buildx plugin. Docker Engine on Linux needs the `docker-buildx-plugin` package.
+- [uv](https://docs.astral.sh/uv/). On a Mac, `brew install uv` installs it.
+- git at `/usr/bin/git`.
+- A license key from your purchase email, or no key and a trial.
+
+## 1. Install
+
+Copy the key from your purchase email, then run this line on a Mac.
+It hands the key to uv as the index's password, so the key never reaches your shell history or a command line.
 
 ```bash
-UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeusfyi.com/simple/
+UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeus.fyi/simple/
+dockingbird --version
+dockingbird completion --install
+```
+
+On Linux, `read -rs UV_INDEX_ZEUSFYI_PASSWORD` reads the key without echo, and `unset` clears it afterwards.
+[Install](getting-started/install.md) shows the whole Linux sequence.
+
+Never run a bare `uv tool install dockingbird`. That name on PyPI is not this product, so the line above must carry `--index`.
+
+Done when `dockingbird --version` prints a line that starts with `dockingbird` and a version.
+`dockingbird completion --install` then prints "Open a new terminal." for tab completion.
+If `dockingbird` is not found, run `uv tool update-shell` and open a new terminal.
+
+## 2. Activate
+
+```bash
 dockingbird license activate
 ```
 
-No uv yet? `brew install uv`. With a license key, from Zeusfyi's release index: copy the key from your purchase email, then run the first line, which hands it to uv as the index's password without it reaching your shell's history. Then `dockingbird license activate` gives this computer its seat; from then on `dockingbird update` needs no key. `dockingbird completion --install` adds tab completion; open a new terminal for it. If `dockingbird` is not found afterwards, run `uv tool update-shell`, then open a new terminal. The first run sets everything up (downloads about 1 GB, once); the first start of each tool then fetches its latest release.
+Dockingbird asks for the key and does not show it. `pbpaste | dockingbird license activate` also works.
+A key typed on the command line is refused with exit 2.
+No key? `dockingbird license trial` starts this computer's trial, but a trial cannot install from the index or update.
 
-## First run
+One seat is one person, who may link up to three computers.
+[Activate](getting-started/activate.md) explains seats, the trial and the refusals.
 
-```bash
-cd your-repo && dockingbird claude
+Done when Dockingbird prints these two lines.
+
+```text
+This computer is activated: {plan}, {seats}, {term}.
+You use Dockingbird under its terms: {link}
 ```
 
-Dockingbird checks your branch first: one holding files the agents don't take (a symlink leaving the repo, a submodule, a Git LFS file) is refused in seconds, each file named, before anything is set up. Then it sets itself up (about 5 minutes, the first time only), copies your branch for the agents and starts `claude-1`. Claude then signs in once, inside its container: open the link it shows on this Mac, sign in, and paste the code back. Codex works the same way with `dockingbird codex`: open its link and enter the one-time code. No Claude or ChatGPT account? Quit the sign-in, then use an API key: `dockingbird login claude --api-key` or `dockingbird login codex --api-key`. The repo's own settings, hooks and MCP servers load in the agent as they do outside Dockingbird, and Claude doesn't ask whether to trust `/work/your-repo`, its copy of this repo; for a repo you don't control, `dockingbird trust --off` in it keeps them off (the operator guide's "Trust" says what then changes). To leave it working, close this window: `claude-1` keeps going, and a bare `dockingbird claude` in that repo reconnects to it.
+If every computer of the license is linked, the message is `LICENSE_SEATS_FULL` and it names the command that frees one.
+
+## 3. Make a repository ready
+
+```bash
+cd your-repo
+dockingbird init
+git add .dockingbird .agents .claude && git commit
+```
+
+`dockingbird init` writes `.dockingbird/project.toml`, the rules file, an example swarm, and the skills and agent definitions of this release.
+Agents start from your last commit, so commit these files before the first start.
+Without an org login, `init` says the project is not in an organisation's store and still exits 0.
+Add `--no-register` to skip that line.
+
+Done when the first line reads "Set up {project} for Dockingbird {release}: the project file, its rules,". The next lines tell you to keep the files in git.
+Run in a folder that is no git repo, it stops with `INIT_NOT_A_CHECKOUT`.
+[First run](getting-started/first-run.md) lists what `init` writes.
+
+## 4. First run
+
+```bash
+dockingbird claude
+```
+
+The first start checks your branch, builds the image, starts Dockingbird and copies the branch for the agents.
+The build takes about 5 minutes and downloads about 1 GB, once.
+The first start of each tool also fetches that tool's latest release.
+Dockingbird refuses a branch holding a symlink that leaves the repo, a submodule or a Git LFS file. It does so in seconds, names each file, and sets nothing up.
+Then it starts `claude-1`.
+
+Claude shows a sign-in link once. Open it on this Mac, sign in, and paste the code back.
+Codex works the same way with `dockingbird codex`: open its link and enter the one-time code.
+With no Claude or ChatGPT account, quit the sign-in. Then run `dockingbird login claude --api-key` or `dockingbird login codex --api-key`.
+
+The repo's own settings, hooks and MCP servers load in the agent, and Claude does not ask whether to trust `/work/your-repo`.
+For a repo you do not control, run `dockingbird trust --off` in it.
+To leave the agent working, close the window. A bare `dockingbird claude` in that repo reconnects to it.
+Dockingbird turns itself off after 30 minutes with no agent, and the next command turns it back on.
+
+Done when the start prints these lines and Claude opens its sign-in.
+
+```text
+Copying your-repo (main) for the agents ({size}) ... done ({elapsed})
+Starting claude-1 on your-repo (main). Claude will show a sign-in link:
+open it on this Mac, sign in, then paste the code here. Only this once.
+```
 
 Run as many agents as you like, each in its own terminal, in as many repos as you like.
 
-## Every day
+## 5. Every day
 
 ```bash
-dockingbird status    # who is working on what, and what needs you
-dockingbird sync      # take the agents' commits, send them yours
-dockingbird stop      # turn it all off; nothing is lost
+dockingbird status
+dockingbird sync
+dockingbird stop
 ```
 
-- Agents start from your last commit, never from uncommitted edits, and their work reaches you only as commits, through `dockingbird sync`.
+- `status` shows who is working on what and what needs you. Its first line reads "Dockingbird {version}, signed in to Claude and Codex".
+- `sync` takes the agents' commits and sends yours. It prints "Updated your {branch} to {head}." for commits taken and "up to date." when nothing moved.
+- `stop` turns everything off and prints "Dockingbird is off until you next use it." Nothing is lost.
+- Agents start from your last commit, never from uncommitted edits, and their work reaches you only through `dockingbird sync`.
 - `sync` never rewrites history. It keeps your uncommitted edits, and when both sides have new commits it offers to merge.
-- Don't want an agent's commit? Undo it with a commit of your own: `git revert COMMIT`, then `dockingbird sync`. Resetting or deleting your branch doesn't remove it: the agents' copy keeps it.
-- A one-shot works too: `dockingbird claude -p "Summarize the open TODOs"`.
-- Every agent in one window: `dockingbird update` or `dockingbird ui --install` once, then `dockingbird ui`, mouse first; `ctrl+b q` leaves it, and every agent keeps working.
-- Another computer's agents in the same window: `dockingbird fleet hosts set NAME --ssh DEST` (or `--gcloud VM --zone ZONE --project PROJECT`), then `dockingbird ui`; the operator guide's "Every agent on every host" has the rest.
-- Sometimes: `dockingbird login claude` (sign in again), `dockingbird update` (the latest versions), `dockingbird clean` (free disk space).
+- To undo an agent's commit, make a commit of your own with `git revert COMMIT`, then run `dockingbird sync`.
+- A one-shot works too: `dockingbird claude -p "Summarize the open TODOs"` prints only the answer.
+- `dockingbird login claude` signs in again, `dockingbird update` gets the latest versions, and `dockingbird clean` frees disk space.
+- A second computer joins with `dockingbird fleet hosts set NAME --ssh DEST`, or with `--gcloud VM --zone ZONE --project PROJECT`. [Choose a topology](getting-started/choose-a-topology.md) compares the options.
+- The GUI (`dockingbird ui`) is not yet available to customers, so use the terminal commands on this page.
 
-Every command explains itself: `dockingbird -h`. When something goes wrong, the message says what to do next; all of them are in [troubleshooting](troubleshooting.md). The [operator guide](operator-guide.md) has the rest: sign-ins, API keys, what lives where, and the limits.
-
-## Delegate
+## 6. Delegate
 
 ```bash
-dockingbird start "Fix the flaky test"    # an agent works on it without a terminal
-dockingbird wait claude-1                 # its next message, as it comes
-dockingbird inbox                         # what waits for you, numbered
-dockingbird read 1                        # one message, and the files it names
-dockingbird search "closed issues"        # finds a message by its words
-dockingbird send claude-1 "The new one"   # answers its question, or is a new task
-dockingbird results claude-1              # saves the files it attached
-dockingbird stop claude-1                 # stops it; its messages and results stay
+dockingbird start "Fix the flaky test"
+dockingbird wait claude-1
+dockingbird inbox
+dockingbird read 1
+dockingbird search "closed issues"
+dockingbird send claude-1 "The new one"
+dockingbird results claude-1
+dockingbird stop claude-1
 ```
 
-The agent works in its own container on its own copy, as `dockingbird claude`'s agents do, and a question it asks you also leads `dockingbird status` until you answer it. A repo's own `.dockingbird/` configs add commands of their own: the operator guide's "Your own commands (configs)" explains them.
+`start` hands an agent a task without a terminal. `wait` shows its next message as it comes.
+`inbox` lists what waits for you. `read` opens one message and the files it names. `search` finds a message by its words.
+`send` answers a question or sends a new task. `results` saves the files it attached. `stop claude-1` stops it, and its messages and results stay.
+A question the agent asks also leads `dockingbird status` until you answer it.
 
-## Uninstall
+Done when `start` prints "claude-1 started on your-repo (main)." and a thread line that names `dockingbird wait claude-1`.
+`dockingbird inbox` prints "Nothing is waiting in your inbox." when no message waits.
+[Delegating tasks](guides/delegating-tasks.md) has the full loop.
+
+## 7. Uninstall
 
 ```bash
 dockingbird clean --all
 uv tool uninstall dockingbird
 ```
 
-Uninstalling first would leave Dockingbird's containers, volumes and image behind. `clean --all` keeps one empty folder, `~/.local/share/dockingbird/logs`, so a later start works while Docker Desktop still shares it; delete it after Docker Desktop restarts if you like.
+`clean --all` lists what it removes, then asks you to type `delete`. It gives this computer's seat back first.
+Uninstalling first would leave Dockingbird's containers, volumes and image behind.
+`clean --all` keeps one empty folder, `logs`, in the Dockingbird home, so a later start works while Docker Desktop still shares it.
+Docker keeps the build cache of Dockingbird's image, shared with every other project's, and `docker builder prune` frees all of it.
 
-Docker keeps the build cache of Dockingbird's image, shared with every other project's; `docker builder prune` frees all of it.
+Done when `clean --all` prints these lines.
+
+```text
+Removed everything Dockingbird made ({freed}). Your code is untouched.
+To remove the command too: uv tool uninstall dockingbird
+```
+
+## When it fails
+
+- [`DOCKER_NOT_INSTALLED`](troubleshooting.md#docker_not_installed) appears when no `docker` command exists. Install Docker Desktop, or Docker on Linux.
+- [`HOME_NOT_EMPTY`](troubleshooting.md#home_not_empty) appears when the folder Dockingbird would use holds files it did not make. Unset `DOCKINGBIRD_HOME` or point it at an empty folder.
+- [`COMPLETION_ALREADY`](troubleshooting.md#completion_already) appears when you install completion a second time. Nothing is wrong.
+- [`LICENSE_KEY_IN_ARGV`](troubleshooting.md#license_key_in_argv) appears when you type the key on the command line. Nothing ran, so run `dockingbird license activate` and paste the key.
+- [`LICENSE_TRIAL_USED`](troubleshooting.md#license_trial_used) appears when this computer already had its trial. Activate it with a key.
+- [`INIT_NOT_A_CHECKOUT`](troubleshooting.md#init_not_a_checkout) appears when `init` runs outside a git repo. Run it in your repo.
+- [`INIT_INSIDE_HOME`](troubleshooting.md#init_inside_home) appears when `init` runs inside the Dockingbird home. Run it in your repo.
+- [`SIGNIN_NEEDED`](troubleshooting.md#signin_needed) appears when the tool has no sign-in. Run `dockingbird claude` again, or use an API key.
+
+Every command explains itself with `dockingbird -h`.
+All messages are in [troubleshooting](troubleshooting.md), and the [operator guide](operator-guide.md) has the rest.

@@ -1,0 +1,41 @@
+# Regression queries for the docs search: a query, a tab, then the page it must keep in its top 3.
+# A page is a path from the repository root, or a path and an anchor for one section.
+# Pages joined by | pass when any one of them is in the top 3.
+# The ten docs/troubleshooting/<area>.md index pages are not indexed, so no row can expect them.
+# Run: python3 .github/scripts/check_queries.py
+
+# Ids, a phrase from the screen, a flag, a typo and tool names
+LICENSE_SEATS_FULL	docs/troubleshooting.md#license_seats_full
+seats full	docs/troubleshooting.md#license_seats_full
+Every computer this license admits is linked	docs/troubleshooting.md#license_seats_full
+--release	docs/guides/licensing.md
+my second laptop can't activate	examples/move-your-seat/README.md|docs/getting-started/activate.md
+docker not runing	docs/troubleshooting.md#docker_not_running
+DOCKINGBIRD_HOME	docs/reference/files/home-layout.md
+agent_send	docs/reference/integration/mcp.md
+exit code 78	docs/reference/integration/exit-codes.md
+sync asks to merge	docs/concepts/sync-model.md|docs/troubleshooting.md#sync_both_moved
+how do I move to a new laptop	examples/move-your-seat/README.md
+
+# The ten questions a first-week customer asks most
+what do I need before I install	docs/getting-started/prerequisites.md|docs/faq.md
+how do I know the install worked	docs/getting-started/install.md|docs/getting-started/activate.md|docs/faq.md
+what can the agent see of my mac and my repo	docs/concepts/security-model.md|docs/concepts/architecture.md|docs/faq.md
+what if we both committed	docs/guides/daily-loop.md|docs/concepts/sync-model.md|docs/faq.md
+can two agents work on one branch	docs/concepts/sync-model.md|docs/faq.md
+can my colleague use my key	docs/getting-started/activate.md|docs/guides/licensing.md|docs/faq.md
+why is the first start slow	docs/getting-started/first-run.md|docs/guides/clean-and-uninstall.md|docs/faq.md
+what happens when I close the lid	docs/guides/daily-loop.md|docs/faq.md
+claude code or codex which should I use	docs/concepts/claude-code-and-codex.md|docs/guides/delegating-tasks.md|docs/faq.md
+where do I ask for help	docs/faq.md
+
+# Steps of the first week, from install to uninstall
+install dockingbird on a mac	docs/getting-started/install.md
+command not found	docs/troubleshooting/install-fails.md|docs/getting-started/install.md
+make a repository ready with init	docs/getting-started/first-run.md|docs/quickstart.md
+how do I stop everything	docs/guides/daily-loop.md
+start a task and wait for its result	docs/guides/delegating-tasks.md
+start a trial without a key	docs/guides/licensing.md|docs/getting-started/activate.md
+add a second mac over ssh	examples/two-macs-ssh/README.md|docs/guides/hosts.md
+update while agents are running	examples/update-with-agents-running/README.md|docs/guides/updates.md
+uninstall everything and give the seat back	examples/uninstall-completely/README.md|docs/guides/clean-and-uninstall.md

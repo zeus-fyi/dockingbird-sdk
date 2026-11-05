@@ -1,0 +1,125 @@
+# A template: copy it to .dockingbird/swarms/example/swarm.toml in your repo,
+# where dockingbird init writes a shorter example of its own. It names files of
+# yours beside it, review.md and review-rules.md, the library role
+# .dockingbird/roles/example-role.toml and the connection example-service (both
+# templates sit beside this folder): write them, or change the roles that name
+# them. Fill in the hosts, then run from the repository's top:
+#   dockingbird fleet describe example
+#   dockingbird fleet submit example --set N=4
+# describe prints every parameter and settable field as JSON; submit queues the
+# swarm on the pool. The swarm definition reference,
+# docs/reference/files/swarm-definition.md, has every key.
+
+# The definition's version. Required: 1.
+schema = 1
+# The project's slug. Required, or given by fleet submit --project.
+project = "example"
+# A repeat of this key answers the swarm it queued first. Default: the
+# definition's name and the UTC time, or fleet submit --key.
+key = "example-1"
+# The queue priority: P0, P1, P2 or P3. Required.
+priority = "P2"
+
+# [[attachments]]: a file the swarm carries, a table with path and name.
+# Left out here.
+
+# The repository and branch the agents work on. Required unless every role has
+# workspace = "scratch".
+[source]
+repository = "example-org/example-app"
+branch = "main"
+
+# The pool's hosts to try, in order of preference. Default: every pool host that
+# takes swarms, in the pool's rank order.
+[placement]
+hosts = ["lab"]
+# A host's home, by the name its worker publishes or by its folder path.
+# Default: a home the fleet picks.
+home.lab = "/opt/dockingbird/homes/team-1"
+
+# Parameters, written {{name}} in values and in briefs. fleet submit --set N=4
+# gives one, and --values FILE gives several as JSON. A parameter takes min and
+# max; a service file's arguments take minimum and maximum.
+[params]
+# An int, with its default, min and max.
+N = { type = "int", default = 2, min = 1, max = 8 }
+# A choice, with the words it allows in choice.
+effort = { type = "choice", default = "high", choice = ["high", "xhigh", "max"] }
+# A text.
+model = { type = "text", default = "opus" }
+
+# A coordinator, from the roles Dockingbird ships.
+[[role]]
+# The role's name.
+name = "coord"
+# "dockingbird/NAME" takes a shipped role: coordinator, implementer, reviewer,
+# tester or reader. "NAME" takes .dockingbird/roles/NAME.toml.
+use = "dockingbird/coordinator"
+# claude or codex. Required, unless the library role or the project file gives it.
+harness = "claude"
+# Overrides of the model and effort. Default: the library role's, else the
+# project file's [roles.<kind>] for this harness, else your organisation's store.
+model = "{{model}}"
+effort = "max"
+# Agents of the role at the start, at most 24 per home.
+count = 1
+# The roles its agents may message besides their parent. Default: any agent of
+# the project; [] allows the parent alone.
+send_to = ["worker", "review"]
+
+# Workers built from the library role example-role.
+[[role]]
+name = "worker"
+use = "example-role"
+effort = "{{effort}}"
+count = "{{N}}"
+# The fewest agents a retire leaves; the fleet admits the swarm once every
+# role's min fits. Default: count.
+min = 1
+# The most agents an add reaches. Default: count.
+max = 8
+# The home's connections its agents are granted at start; each must name an
+# enabled connection at submit. Given here, it replaces the library role's list.
+connections = ["example-service"]
+send_to = ["coord"]
+
+# The workers' helper, merged field by field with the library role's: here, how
+# many run at once. Its other keys are instructions, model and effort.
+[role.subagents.helper]
+max = 2
+# tools: the helper's tools. Left out here.
+
+# A reviewer with a brief of its own.
+[[role]]
+name = "review"
+harness = "claude"
+count = 1
+# The Markdown file of the first task, read under this folder. Required unless
+# the library role gives one.
+brief = "review.md"
+# Text its agents get after Dockingbird's rules and the project's.
+instructions = "review-rules.md"
+# The roles whose commits this role reviews. A role that tests names them in
+# tests, such as tests = ["worker"].
+reviews = ["worker"]
+# Picks the model and effort rows. Default: reviewer for a role that reviews,
+# tester for one that tests, else implementer.
+kind = "reviewer"
+# repo: a copy of the repository; scratch: an empty folder of its own.
+workspace = "repo"
+# "bus" or "full", as in a config; a role keeps every tool of the bus.
+tools = "full"
+# full, allowlist, models or none, as in a config; allow names what an allowlist
+# adds: the presets registries and github, or hosts.
+egress = "allowlist"
+allow = ["registries", "github"]
+# Variables its agents' tool sees: settings, never secrets.
+env = { REVIEW_STYLE = "short" }
+# Compact an agent's context at this many tokens: 500000, 500k or auto.
+# Default: 500000 for an agent the fleet starts.
+compact_at = "500k"
+# Hours each agent may run, 1 to 168. Default: 48 for an agent the fleet starts.
+session_hours = 48
+# needs: the role's resource reservation, cpus, memory and pids, each with a
+# request and a limit. Default: measured. Left out here.
+# args: extra words a start takes, from a closed set. Left out here.

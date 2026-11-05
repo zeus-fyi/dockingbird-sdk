@@ -1,22 +1,55 @@
+---
+title: One Mac, day one
+summary: Install, activate, start a first agent, hand a second one a task and take their commits with sync, on one Apple silicon Mac.
+audience: first-day
+commands:
+  - uv tool install
+  - dockingbird license activate
+  - dockingbird completion --install
+  - dockingbird license status
+  - dockingbird status
+  - dockingbird claude
+  - dockingbird start
+  - dockingbird wait
+  - dockingbird inbox
+  - dockingbird read
+  - dockingbird send
+  - dockingbird results
+  - dockingbird sync
+  - dockingbird stop
+---
+
+> Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
+
 # One Mac, day one
 
-Everything here runs on one Apple silicon Mac with Docker Desktop and uv, in a git repo of yours (`~/code/myapp`
-below); nothing is written by hand. Each step ends with the line it gives when it is done, as
-`docs/troubleshooting.md` lists that line under its message's id.
+This cookbook takes one Apple silicon Mac from the install to an agent's commit on your branch. It needs Docker
+Desktop, uv and a git repo of yours, `~/code/myapp` below, and you edit no file by hand. Each step shows the line
+Dockingbird prints when the step is done. The [troubleshooting](../../docs/troubleshooting.md) catalogue holds every
+such line under its message id.
 
 ## 1. Install
 
-Copy your license key from your purchase email, then:
+Copy the license key from your purchase email. The first line passes it to uv in two environment variables, so the
+key shows up neither on screen nor in your shell history.
 
 ```bash
-UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeusfyi.com/simple/
+UV_INDEX_ZEUSFYI_USERNAME=license UV_INDEX_ZEUSFYI_PASSWORD="$(pbpaste)" uv tool install dockingbird --index zeusfyi=https://license.zeus.fyi/simple/
 dockingbird license activate
 dockingbird completion --install
 ```
 
-`dockingbird license activate` asks for the key and gives this Mac its seat; from then on `dockingbird update` needs no
-key, and `dockingbird license status` names your plan, its seats and the day it ends. Open a new terminal for the tab
-completion. If `dockingbird` is not found, run `uv tool update-shell` and open a new terminal.
+`dockingbird license activate` asks for the key again at a hidden prompt and links this Mac to your seat. It is done
+when it prints the plan, the seats and the term:
+
+```text
+This computer is activated: {plan}, {seats}, {term}.
+You use Dockingbird under its terms: {link}
+```
+
+The activation saves a download token, so `dockingbird update` needs no key after this. `dockingbird license status`
+prints the same plan, seats and term on its first line. Tab completion starts working in the next terminal you open.
+A shell that answers `command not found: dockingbird` needs `uv tool update-shell` and a new terminal.
 
 ## 2. `dockingbird status`
 
@@ -80,18 +113,8 @@ myapp (main): up to date.
 
 ## 5. `dockingbird ui`
 
-`dockingbird ui` opens the Dockingbird GUI in this terminal: a tab for each agent at a terminal, a sidebar row for each
-agent and one for your inbox. It is installed once with `dockingbird ui --install`, which gets it from the
-zeus-fyi/dockingbird-gui repository with your own git and SSH key, so it needs your access to that repository, and
-ends with:
+The Dockingbird GUI is not yet available to customers. Today `dockingbird ui` prints `The Dockingbird GUI isn't
+installed.` and exits 1, and [the GUI](../../docs/guides/gui.md) says what that message means.
 
-```text
-Installed dockingbird-gui <version>:
-  <its path>
-Open it: dockingbird ui
-```
-
-With no GUI installed, `dockingbird ui` says `The Dockingbird GUI isn't installed.` and names the install command.
-
-The operator guide (`docs/operator-guide.md`) has the rest: sign-ins and API keys, update and clean, and what lives
-where. `dockingbird stop` turns it all off, and nothing is lost.
+The [operator guide](../../docs/operator-guide.md) has the rest: sign-ins and API keys, update and clean, and what
+lives where. `dockingbird stop` turns it all off, and nothing is lost.

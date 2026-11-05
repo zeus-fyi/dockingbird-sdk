@@ -1,6 +1,6 @@
 # A swarm definition: dockingbird fleet submit swarm.toml queues it on the pool.
 schema = 1
-# The project your fleet.toml's role submits for.
+# The project this swarm is submitted for (your org login names its role).
 project = "example"
 # A repeat of this key answers the swarm it queued first.
 key = "example-feature-1"

@@ -3,7 +3,7 @@
 Usage: python3 examples/tasks/delegate_and_wait.py "TASK"
 
 Run it in the repo the agent works on. It runs the commands a person would
-type, each with --json (docs/integration/json.md): dockingbird start "TASK",
+type, each with --json (docs/reference/integration/json.md): dockingbird start "TASK",
 then dockingbird wait NAME until the agent sends a message, dockingbird
 read on that message, which prints its body, and dockingbird results NAME,
 which saves the files the agent attached and prints where. It reads each
