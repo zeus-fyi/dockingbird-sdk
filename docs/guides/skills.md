@@ -47,7 +47,7 @@ Message id `AGENT_STARTED_BUS`. A path Dockingbird cannot use stops the start, a
 
 ## 2. Name them in a config
 
-A config's `[skills]` table gives the skills to every start of its command. Add it to a config such as the one [your own commands](your-own-commands.md) writes.
+A config's `[skills]` table gives the skills to every start of its command. Add the table to any config; [your own commands](your-own-commands.md) writes one step by step.
 
 ```toml
 # .dockingbird/app.toml
