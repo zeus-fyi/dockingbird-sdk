@@ -152,7 +152,7 @@ A repo's own config's skills apply only in a checkout you have not marked untrus
 
 ## Trust, tool arguments and secrets
 
-A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, three keys are off: `harness_args`, `[env]` and `repo_settings = true`. An added config's `harness_args` and `[env]` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
+A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, five keys are off: `harness_args`, `[env]`, `[skills]`, `harness_config` and `repo_settings = true`. An added config's `harness_args`, `[env]`, `[skills]` and `harness_config` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
 
 `harness_args` take only Claude Code's `--model`, `--fallback-model`, `--max-turns` and `--effort`, with `low`, `medium`, `high`, `xhigh` or `max` as the effort. For Codex they take `--model`, `-m` and `-c model_reasoning_effort=LEVEL`. Anything else is refused, and the refusal names the allowed flags.
 
