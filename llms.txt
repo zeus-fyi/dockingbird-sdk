@@ -38,6 +38,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Delegating tasks](docs/guides/delegating-tasks.md): Hand an agent a task on the bus, wait for it, read its messages, answer its questions, send more work and save its files.
 - [Connections](docs/guides/connections.md): A connection lets agents use a GitHub repo, a folder, a database, a program, an MCP server or a browser while the secret stays with Dockingbird.
 - [Your own commands](docs/guides/your-own-commands.md): Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo.
+- [Give agents skills](docs/guides/skills.md): Give an agent skills its tool lists as its own, at one start, from a config, on a running agent or for a swarm role.
 - [Toolchains and dependencies](docs/guides/toolchains.md): See, install, lock and change the language versions agents get from your repo's mise.toml or .tool-versions.
 - [Trust and repo settings](docs/guides/trust-and-repo-settings.md): Decide which checkouts load their own settings, hooks, MCP servers, rules and dependency installs inside an agent, and add rules of your own for every agent.
 - [Sign-in and API keys](docs/guides/sign-in-and-api-keys.md): Reuse the Claude and Codex logins already on your computer, sign in again or as someone else, use an API key, and sign out.
@@ -100,14 +101,14 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [License refused](docs/troubleshooting/licence-refused.md): Each way a license command or a license check can stop you, in the order you meet it, with what the screen shows and the fix.
 - [First start stops](docs/troubleshooting/first-start-stops.md): Each place the first dockingbird claude can stop, in the order you meet it, with what the screen shows and the fix.
 - [Troubleshooting index: install, Docker, licensing and the command line](docs/troubleshooting/install.md): The 63 message ids about installing, Docker, the license and typing a command, each with when it appears.
-- [Troubleshooting index: homes, checkouts and toolchains](docs/troubleshooting/homes.md): The 110 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears.
-- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 300 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
-- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 70 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
-- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 197 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
-- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 210 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
+- [Troubleshooting index: homes, checkouts and toolchains](docs/troubleshooting/homes.md): The 113 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears.
+- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 325 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
+- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 72 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
+- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 204 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
+- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 222 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
 - [Troubleshooting index: benchmark jobs](docs/troubleshooting/benchmarks.md): The 51 message ids about Harbor benchmark jobs, each with when it appears.
 - [Troubleshooting index: sign-ins and the org store](docs/troubleshooting/sign-ins.md): The 91 message ids about signing in, API keys, signing out and the org login, each with when it appears.
-- [Troubleshooting index: updates](docs/troubleshooting/updates.md): The 43 message ids about checking for and installing updates, pins and the switch to a new version, each with when it appears.
+- [Troubleshooting index: updates](docs/troubleshooting/updates.md): The 49 message ids about checking for and installing updates, pins and the switch to a new version, each with when it appears.
 - [Troubleshooting index: the GUI, the MCP server and shell completion](docs/troubleshooting/gui-and-mcp.md): The 27 message ids about the GUI, the MCP server and shell completion, each with when it appears.
 - [Troubleshooting](docs/troubleshooting.md): Every message Dockingbird prints, by id: when it appears, its text, the next step it gives and its exit status.
 

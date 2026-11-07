@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: the bus"
-summary: "The 70 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
+summary: "The 72 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: the bus
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 70 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 72 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
 
 | Id | When it appears |
 |---|---|
@@ -31,6 +31,8 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`INBOX_ROW_RESOLVED`](../troubleshooting.md#inbox_row_resolved) | You gave a row number of your inbox instead of an id. |
 | [`DELIVERY_EXCEEDS_LINE`](../troubleshooting.md#delivery_exceeds_line) | An agent asked to read a message, and not even the shortest page of it fits in one answer of the agent's tools (they are given a most characters an answer may have). |
 | [`SEND_AMBIGUOUS`](../troubleshooting.md#send_ambiguous) | You sent an agent a plain message while two or more of its questions to you are still unanswered, so Dockingbird can't tell which one it answers. |
+| [`SEND_GROUP_CONFLICT`](../troubleshooting.md#send_group_conflict) | You ran `dockingbird send --all` with `--role` or `--swarm` too: `--all` already sends to every live agent, so Dockingbird can't tell which group you meant. |
+| [`SEND_GROUP_NO_REPLY`](../troubleshooting.md#send_group_no_reply) | You sent to a group (`--all`, `--role` or `--swarm`) with `--reply-to` or `--kind answer`: an answer goes to the one agent that asked, never to a group. |
 | [`SEND_REPLY_ANOTHER_AGENT`](../troubleshooting.md#send_reply_another_agent) | You replied with `--reply-to` to a message in your inbox that is another agent's question, not one of the agent you sent to: the words would have answered the other agent. |
 | [`SEND_NOT_ON_BUS`](../troubleshooting.md#send_not_on_bus) | You sent a message to an agent that runs in a terminal without the bus's read tool: Dockingbird's default environment, or a config whose tool set lacks it. |
 | [`SEND_PAYLOAD_INVALID`](../troubleshooting.md#send_payload_invalid) | `dockingbird send --kind KIND --payload JSON` with a payload larger than the bound: nothing was sent; give the kind's fields as one JSON object. |
