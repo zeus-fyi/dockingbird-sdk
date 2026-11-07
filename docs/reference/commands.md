@@ -73,7 +73,7 @@ After a command, `--home NAME` belongs to `--host` on `status`, `swarm` and `ins
 
 | Command | Arguments | What it does | Exit | Guide |
 |---|---|---|---|---|
-| `claude` | `[--as NAME] [--new] [--egress MODE] [--cpus N] [--memory SIZE] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [-- TOOL ARGS]` | starts Claude Code on this repo in its own container, picks up kept work, or reconnects to a running agent | the tool's own, 1, 2 | [daily-loop.md](../guides/daily-loop.md) |
+| `claude` | `[--as NAME] [--new] [--egress MODE] [--cpus N] [--memory SIZE] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [--skills PATHS] [-- TOOL ARGS]` | starts Claude Code on this repo in its own container, picks up kept work, or reconnects to a running agent | the tool's own, 1, 2 | [daily-loop.md](../guides/daily-loop.md) |
 | `codex` | the same as `claude`; `--claude-md` is refused | starts Codex on this repo in its own container, picks up kept work, or reconnects to a running agent | the tool's own, 1, 2 | [daily-loop.md](../guides/daily-loop.md) |
 | `status` | `[NAME] [--host NAME] [--home NAME]` | shows who works on what, what was shared today and what needs you; with a name, one agent; reads only | 0, 1, 2 | [daily-loop.md](../guides/daily-loop.md) |
 | `sync` | `[--accept COMMIT] [--let-go]` | takes the agents' commits on your branch and sends yours; `--accept` resumes after a pause, `--let-go` makes your branch the one after you refused a deleted branch's commits | 0, 1, 2 | [daily-loop.md](../guides/daily-loop.md) |
@@ -93,7 +93,7 @@ After a command, `--home NAME` belongs to `--host` on `status`, `swarm` and `ins
 
 | Command | Arguments | What it does | Exit | Guide |
 |---|---|---|---|---|
-| `start` | `[TASK] [--command NAME] [--terminal] [--bus] [--harness TOOL] [--egress MODE] [--cpus N] [--memory SIZE] [--compact-at N] [--session-hours N] [--cpu-shares N] [--pids-limit N] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [--as NAME] [--swarm NAME] [--role ROLE] [--new] [--file PATH]... [--task -] [-- TOOL ARGS]` | gives an agent a task; it works in the background on the bus and `start` prints its name | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
+| `start` | `[TASK] [--command NAME] [--terminal] [--bus] [--harness TOOL] [--egress MODE] [--cpus N] [--memory SIZE] [--compact-at N] [--session-hours N] [--cpu-shares N] [--pids-limit N] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [--skills PATHS] [--as NAME] [--swarm NAME] [--role ROLE] [--new] [--file PATH]... [--task -] [-- TOOL ARGS]` | gives an agent a task; it works in the background on the bus and `start` prints its name | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `send` | `NAME TEXT [--file PATH]... [--reply-to ROW] [--kind KIND] [--payload JSON] [--withdraw ROW]` | answers an agent's question or gives it more to do | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `inbox` | `[--all] [--page N] [--priority P0 to P3] [--questions] [--clear] [--swarm NAME,NAME] [--engine ID,ID] [--no-swarm]` | lists the questions and results waiting for you, one numbered row each | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `read` | `ROW [--keep] [--swarm NAME,NAME] [--engine ID,ID] [--no-swarm]` | reads one message in full; `--keep` leaves it unread | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
@@ -102,7 +102,7 @@ After a command, `--home NAME` belongs to `--host` on `status`, `swarm` and `ins
 | `wait` | `[NAME] [--seconds SECONDS]` | waits up to 25 seconds by default for an agent's next message | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `results` | `NAME [--to DIR]` | saves the files an agent shared as files on your computer, overwriting nothing | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `search` | `TEXT` | finds the newest messages whose subject or body has every word of TEXT | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
-| `set` | `NAME [--model MODEL] [--effort LEVEL] [--compact-at POINT] [--stop-after-turn] [--run-turns]` | changes a running bus agent's model, effort or compact point from its next turn; `--stop-after-turn` ends it after its running turn | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
+| `set` | `NAME [--model MODEL] [--effort LEVEL] [--compact-at POINT] [--skills PATHS] [--stop-after-turn] [--run-turns]` | changes a running bus agent's model, effort or compact point from its next turn; `--skills`, given alone, adds skills to a running agent; `--stop-after-turn` ends it after its running turn | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `swarm list` | `[--json]` | lists each swarm of this home and how many agents it has | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
 | `swarm add` | `NAME --swarm SWARM [--role ROLE]` | puts an agent in a swarm and takes it out of any other | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
 | `swarm remove` | `NAME` | takes an agent out of its swarm | 0, 1, 2 | [swarms.md](../guides/swarms.md) |

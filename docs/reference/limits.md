@@ -31,6 +31,13 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 |---|---|---|---|
 | Rules text of one agent | 64 KB | Dockingbird's rules plus the project's rules file; a longer text stops the start | [trust-and-repo-settings.md](../guides/trust-and-repo-settings.md) |
 | `--agent-md` and `--claude-md` file | 1 MB | a regular UTF-8 text file with no Dockingbird credential in it, else nothing starts | [commands.md](commands.md) |
+| Entries of one `skills.path` or `--skills` | 16 | the skill folders or skills folders one config's `[skills]` or one `--skills` names | [skills.md](../guides/skills.md) |
+| Skills of one agent | 32 | a config's and a start's together | [skills.md](../guides/skills.md) |
+| Files of one skill | 64 | the files under one skill folder | [skills.md](../guides/skills.md) |
+| Depth of a skill's file | 8 path parts | how deep a file may sit under its skill folder | [skills.md](../guides/skills.md) |
+| One skill file | 1 MiB | one file of a skill | [skills.md](../guides/skills.md) |
+| One agent's skills | 4 MiB | all its skills together, as Dockingbird records them | [skills.md](../guides/skills.md) |
+| Codex's skills listing | 10,000 tokens | the `skills.max_context_tokens` Dockingbird sets for a Codex agent with skills | [skills.md](../guides/skills.md) |
 | `hosts.toml` | 1 MiB | a regular file of yours; a larger one is refused | [hosts-file.md](files/hosts-file.md) |
 | Host name | 56 characters | lowercase letters, digits and dashes, one per file, never `local` | [hosts-file.md](files/hosts-file.md) |
 | Service program output | 64 MiB and 10,000 entries | what a program you connected as a service may write to its output folder | [connections.md](../guides/connections.md) |
