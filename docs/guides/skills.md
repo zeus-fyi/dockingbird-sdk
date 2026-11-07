@@ -126,7 +126,7 @@ Done when the swarm is queued.
 {id} pending, position {position}
 ```
 
-What the submit cannot read is refused at its key, one line each: `role[N].skills.path`, `role[N].skills.<name>` for one skill, or `role[N].skills` for the set's bounds.
+Message id `FLEET_SUBMITTED`. What the submit cannot read is refused at its key, one `FLEET_REFUSED` line each: `role[N].skills.path`, `role[N].skills.<name>` for one skill, or `role[N].skills` for the set's bounds.
 
 ```text
 refused: role[N].skills.path: not a skills table: path (skill or skills folders of the source checkout), into (both, claude or agents)
@@ -142,7 +142,7 @@ dockingbird fleet why ID
 {id} is held: skills_refused
 ```
 
-Push the fix to the swarm's branch, then release the swarm.
+Message id `FLEET_WHY_STATE`. Push the fix to the swarm's branch, then release the swarm.
 
 ```bash
 dockingbird fleet release ID
@@ -164,7 +164,7 @@ Dockingbird places each `SKILL.md` as it is, its frontmatter and any hooks it na
 |---|---|---|
 | Where `into` writes them | `~/.claude/skills`, where Claude Code finds personal skills (`both` or `claude`) | `~/.agents/skills`, where Codex finds a user's (`both` or `agents`) |
 | How it lists them | in its Skill tool and its `/` menu | in a table of its skill roots, each with an alias (`r0`, `r1`, ...), `~/.agents/skills` among them, and one line per skill naming its `SKILL.md` under its root's alias |
-| Listing budget | 1% of its context window | 2% of its context window, or 8,000 characters when it doesn't know the window |
+| Listing budget | 1% of its context window | 2% of its context window, or 8,000 characters when it doesn't know the window; for an agent started with skills, the 10,000 tokens Dockingbird sets (below) |
 | Each description cut at | 1,536 characters | 1,024 characters |
 | A `SKILL.md` without a frontmatter `description` | listed among its slash commands when it has no frontmatter | not listed |
 | A skill of the same name in the checkout's own `.claude/skills` or `.agents/skills`, which the tool loads | lists only the one in your personal folder, the one Dockingbird wrote | lists both |

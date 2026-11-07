@@ -138,7 +138,7 @@ One file can hold several commands, each in a `[commands.NAME]` table, in place 
 
 ## Skills
 
-A config's `[skills]` table gives the agents of its commands skills their tool lists as its own. The `skill` key, singular, is another key: the first turn's text.
+A config's `[skills]` table gives each agent of its commands skills its tool lists as its own. The `skill` key, singular, is another key: the first turn's text.
 
 ```toml
 # Skills its tool lists (Claude Code's Skill tool and / menu, Codex's $ mention): one skills folder, or skill folders, each a path from this checkout's top. Default: none.
