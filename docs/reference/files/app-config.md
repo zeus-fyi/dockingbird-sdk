@@ -37,7 +37,7 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `harness` | `claude` or `codex` | `claude` | the tool; once set it is fixed, and `--harness` on a start cannot change it |
 | `workspace` | `repo` or `scratch` | `repo` | a copy of this repo, or an empty folder of its own that needs no git repo |
 | `mode` | `bus` or `terminal` | `bus` | in the background through messages, or at your terminal; once set it is fixed, and `--terminal` cannot change it |
-| `context` | `kept` or `fresh` | `kept` | bus only: one conversation for every delivery, or a new conversation for each task delivery under the same rules |
+| `context` | `kept` or `fresh` | `kept` | bus only: `kept` is one conversation for every delivery; `fresh` starts a new conversation for each task delivery under the same rules, while a delivery of another kind, such as a status, an answer or a decision, continues the conversation that holds the task; `fresh` with `mode = "terminal"` is refused as a conflict |
 | `repo_settings` | `true` or `false` | `false` | load the repo's own Claude Code or Codex settings, hooks and MCP servers, once the checkout is trusted |
 | `tools` | `bus`, `default` or `full` | `bus` | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool. Commits made under `default` or `full` reach you through `dockingbird sync` |
 | `egress` | `allowlist`, `models`, `none` or `full` | `full`, or what `dockingbird egress` set | what the agent may reach on the network |
@@ -51,10 +51,35 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | Key | Values | Default | What it does |
 |---|---|---|---|
 | `turn_minutes` | whole number, at least 1 | none, so no turn deadline | a turn that runs longer is interrupted and reported |
-| `session_hours` | whole number from 1 to the installation's maximum, 168 | 12 | the agent stops itself after this many hours |
+| `session_hours` | whole number from 1 to the installation's maximum, 168 | 12 | the agent stops itself after this many hours; an agent the fleet starts for a swarm role gets that role's `session_hours`, 48 when the role names none |
 | `cpus` | text such as `"2"` | none | the agent container's CPU limit |
 | `memory` | text such as `"4g"` | none | the agent container's memory limit |
 | any key named here | as above | as above | fixed for the config's agents: `--session-hours`, `--cpus` and `--memory` with another value are refused, the same value is not |
+
+## How `context = "fresh"` behaves
+
+`fresh` makes each task a first turn of its own conversation.
+
+- A task delivery after the first one starts a new conversation. The conversation before it is not resumed, and the agent's rules and settings stay the same.
+- A delivery of another kind goes into the current conversation. An answer or a decision belongs to the conversation that asked.
+- A restart, a rollover or a continuation passes no resume, so the pending delivery starts in a new conversation.
+- A reset that does not complete ends the session, and the delivery stays pending for the continuation.
+- An agent cannot clear its context in the middle of a task. The key acts between task deliveries only.
+
+## How a swarm's `[[role]]` relates to a config
+
+A role of a swarm definition names settings that a config also takes, and the fleet passes them to each agent as a config of its own. [The swarm definition reference](swarm-definition.md) lists the role's keys.
+
+| Item | What the sources state |
+|---|---|
+| shared keys | a role may name `workspace`, `tools`, `instructions`, `egress`, `allow`, `env`, `connections`, `context` and `subagents`, each with the meaning and the rule the config gives it |
+| role keys only | `model` and `effort` stay keys of the role; they are not `harness_args` |
+| not a role key | `harness_args`, `browser`, `local_model`, `folders` and `[limits]`; a role's limits are its `needs`, and its `session_hours` is its own key |
+| the carrier | at each start of an agent whose role names any shared key, the engine writes the resolved role as a config file and starts the agent with it |
+| a role that names none | it starts as before and takes the checkout's config marked `default = true`; a role that names any shared key no longer takes that config |
+| `instructions` | text added after Dockingbird's rules and the project's rules, as in a config, and never in place of them |
+| `tools` | a role takes `bus`, `full` or a list that keeps every bus tool; `default` is a config's word |
+| hand start | an agent you start by hand takes no library role and starts as it did before |
 
 ## Keys of an added config only, refused in a repo's own config
 

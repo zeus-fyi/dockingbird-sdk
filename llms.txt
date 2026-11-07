@@ -58,6 +58,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Give agents a database](docs/guides/databases.md): Connect a PostgreSQL database so agents query it, and write to it through a broker, without ever seeing its address or password.
 - [Sign agents in with a password vault](docs/guides/secrets-vault.md): Connect a gopass store so Dockingbird types a login's password and one-time code into an agent's browser, and the agent sees neither.
 - [Swarms](docs/guides/swarms.md): Write a swarm definition, check it, submit it with values, follow it in the queue and change it while it runs.
+- [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
 - [The work queue](docs/guides/work-queue.md): Keep one board of items, agents and requests in the organisation's store that people, scripts and agents read and write from any computer.
 - [Install a team fleet](docs/guides/team-fleet.md): Install the PostgreSQL store, the roles, the worker and admitter services and the control plane that let a team share hosts and message across computers.
 - [Run work on the fleet pool](docs/guides/fleet-scheduler.md): Enrol hosts in the pool, read the queue, see why a workload waits, control it, run a check under a lease and move the pool to a release.
