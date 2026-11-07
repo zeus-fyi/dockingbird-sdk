@@ -83,7 +83,7 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `[env]` | not applied until `dockingbird trust` marks the checkout trusted |
 | `[skills]` | not applied until `dockingbird trust` marks the checkout trusted; `dockingbird -h` and `config list` say `.dockingbird/app.toml: skills applies after dockingbird trust`; an added config's `[skills]` apply everywhere |
 | `repo_settings = true` | the repo's own settings, hooks and MCP servers do not load |
-| an added config's `harness_args` and `[env]` | still apply everywhere, because you chose to add the config |
+| an added config's `harness_args`, `[env]` and `[skills]` | still apply everywhere, because you chose to add the config |
 
 ## Smallest useful files
 

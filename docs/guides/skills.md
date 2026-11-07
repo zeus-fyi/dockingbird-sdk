@@ -154,7 +154,7 @@ Done when the line names the state the swarm entered.
 {id} {state}
 ```
 
-Message id `FLEET_STATE_NOW`. From v0.15.12, every start attempt of a swarm in a clone of the worker's own, the one `fleet release` makes included, first fetches and fast-forwards that clone from its `origin`, so the fix you pushed reaches the start. A clone that cannot fast-forward, because it holds commits not yet pushed, is used as it is, and the worker's log says so. A checkout your home links by hand is never fetched. Before v0.15.12, only a swarm's first attempt fetched, so a release after a hold read the clone as the first attempt left it and held the swarm again.
+Message id `FLEET_STATE_NOW`. Every start attempt of a swarm in a clone of the worker's own, the one `fleet release` makes included, first fetches and fast-forwards that clone from its `origin`, so the fix you pushed reaches the start. A clone that cannot fast-forward, because it holds commits not yet pushed, is used as it is, and the worker's log says so. A checkout your home links by hand is never fetched.
 
 ## How each tool lists them
 
@@ -183,7 +183,7 @@ Past its budget, Codex shortens the descriptions, then leaves out whole skills, 
 | One agent's skills together, as Dockingbird records them | 4 MiB |
 | Codex's `skills.max_context_tokens` for an agent with skills | 10,000 tokens |
 
-A refusal past a bound names the key that went over, never a path.
+A refusal past a bound names the key that went over.
 
 ## When it fails
 
