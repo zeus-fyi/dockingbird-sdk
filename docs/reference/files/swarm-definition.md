@@ -52,6 +52,7 @@ Each `[[role]]` is one kind of agent.
 | `session_hours` | integer, 1 to 168 | 48 for a fleet-started agent | how long each agent may run |
 | `needs` | cpus, memory and pids, each with `request` and `limit` | measured | the role's resource reservation |
 | `args` | list from a closed set of start words | none | extra words a start takes |
+| `skills` | table of `path` and `into` | none | skills its agents' tool lists as its own, as a config's `[skills]` takes them: `path`, one skill or skills folder or a list of them, each a path from the top of the swarm's source; `into`, `both`, `claude` or `agents`; every start reads them from the swarm's clone, and a path the clone lacks holds the swarm (`skills_refused`) until you push the fix and run `fleet release ID`; see [skills.md](../../guides/skills.md) |
 
 The shipped roles are `coordinator`, `implementer`, `reviewer`, `tester` and `reader`. `dockingbird init` copies them into `.dockingbird/roles/` with the library's `index.toml`, and a copy you edited survives a later `init`. A key the entry gives replaces the library role's, and a subagent's table is merged field by field. [The roles and connections reference](roles-and-connections.md) lists the library file's keys.
 

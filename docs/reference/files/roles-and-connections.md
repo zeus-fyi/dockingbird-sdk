@@ -28,6 +28,7 @@ A role library holds the settings a swarm role reuses, and a service connection 
 | `needs` | cpus, memory, pids | the role's resource reservation |
 | `compact_at` | `500000`, `500k` or `auto` | the point at which the agent's context compacts |
 | `session_hours` | integer, 1 to 168 | how long each agent may run |
+| `skills` | table of `path` and `into` | skills its agents' tool lists as its own, as a config's `[skills]` takes them; each `path` is from the top of the swarm's source, not from `.dockingbird/roles/`; see [skills.md](../../guides/skills.md) |
 
 | Not allowed in a library file | Why |
 |---|---|

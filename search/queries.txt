@@ -43,3 +43,7 @@ uninstall everything and give the seat back	examples/uninstall-completely/README
 # Rows added after the review of the first build: a flag of a running agent, and a reference page
 --compact-at	docs/guides/delegating-tasks.md#8-change-its-model-or-effort
 which ports does the control plane open	docs/reference/ports-and-hosts.md
+
+# Agent skills: at a start, from a config, on a running agent
+give an agent skills	docs/guides/skills.md
+add skills to a running agent	docs/guides/skills.md|docs/guides/delegating-tasks.md

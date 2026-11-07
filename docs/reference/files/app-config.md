@@ -33,6 +33,7 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `summary` | text | none | one line shown by `dockingbird -h`, `config list` and, for your own harness, `dockingbird mcp` |
 | `default` | `true` or `false` | `false` | `dockingbird start` with no `--command` runs this command in this checkout; `claude` and `codex` never use it |
 | `skill` | path to a Markdown file | none | on the bus, the file's text with `$TASK` replaced by the task is the first turn |
+| `[skills]` | table of `path` and `into` | none | skills the agent's tool lists as its own (Claude Code's Skill tool and `/` menu, Codex's `$` mention); [its keys](#keys-of-skills) are below, and [skills.md](../../guides/skills.md) gives them step by step |
 | `instructions` | path | none | role text given to the agent after Dockingbird's own rules |
 | `harness` | `claude` or `codex` | `claude` | the tool; once set it is fixed, and `--harness` on a start cannot change it |
 | `workspace` | `repo` or `scratch` | `repo` | a copy of this repo, or an empty folder of its own that needs no git repo |
@@ -45,6 +46,13 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `harness_args` | list of words | none | fixed arguments for the tool: Claude takes `--model`, `--fallback-model`, `--max-turns` and `--effort` (`low`, `medium`, `high`, `xhigh` or `max`); Codex takes `--model`, `-m` and `-c model_reasoning_effort=LEVEL`; anything else is refused |
 | `mise_env` | text | none | mise's environments for the agent's toolchain, comma separated; `ci` makes mise read `mise.ci.toml` over `mise.toml` |
 | `[env]` | table of text | none | variables the agent's tool sees; settings, never secrets, because the agent can read and send them |
+
+## Keys of `[skills]`
+
+| Key | Values | Default | What it does |
+|---|---|---|---|
+| `path` | a folder, or a list of folders | none | one skills folder, each of whose folders holding a `SKILL.md` is one skill (`".agents/skills"`), or a list of folders, each one skill or a skills folder (`[".agents/skills/review", "tools/skills"]`); a repo's own config names paths from the checkout's top, an added config's are relative to its file's folder, and `config add` copies them with it |
+| `into` | `both`, `claude` or `agents` | `both` | where they go in the agent's home: `both` writes each skill to `~/.claude/skills`, where Claude Code finds personal skills, and to `~/.agents/skills`, where Codex finds a user's; `claude` or `agents` writes only that one |
 
 ## Keys of `[limits]`
 
@@ -73,8 +81,9 @@ Every key is optional, and a key you leave out takes the default in the tables b
 |---|---|
 | `harness_args` | not applied until `dockingbird trust` marks the checkout trusted |
 | `[env]` | not applied until `dockingbird trust` marks the checkout trusted |
+| `[skills]` | not applied until `dockingbird trust` marks the checkout trusted; `dockingbird -h` and `config list` say `.dockingbird/app.toml: skills applies after dockingbird trust`; an added config's `[skills]` apply everywhere |
 | `repo_settings = true` | the repo's own settings, hooks and MCP servers do not load |
-| an added config's `harness_args` and `[env]` | still apply everywhere, because you chose to add the config |
+| an added config's `harness_args`, `[env]` and `[skills]` | still apply everywhere, because you chose to add the config |
 
 ## Smallest useful files
 

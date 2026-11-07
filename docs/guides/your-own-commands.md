@@ -136,9 +136,23 @@ Agents already running keep the config they started with. Cleaning everything re
 
 One file can hold several commands, each in a `[commands.NAME]` table, in place of the top-level `command`, `default` and `skill`. A table sets its own summary, default, skill and instructions, and may override any other key. The top instructions come before each command's own, and a top summary reaches no command.
 
+## Skills
+
+A config's `[skills]` table gives each agent of its commands skills its tool lists as its own. The `skill` key, singular, is another key: the first turn's text.
+
+```toml
+# Skills its tool lists (Claude Code's Skill tool and / menu, Codex's $ mention): one skills folder, or skill folders, each a path from this checkout's top. Default: none.
+[skills]
+path = ".agents/skills"
+# Where they go in the agent's home: both (~/.claude/skills and ~/.agents/skills), claude or agents. Default: both.
+into = "both"
+```
+
+A repo's own config's skills apply only in a checkout you have not marked untrusted. An added config's paths are relative to its file's folder, and `config add` copies them with it, so its skills are the ones it had when you added it, until you add it again. `--skills PATHS` on a start does the same for that start, and a skill it names replaces the config's skill of the same name. [Give agents skills](skills.md) has every rule, the bounds and how each tool lists the skills.
+
 ## Trust, tool arguments and secrets
 
-A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, three keys are off: `harness_args`, `[env]` and `repo_settings = true`. An added config's `harness_args` and `[env]` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
+A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, five keys are off: `harness_args`, `[env]`, `[skills]`, `harness_config` and `repo_settings = true`. An added config's `harness_args`, `[env]`, `[skills]` and `harness_config` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
 
 `harness_args` take only Claude Code's `--model`, `--fallback-model`, `--max-turns` and `--effort`, with `low`, `medium`, `high`, `xhigh` or `max` as the effort. For Codex they take `--model`, `-m` and `-c model_reasoning_effort=LEVEL`. Anything else is refused, and the refusal names the allowed flags.
 
@@ -154,3 +168,4 @@ Your own Claude Code or Codex can start these commands too, through `dockingbird
 - [`CONFIG_NOT_REGISTERED`](../troubleshooting.md#config_not_registered) means `config remove` found no added config of that name. `config list` shows the names.
 - [`START_COMMAND_UNKNOWN`](../troubleshooting.md#start_command_unknown) means no config here gives that command. The message lists the ones that do.
 - [`START_CONFIG_FIXED`](../troubleshooting.md#start_config_fixed) means a flag such as `--harness` or `--terminal` disagrees with a key the file fixes. Drop the flag or change the file.
+- [`START_SKILLS_REFUSED`](../troubleshooting.md#start_skills_refused) means a start's `--skills` names what Dockingbird cannot use, such as a path with no skill or a link. Nothing was started. Fix that skill folder, or leave it out of `--skills`.

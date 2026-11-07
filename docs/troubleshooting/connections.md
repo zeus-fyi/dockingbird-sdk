@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: configs, connections and host resources"
-summary: "The 197 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears."
+summary: "The 204 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: configs, connections and host resources
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 197 ids about your own commands, connections, served resources, browsers and watch.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 204 ids about your own commands, connections, served resources, browsers and watch.
 
 | Id | When it appears |
 |---|---|
@@ -42,7 +42,9 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`CONNECTION_SESSION_CHANGED`](../troubleshooting.md#connection_session_changed) | The active agent with the requested name changed before its grant or revocation was sent. |
 | [`CONNECTION_UNKNOWN_GRANT`](../troubleshooting.md#connection_unknown_grant) | You asked to revoke access, but the active agent with that name has no unrevoked grant for that connection. |
 | [`CONNECTION_INVALID_STATE`](../troubleshooting.md#connection_invalid_state) | Dockingbird could not verify complete, consistent connection and agent information, or could not verify the returned access change. |
-| [`CONNECTION_NATIVE_FAILED`](../troubleshooting.md#connection_native_failed) | Dockingbird could not read or confirm the requested owner access change. |
+| [`CONNECTION_NATIVE_FAILED`](../troubleshooting.md#connection_native_failed) | Dockingbird could not read or confirm the requested owner access change, and does not retry by itself. |
+| [`CONNECTION_LIST_TOO_LARGE`](../troubleshooting.md#connection_list_too_large) | Dockingbird couldn't read its connections because its list was longer than it reads at once: the agents running now have more grants, or use more connections, than that, or this home still runs a release from before 0.15.12, which lists every grant ever made. |
+| [`CONNECTION_TOO_MANY`](../troubleshooting.md#connection_too_many) | `dockingbird connect` of a new name when as many connections are enabled as Dockingbird keeps. |
 | [`CONNECT_GITHUB_DONE`](../troubleshooting.md#connect_github_done) | `dockingbird connect NAME --github OWNER/REPO` connected the repo and the branch you are on, with a copy of the key your own ssh uses for GitHub, kept in Dockingbird without its passphrase until you disconnect, or, with `--agent`, with your Mac's ssh-agent, which Docker Desktop forwards into Dockingbird, and no copy of any key. |
 | [`CONNECT_NOT_IN_REPO`](../troubleshooting.md#connect_not_in_repo) | You ran `dockingbird connect NAME --github OWNER/REPO` outside a git checkout, or with `--branch` naming a branch Dockingbird hasn't copied yet. |
 | [`CONNECT_GITHUB_INVALID`](../troubleshooting.md#connect_github_invalid) | The value after `--github` isn't a repo's owner and name as GitHub shows them, such as `your-org/myapp`: two parts of letters, digits, hyphens, underscores and dots, joined by one slash. |
@@ -84,6 +86,8 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`CONFIG_INDEX_FULL`](../troubleshooting.md#config_index_full) | You ran `dockingbird config add` with a config whose name isn't added yet, and Dockingbird already has as many added configs as it keeps; the line says how many. |
 | [`HARNESS_ARG_STREAM_REFUSED`](../troubleshooting.md#harness_arg_stream_refused) | You passed an argument after `--` that Dockingbird refuses: one it sets itself for an agent without a terminal, or the hook-trust bypass, which would let a repo's hooks run unchecked. |
 | [`HARNESS_ARG_LOCAL_MODEL`](../troubleshooting.md#harness_arg_local_model) | You started an agent of a config that names a local model and passed an argument after `--` that would change the model the tool asks for (`--model`, `-m` or `--fallback-model`) or, for Codex, where it sends its requests (`--oss`, `--ignore-user-config`, `--profile`, or a `-c` that sets its base URL). |
+| [`HARNESS_CONFIG_REFUSED`](../troubleshooting.md#harness_config_refused) | You started an agent with `--harness-config` (or picked up one that started with it, or gave it to `dockingbird set`), and the file is missing, a link, not a regular file, larger than the limit, not UTF-8, has a Dockingbird credential, or isn't a file of its tool: Claude Code's `settings.json` must be one JSON object, Codex's `config.toml` a TOML table with no dates. |
+| [`HARNESS_CONFIG_IGNORED`](../troubleshooting.md#harness_config_ignored) | You started an agent with a harness config file, typed with `--harness-config` or named by its config, that sets keys Dockingbird sets itself, such as Claude Code's `apiKeyHelper` and its own `env` names, or Codex's `notify` and `projects`. |
 | [`FILE_REPEATED`](../troubleshooting.md#file_repeated) | You attached the same file twice with `--file`, or two files with the same name and the same text: Dockingbird keeps such a file once, and a message can't carry it twice. |
 | [`FILE_REFUSED`](../troubleshooting.md#file_refused) | A file you attached with `--file` is missing, a link, not a regular file, too large, not UTF-8 text, or named with characters an attachment's name can't hold. |
 | [`HARNESS_PATH_REFUSED`](../troubleshooting.md#harness_path_refused) | `dockingbird mcp install` found a `claude` or `codex` it won't run: in a `PATH` folder that isn't a full path, inside Dockingbird's own folder, or not a regular program file. |
@@ -195,6 +199,9 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`SERVE_NOT_A_SERVICE`](../troubleshooting.md#serve_not_a_service) | You gave `dockingbird serve` the name of a connection that isn't a service: a GitHub repo, a folder, a database or a cloud account. |
 | [`SERVE_CHECKOUT_MOVED`](../troubleshooting.md#serve_checkout_moved) | The checkout the service runs from isn't at the commit it was connected with: its HEAD moved since `dockingbird connect NAME --service FILE`. |
 | [`SERVE_COORDINATOR_GONE`](../troubleshooting.md#serve_coordinator_gone) | Dockingbird stopped while `dockingbird serve` waited for requests; `serve` never starts it again itself, so your stop stands. |
+| [`SERVE_UPDATE_WAITING`](../troubleshooting.md#serve_update_waiting) | An update stopped Dockingbird to start its new version while `dockingbird serve` waited for a request, so `serve` waits for the update to finish instead of stopping, then serves again; it never starts Dockingbird itself. |
+| [`SERVE_UPDATE_OVER`](../troubleshooting.md#serve_update_over) | The update `dockingbird serve` waited for has finished; the message says how long it waited. |
+| [`SERVE_UPDATE_TOO_LONG`](../troubleshooting.md#serve_update_too_long) | `dockingbird serve` waited for an update as long as it waits for one, the time the message names, and the update was still running, so `serve` stopped. |
 | [`SERVE_CHECKOUT_UNREAD`](../troubleshooting.md#serve_checkout_unread) | After a run, git couldn't read the service's checkout to tell whether the program changed it, so the result tells the agent the checkout has changes. |
 | [`SERVE_OUTPUT_UNREAD`](../troubleshooting.md#serve_output_unread) | After a run, Dockingbird couldn't read a file the program wrote in its output folder, so it sent the agent no result, and the request ended as stopped. |
 | [`SERVE_FOLDER_LEFT`](../troubleshooting.md#serve_folder_left) | Dockingbird couldn't remove the folder a run used, after the run (a program can make its files hard to remove), or the folder a temporary Chrome profile used, after the agent let the browser go (a download can do the same). |

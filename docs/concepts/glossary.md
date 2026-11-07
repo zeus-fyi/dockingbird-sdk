@@ -51,6 +51,12 @@ A config is a small TOML file that adds a command of your own, such as `dockingb
 
 Explained in [Your own commands](../guides/your-own-commands.md).
 
+## skill
+
+A skill is a folder holding a `SKILL.md` and the files it uses, named by its folder, which an agent's tool lists as its own. A config's `[skills]` table, `--skills` on a start and `dockingbird set NAME --skills` give an agent skills.
+
+Explained in [Give agents skills](../guides/skills.md).
+
 ## connection
 
 A connection is a named grant of one outside thing: a GitHub branch, a folder, a database, a service, an MCP server or a browser. Dockingbird holds the secret, and the agent only asks for the thing by its name.

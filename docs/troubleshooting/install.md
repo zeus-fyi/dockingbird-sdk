@@ -22,7 +22,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`UNEXPECTED_ARGUMENT`](../troubleshooting.md#unexpected_argument) | You gave the command a word it has no place for. |
 | [`OPTION_NEEDS_OPTION`](../troubleshooting.md#option_needs_option) | You gave an option that only works together with another one. |
 | [`OPTIONS_NOT_BOTH`](../troubleshooting.md#options_not_both) | You gave two options that don't go together, such as a start's `--bus` with `--terminal`, or `dockingbird inbox --clear` with another inbox option. |
-| [`OPTION_GIVEN_TWICE`](../troubleshooting.md#option_given_twice) | You gave `--agent-md` or `--claude-md` twice on one command. |
+| [`OPTION_GIVEN_TWICE`](../troubleshooting.md#option_given_twice) | You gave `--agent-md`, `--claude-md` or `--skills` twice on one command. |
 | [`NOT_BUILT_YET`](../troubleshooting.md#not_built_yet) | You ran a command this version doesn't have yet, or the MCP server was asked to start an agent at a terminal: it starts agents without one. |
 | [`INTERNAL_ERROR`](../troubleshooting.md#internal_error) | Something went wrong that Dockingbird has no words for. |
 | [`DOCKER_NOT_RUNNING`](../troubleshooting.md#docker_not_running) | Docker isn't running, and didn't start in time. |
@@ -43,7 +43,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`IMAGE_SOURCE_UNAVAILABLE`](../troubleshooting.md#image_source_unavailable) | This install of Dockingbird is missing the files it sets up from. |
 | [`DOCKINGBIRD_STARTING`](../troubleshooting.md#dockingbird_starting) | Dockingbird had stopped (it stops when idle, or after a restart) and is starting again. |
 | [`COORDINATOR_UNHEALTHY`](../troubleshooting.md#coordinator_unhealthy) | Dockingbird's container started but didn't report ready. |
-| [`LOGS_NOT_VISIBLE`](../troubleshooting.md#logs_not_visible) | Docker Desktop can't see Dockingbird's log folder, though it is there. |
+| [`LOGS_NOT_VISIBLE`](../troubleshooting.md#logs_not_visible) | Docker Desktop can't see one of the folders in Dockingbird's home, though it is there. |
 | [`COORDINATOR_ROLLED_BACK`](../troubleshooting.md#coordinator_rolled_back) | An update's new version didn't start, so the version you had is running again. |
 | [`SETTINGS_CHANGED`](../troubleshooting.md#settings_changed) | Dockingbird was started with other settings (the variables with its prefix in that shell) than this terminal gives now, and a running Dockingbird keeps the settings it started with. |
 | [`DOCKER_ARGV_REFUSED`](../troubleshooting.md#docker_argv_refused) | Dockingbird stopped one of its own Docker commands because it broke a safety rule. |

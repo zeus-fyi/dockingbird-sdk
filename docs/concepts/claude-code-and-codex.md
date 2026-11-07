@@ -28,6 +28,10 @@ Both tools run in a container with their own copy of your branch. Both use the b
 | Effort levels | `low`, `medium`, `high`, `xhigh`, `max` | The levels its model takes |
 | Compact point | 100K to 1M | Any count of tokens |
 | `set` on a running agent | A running Claude gets `/model`, `/effort` and `/autocompact` before its next turn | At a terminal Codex takes no typed command, so `set` names the stop and the pick-up that apply the change |
+| Where it reads the skills Dockingbird gives | `~/.claude/skills`, where Claude Code finds personal skills | `~/.agents/skills`, where Codex finds a user's |
+| How it lists skills | In its Skill tool and its `/` menu, within 1% of its context window, each description cut at 1,536 characters | For its `$` mention, within 2% of its context window (8,000 characters when it doesn't know the window), each description cut at 1,024 characters; Dockingbird sets its `skills.max_context_tokens` to 10,000 tokens for an agent with skills |
+| A `SKILL.md` with no frontmatter `description` | One with no frontmatter is listed among its slash commands | Not listed |
+| A skill `set --skills` adds | On the bus it is told `/reload-skills` before its next turn; with its screen running it is typed `/reload-skills` at its next idle prompt; at a terminal its own watcher lists the skill within seconds | On the bus it reads the skill when its next turn starts; with its screen running it reads it again itself at its next idle prompt; at a terminal its own re-read lists it within seconds |
 | `pin` | `pin claude 2.1.285`, and `"stable"` is its slower channel | `pin codex 0.162.1` |
 | Cost in `status --json` | `result_cost_usd`, Claude Code's own estimate, in US dollars | None, because Codex names no cost |
 

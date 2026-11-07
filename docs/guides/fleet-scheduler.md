@@ -100,7 +100,7 @@ cloud: {hold}, {figure} {reading}, bound {line_bound}
 {sha} by {author}: approved by {reviewer} at {approved_at}; tested {result} by {tester} at {tested_at}
 ```
 
-A swarm held for a missing checkout names the home and the host, and ends `fleet release ID` as the next step. Link the checkout, then release it.
+A swarm held for a missing checkout names the home and the host, and ends `fleet release ID` as the next step. Link the checkout, then release it. A release starts a new attempt that first fetches and fast-forwards the worker's own clone, so a fix you pushed reaches it.
 
 ## 5. Control a workload
 
