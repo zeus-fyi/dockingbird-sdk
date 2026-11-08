@@ -11,7 +11,7 @@ You describe a team of agents in one TOML file, for example four builders, a rev
 
 ## The definition
 
-A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders. Most swarms start from the standard definition that `dockingbird init` installs with the swarm skill: a build, a review and a test role whose counts, tool and fallback tool are parameters, which [the swarms guide](../guides/swarms.md#start-from-the-standard-definition) submits with `--set`.
+A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders. Most swarms start from the standard definition that `dockingbird init` installs with the swarm skill: a build, a review and a test role whose repository, branch, counts, tool and plan are parameters, which [the swarms guide](../guides/swarms.md#start-from-the-standard-definition) submits by its path with `--set`.
 
 ## Roles
 
@@ -27,7 +27,7 @@ A role's `send_to` lists the roles whose agents it may message besides its paren
 
 ## Values at submit
 
-A definition may declare `[params]`, each an `int`, a `choice` or a `text` with a default and bounds, and write `{{name}}` in its roles' values and texts. The submit also supplies built-ins: `{{swarm}}`, `{{project}}`, `{{repository}}` and `{{branch}}`, and in a text alone `{{roles}}` and `{{params}}`. `dockingbird fleet submit NAME --set N=4` gives one value, and `--set grader.count=6` sets a role's count. `--values FILE` takes a JSON document shaped `{"params": {...}, "roles": {"<role>": {...}}}`. A `--set` beats the file for the same key.
+A definition may declare `[params]`, each an `int`, a `choice` or a `text` with a default and bounds, and write `{{name}}` in its roles' values and texts and in its `key`, `priority` and `[source]`. The submit also supplies built-ins, outside `key`, `priority` and `[source]`: `{{swarm}}`, `{{project}}`, `{{repository}}` and `{{branch}}`, and in a text alone `{{roles}}` and `{{params}}`. `dockingbird fleet submit NAME --set N=4` gives one value, and `--set grader.count=6` sets a role's count. `--values FILE` takes a JSON document shaped `{"params": {...}, "roles": {"<role>": {...}}}`. A `--set` beats the file for the same key.
 
 A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, a subagent's `model`, `effort` and `max`, and a role's fallback `harness`, `model`, `effort` and `placement`. `dockingbird fleet describe NAME` prints every parameter and settable field as JSON and connects to nothing. A submit checks every rule before it stores anything, prints each refusal as `refused: <field>: <rule>`, and exits 1. `fleet queue` and `fleet why` show the values a swarm was given.
 
@@ -35,7 +35,7 @@ A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at`
 
 A workload is the unit the scheduler queues, and it is either a swarm or a lease. A successful submit prints `<id> pending, position <n>`, and that id names the workload in every later command. The controls `hold`, `release`, `pause`, `resume`, `cancel` and `done` take it. [The fleet scheduler](fleet-scheduler.md) explains how a workload waits and how it is admitted.
 
-Agents the fleet starts get `--compact-at 500000` and `--session-hours 48` unless their role names its own. An agent that hands its parent a message beginning `status: done` is retired on its own word.
+Agents the fleet starts get `--compact-at 500000` and `--session-hours 48` unless their role names its own. The shipped roles name their compact point: `300k` for `coordinator` and `hands`, `500k` for the other four. A role's `compact_at`, or `--set ROLE.compact_at=POINT` at submit, overrides it. An agent that hands its parent a message beginning `status: done` is retired on its own word.
 
 ## What it never does
 

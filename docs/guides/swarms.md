@@ -48,7 +48,7 @@ Text alternative. A definition names roles, their counts and who each may messag
 
 ## Start from the standard definition
 
-`dockingbird init` installs the standard definition with the swarm skill, in `.agents/skills/dockingbird-swarm/library/standard/`: `swarm.toml` and the three briefs `build.md`, `review.md` and `test.md`. It has three roles from the shipped role library, and every count and choice is a parameter.
+`dockingbird init` installs the standard definition with the swarm skill, in `.agents/skills/dockingbird-swarm/library/standard/`: `swarm.toml` and the three briefs `build.md`, `review.md` and `test.md`. You submit it where it is, by its path from the top of the checkout, with no copy and no edit. It has three roles from the shipped role library, and the repository, the branch, every count, the tool and the plan are parameters.
 
 | Role | Library role | Effort | Its count |
 |---|---|---|---|
@@ -58,60 +58,58 @@ Text alternative. A definition names roles, their counts and who each may messag
 
 | Parameter | Type | Default | What it sets |
 |---|---|---|---|
+| `source-repository` | `text`, at most 120 characters | none, so every submit gives it | `[source]` `repository`, the repository the agents work on, as `OWNER/NAME` |
+| `source-branch` | `text`, at most 120 characters | none, so every submit gives it | `[source]` `branch`, the branch they work on |
 | `implementers`, `reviewers`, `testers` | `int` | 2, 1, 1 | the three roles' counts |
 | `harness` | `choice`: `claude` or `codex` | `claude` | the tool of all three roles |
-| `fallback-harness` | `choice`: `codex` or `claude` | `codex` | the tool each role's agents move to after a turn a safety system refused; never the same word as `harness` |
 | `plan` | `text`, at most 120 characters | the path the coordinator's first message names | the plan's path in the repository, which the three briefs name |
 
-The file names no model. Each role takes its model from the project file's `[roles.NAME]` or your organisation's store, as [Choose each role's model and effort](#choose-each-roles-model-and-effort) shows, and so does its fallback tool. Each role's `[role.fallback]` names `placement = "any"` and no `[role.fallback.on]`, so every transient failure retries on the role's own tool and only a refusal moves an agent.
+The file names no model and no fallback tool. Each role takes its model from the project file's `[roles.NAME]` or your organisation's store, as [Choose each role's model and effort](#choose-each-roles-model-and-effort) shows. A submit gives a role a fallback tool, as the end of this section shows.
 
-1. Copy the folder into the checkout, on the branch the swarm will work on, and fill the two lines of `[source]`. `[source]`, `key` and `priority` take no placeholder, and a copy left unfilled is refused at `source.repository` and `source.branch`.
-
-   ```bash
-   mkdir -p .dockingbird/swarms
-   cp -R .agents/skills/dockingbird-swarm/library/standard .dockingbird/swarms/TEAM
-   ```
-
-   ```toml
-   [source]
-   repository = "example-org/example-app"
-   branch = "feature/example"
-   ```
-
-   Commit the copy and your plan, and push the branch. The step is done when `git status` prints `nothing to commit, working tree clean`.
-
-2. Record a model for each kind of role on each tool the swarm may run: `implementer`, `reviewer` and `tester` on the role's tool, and the same three on the fallback tool. The submit refuses a role with no model at `role[N].model`, and a fallback with none at `role[N].fallback.model`.
+1. Commit the plan on the branch the swarm will work on, and push the branch. `PATH` is the plan's path in the repository and `BRANCH` the branch.
 
    ```bash
-   dockingbird org roles set implementer --harness codex --model MODEL --effort EFFORT
+   git add PATH
+   git commit -m "Add the plan"
+   git push -u origin BRANCH
    ```
 
-   The step is done when each row prints, such as `implementer with codex now runs MODEL at effort EFFORT.` A row for the fallback tool needs both a model and an effort, since the standard file names neither for it. `[roles.NAME]` in `.dockingbird/project.toml` serves for the role's own tool instead.
+   The step is done when `git status` prints `Your branch is up to date with 'origin/BRANCH'.` and `nothing to commit, working tree clean`.
 
-3. Describe it. `fleet describe` prints every parameter and setting with its bounds and what it resolves to, and connects to nothing. It reads no store, so a model only the store gives shows as `required`, and it never shows a missing fallback model.
+2. Record a model for each kind of role on the swarm's tool, the `harness` parameter's: `implementer`, `reviewer` and `tester`. The submit refuses a role with no model at `role[N].model`.
 
    ```bash
-   dockingbird fleet describe TEAM
+   dockingbird org roles set implementer --harness claude --model MODEL --effort EFFORT
+   ```
+
+   The step is done when each row prints, such as `implementer with claude now runs MODEL at effort EFFORT.` `[roles.NAME]` in `.dockingbird/project.toml` serves instead.
+
+3. Describe it from the top of the checkout. `fleet describe` prints every parameter and setting with its bounds and what it resolves to, and connects to nothing. It takes no `--set` and reads no values, so `source-repository` and `source-branch` print `"required": true`, with `binds` naming `source.repository` and `source.branch`. It reads no store either, so a model only the store gives shows as `required`.
+
+   ```bash
+   dockingbird fleet describe .agents/skills/dockingbird-swarm/library/standard
    ```
 
    The step is done when the JSON document prints.
 
-4. Submit it, sized for the work. `--key TEAM` makes a repeat answer the swarm queued first.
+4. Submit it from the top of the checkout, sized for the work: one implementer per task of the plan, up to 12; one reviewer per 3 to 4 implementers; one tester per 4 implementers. The file names no `key`, so `--key TEAM` names the swarm, and a repeat of that key answers the swarm queued first. Without `--key`, each submit queues a new swarm keyed `standard`, a dash and the UTC time.
 
    ```bash
    # a one-file fix: one implementer at high, one reviewer, one tester
-   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set implementers=1 --set build.effort=high
+   dockingbird fleet submit .agents/skills/dockingbird-swarm/library/standard --key TEAM \
+     --set source-repository=OWNER/NAME --set source-branch=BRANCH --set plan=PATH \
+     --set implementers=1 --set build.effort=high
    # a feature of five tasks: five implementers, two reviewers, two testers
-   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set implementers=5 --set reviewers=2 --set testers=2
-   # the Codex tool, with Claude Code as the fallback
-   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set harness=codex --set fallback-harness=claude
+   dockingbird fleet submit .agents/skills/dockingbird-swarm/library/standard --key TEAM \
+     --set source-repository=OWNER/NAME --set source-branch=BRANCH --set plan=PATH \
+     --set implementers=5 --set reviewers=2 --set testers=2
    ```
 
-   `PATH` is the plan's path in the repository. The same values fit one JSON document for `--values`, and a `--set` beside it beats the file for the same key.
+   `OWNER/NAME` is the repository, such as `example-org/example-app`. A submit without `source-repository` or `source-branch` is refused once for each, as `refused: params.source-branch: missing`. The same values fit one JSON document for `--values`, and a `--set` beside it beats the file for the same key.
 
    ```json
    {
-     "params": {"plan": "PATH", "implementers": 5, "reviewers": 2, "testers": 2},
+     "params": {"source-repository": "OWNER/NAME", "source-branch": "BRANCH", "plan": "PATH", "implementers": 5, "reviewers": 2, "testers": 2},
      "roles": {"build": {"effort": "high"}, "review": {"effort": "xhigh"}}
    }
    ```
@@ -121,6 +119,16 @@ The file names no model. Each role takes its model from the project file's `[rol
    ```text
    {id} pending, position {position}
    ```
+
+No role of the standard definition names a fallback tool. Three `--set` keys give a role one at the submit. Here the build role's agents move to Codex, at that model and effort, after a turn a safety system refused.
+
+```bash
+dockingbird fleet submit .agents/skills/dockingbird-swarm/library/standard --key TEAM \
+  --set source-repository=OWNER/NAME --set source-branch=BRANCH --set plan=PATH \
+  --set build.fallback.harness=codex --set build.fallback.model=MODEL --set build.fallback.effort=EFFORT
+```
+
+The role then follows the default rules: every transient failure, such as a rate limit or a server error, retries on the role's own tool, a refusal moves the agent, and every other failure is reported. A fallback harness that is the role's own tool is refused (`fallback-same`). A fallback model or effort left out comes from the project file's `[roles.NAME]` when its `harness` is the fallback's, else from your organisation's row for that tool. One that neither gives is refused at `role[N].fallback.model` or `role[N].fallback.effort` (`fallback-model`), so the harness alone, with no row for that tool, is refused at `role[N].fallback.model`. `fleet describe` takes no `--set`, so the submit is where a fallback is checked. [A role's fallback](../reference/files/swarm-definition.md#a-roles-fallback) lists its other keys.
 
 The file's priority is `P2`; `fleet set ID --priority P1` changes it after the submit. Write a definition of your own, a copy of the standard one edited, only for what its parameters cannot express: more roles, such as a coordinator or readers, one brief per task, attachments, or a role's `skills`, `connections`, `send_to`, `subagents`, `harness_config` or `[role.fallback.on]`, which `--set` cannot set. The steps below write one.
 
@@ -193,7 +201,7 @@ Raise an effort above the table's only for a gain you measured, since a higher e
 
 ## 2. Describe it
 
-Before you submit, ask the definition what it lets you set. `fleet describe` reads the checkout, connects to nothing and prints JSON: each parameter and each role's settable field, with its type, its bounds or words, and its default. Where a default comes from is named too (`file`, `params.<name>`, `library` or `project`). A model or effort the checkout does not give is marked `required`. The defaults alone make a values document that `--values` accepts.
+Before you submit, ask the definition what it lets you set. `fleet describe` reads the checkout, connects to nothing and prints JSON: each parameter and each role's settable field, with its type, its bounds or words, and its default. Where a default comes from is named too (`file`, `params.<name>`, `library` or `project`). A model or effort the checkout does not give is marked `required`. It takes no values, so a parameter with no default is marked `required` too, with the places it `binds`, unless a role's value, `key` or `priority` names it: that one is refused `params.<name>: missing`, as at the submit. The defaults alone make a values document that `--values` accepts.
 
 ```bash
 dockingbird fleet describe NAME
@@ -223,7 +231,7 @@ The step is done when the swarm is queued.
 {id} pending, position {position}
 ```
 
-Every agent the fleet starts gets `--compact-at 500000` and `--session-hours 48` unless its role names its own. Each implementer is given a reviewer and a tester, round-robin, and every brief names them. Read the queue with `fleet queue`, and `fleet why ID` names what holds a swarm.
+Every agent the fleet starts gets `--compact-at 500000` and `--session-hours 48` unless its role names its own. The shipped roles name their compact point: `300k` for `coordinator` and `hands`, `500k` for `implementer`, `reviewer`, `tester` and `reader`. A role's `compact_at`, or `--set ROLE.compact_at=POINT` at the submit, overrides it. Each implementer is given a reviewer and a tester, round-robin, and every brief names them. Read the queue with `fleet queue`, and `fleet why ID` names what holds a swarm.
 
 ## 4. Change a running swarm
 

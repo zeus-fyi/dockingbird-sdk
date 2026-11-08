@@ -29,7 +29,7 @@ A role library holds the settings a swarm role reuses, and a service connection 
 | `tools` | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool |
 | `harness_config` | a path, or a table by harness | the harness's own settings file, relative to `.dockingbird/roles/`; never expanded |
 | `needs` | cpus, memory, pids | the role's resource reservation |
-| `compact_at` | `500000`, `500k` or `auto` | the point at which the agent's context compacts |
+| `compact_at` | `500000`, `500k` or `auto` | the point at which the agent's context compacts; the shipped roles name `300k` for `coordinator` and `hands` and `500k` for the other four |
 | `session_hours` | integer, 1 to 168 | how long each agent may run |
 | `skills` | table of `path` and `into` | skills its agents' tool lists as its own, as a config's `[skills]` takes them; each `path` is from the top of the swarm's source, not from `.dockingbird/roles/`; see [skills.md](../../guides/skills.md) |
 | `[fallback]`, `[fallback.on]` | tables | the tool its agents move to after a failed turn, and each error class's rule, as a config's `[fallback]` takes them; see [app-config.md](app-config.md#keys-of-fallback) |

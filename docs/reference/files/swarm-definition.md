@@ -17,7 +17,7 @@ A swarm definition is a TOML file, `swarm.toml`, at `schema = 1`. Keep it at `.d
 |---|---|---|---|
 | `schema` | integer | required, `1` | the definition's version |
 | `project` | string | the slug of the checkout's `.dockingbird/project.toml`, else `--project`, else your org login's project | the project's slug; every source given must name the same one |
-| `key` | string | `NAME` and the UTC time as `YYYYMMDDhhmmss`, or `--key` | a repeat of a key answers the swarm queued first; like `priority` and `[source]`, it takes no placeholder |
+| `key` | string | `NAME` and the UTC time as `YYYYMMDDhhmmss`, or `--key` | a repeat of a key answers the swarm queued first; like `priority` and `[source]`, it takes a declared parameter's placeholder, never a built-in's |
 | `priority` | `P0`, `P1`, `P2` or `P3` | required | the queue priority |
 | `[source]` `repository` | string | required unless every role has `workspace = "scratch"` | the repository the agents work on, such as `example-org/example-app` |
 | `[source]` `branch` | string | required with `repository` | the branch they work on |
@@ -53,7 +53,8 @@ A parameter's name is at most 32 characters of letters, digits and `-`, and its 
 | a string value of a `[[role]]` entry | when the definition declares `[params]`; without `[params]`, `{{` stays as written |
 | a role's `brief`, its `instructions` and its subagent's `instructions` | when the definition declares `[params]` |
 | a library role's string values and texts | always |
-| an attachment, a `harness_config` file | never |
+| `key`, `priority`, and `[source]` `repository` and `branch` | when the definition declares `[params]`, a declared parameter alone; a built-in there is refused (`undeclared`), since these values give the swarm's key, repository and branch |
+| `project`, `[placement]`, an attachment, a `harness_config` file | never |
 
 A string that is one placeholder of an `int` parameter and nothing else becomes that number, so `count = "{{N}}"` is `count = 4` for `--set N=4`. A placeholder in a key is refused (`placeholder-key`). A placeholder that names no declared parameter and no built-in is refused (`undeclared`).
 
@@ -96,7 +97,7 @@ Each `[[role]]` is one kind of agent.
 | `context` | `kept` or `fresh` | `kept` | as a config's `context`: one conversation for every delivery, or a new one for each task delivery |
 | `tools` | `bus`, `full` or a list | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool; a list that drops a bus tool gives `refused: role[N].tools: drops a tool of the bus set` |
 | `harness_config` | a path, or a table by harness | none | the harness's own settings file, the base under Dockingbird's own keys, read under the definition's folder or the library role's; never expanded |
-| `compact_at` | `500000`, `500k` or `auto` | `500000` for a fleet-started agent | the point at which the agent's context compacts |
+| `compact_at` | `500000`, `500k` or `auto` | the library role's: `300k` for `coordinator` and `hands`, `500k` for the other four; else `500000` for a fleet-started agent | the point at which the agent's context compacts; `--set ROLE.compact_at=POINT` overrides it at submit |
 | `session_hours` | integer, 1 to 168 | 48 for a fleet-started agent | how long each agent may run |
 | `needs` | cpus, memory and pids, each with `request` and `limit` | measured | the role's resource reservation |
 | `args` | list from a closed set of start words | none | extra words a start takes |
@@ -106,7 +107,7 @@ Each `[[role]]` is one kind of agent.
 
 ## Library roles
 
-The shipped roles are `coordinator`, `implementer`, `reviewer`, `tester`, `reader` and `hands`. Each names its `harness`, `brief`, `instructions`, `workspace` and `tools`, and none names a model or an effort. `hands` carries out a coordinator's host requests with no clone of its own: `workspace = "scratch"`, a list of tools and `compact_at = "300k"`.
+The shipped roles are `coordinator`, `implementer`, `reviewer`, `tester`, `reader` and `hands`. Each names its `harness`, `brief`, `instructions`, `workspace`, `tools` and `compact_at`, and none names a model or an effort. `coordinator` and `hands` compact at `300k`, the other four at `500k`. `hands` carries out a coordinator's host requests with no clone of its own: `workspace = "scratch"` and a list of tools.
 
 `dockingbird init` copies them into `.dockingbird/roles/` with the library's `index.toml`, and a copy you edited survives a later `init`. A key the entry gives replaces the library role's whole value. Two tables merge field by field instead, the entry's field winning: `needs` and each `subagents.<name>`. A `skills` or a `fallback` table the entry gives replaces the library role's whole. [The roles and connections reference](roles-and-connections.md) lists the library file's keys and `index.toml`.
 
