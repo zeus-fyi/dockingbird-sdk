@@ -1,6 +1,6 @@
 ---
 title: Role and connection files
-summary: The keys of a library role file, a service connection file with its argument keys, and a subagent block.
+summary: The keys of a library role file and the library's index.toml, a service connection file with its argument keys, and a subagent block.
 audience: team-admin
 commands: []
 ---
@@ -13,37 +13,67 @@ A role library holds the settings a swarm role reuses, and a service connection 
 
 ## Library role file
 
-`.dockingbird/roles/NAME.toml` is a role a definition names with `use = "NAME"`. Paths in it are relative to `.dockingbird/roles/`.
+`.dockingbird/roles/NAME.toml` is a role a definition names with `use = "NAME"`, and `use = "dockingbird/NAME"` names the shipped file of that name. Paths in it are relative to `.dockingbird/roles/`. `{{name}}` expands in its string values and its texts, a parameter of the definition or a built-in such as `{{swarm}}`, whether or not the definition declares `[params]`.
 
 | Key | Type | Meaning |
 |---|---|---|
+| `name` | slug | optional; when given, the file's own name, else `use-name` |
 | `harness` | `claude` or `codex` | the tool the agents run |
-| `model`, `effort` | string | the role's model and effort |
-| `brief` | path | the Markdown file of the first task; `{{name}}` expands a parameter of the definition |
+| `model`, `effort` | string | the role's model and effort; the shipped roles name neither, so the project file or your organisation's store gives them |
+| `brief` | path | the Markdown file of the first task |
 | `instructions` | path | text added after Dockingbird's rules and the project's, never in place of them |
 | `connections` | list of names | the home's connections its agents are granted at start |
-| `subagents` | tables | helper kinds, one `[subagents.NAME]` each |
+| `subagents` | table | one helper kind, `[subagents.NAME]`; a role takes one kind at most |
 | `workspace`, `egress`, `allow`, `env` | as in a config | session settings |
+| `context` | `kept` or `fresh` | one conversation for every delivery, or a new one for each task delivery |
 | `tools` | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool |
+| `harness_config` | a path, or a table by harness | the harness's own settings file, relative to `.dockingbird/roles/`; never expanded |
 | `needs` | cpus, memory, pids | the role's resource reservation |
 | `compact_at` | `500000`, `500k` or `auto` | the point at which the agent's context compacts |
 | `session_hours` | integer, 1 to 168 | how long each agent may run |
 | `skills` | table of `path` and `into` | skills its agents' tool lists as its own, as a config's `[skills]` takes them; each `path` is from the top of the swarm's source, not from `.dockingbird/roles/`; see [skills.md](../../guides/skills.md) |
+| `[fallback]`, `[fallback.on]` | tables | the tool its agents move to after a failed turn, and each error class's rule, as a config's `[fallback]` takes them; see [app-config.md](app-config.md#keys-of-fallback) |
+
+A `[[role]]` entry that uses the file replaces each key it gives. `needs` and each `[subagents.NAME]` table merge field by field instead, the entry's field winning. An entry's `skills` or `fallback` replaces the file's whole table.
 
 | Not allowed in a library file | Why |
 |---|---|
 | `use`, `count`, `min`, `max`, `send_to`, `reviews`, `tests`, `kind`, `args` | they belong to a swarm's own `[[role]]` |
-| `system_prompt`, `append_system_prompt`, `developer_instructions` | the fixed prompt keys are refused |
+| `system_prompt`, `append_system_prompt`, `developer_instructions`, `rules` | they would change a layer Dockingbird injects, so they are refused (`fixed-prompt`) |
+
+## The library's index
+
+`.dockingbird/roles/index.toml` lists the library's roles and the names a role is looked up by. `dockingbird init` installs the shipped one.
+
+```toml
+roles = ["coordinator", "implementer", "reviewer", "tester", "reader", "hands"]
+
+[defaults]
+reviews = "reviewer"
+tests = "tester"
+otherwise = "implementer"
+```
+
+| Key | Meaning |
+|---|---|
+| `roles` | the library's roles; `init` writes one `[roles.NAME]` table into `.dockingbird/project.toml` for each |
+| `[defaults]` `reviews` | the name a role that reviews and names no `kind` looks its model and effort up by |
+| `[defaults]` `tests` | the same for a role that tests |
+| `[defaults]` `otherwise` | the same for every other role |
+
+The shipped index is read first, and the project's replaces each key it gives. An empty value in the project's `[defaults]` gives no name for that kind of role, so such a role needs a model and an effort from another source. A `use` reads the role's file by its name, whether or not `roles` lists it.
 
 ## Subagent block
 
-`[subagents.NAME]` is one helper that the role's harness runs, with its own settings.
+`[subagents.NAME]` is one helper that the role's harness runs, with its own settings. A role holds one such table at most (`one-subagent-kind`).
 
 | Key | Type | Meaning |
 |---|---|---|
-| `instructions` | path | the helper's own text; the first line is the helper's description |
-| `model`, `effort` | string | the helper's model and effort |
-| `max` | integer | how many helpers run at once |
+| `instructions` | path | required; the helper's own text; the first line is the helper's description |
+| `model` | string | the helper's model; left out, the role's own |
+| `effort` | string | the helper's effort; left out, the tool's default |
+| `max` | integer, 0 to 20 | how many helpers run at once; `0` denies the helper tool; left out, the tool's own cap |
+| `tools` | list of tool names | the tool's own tools the helper may use; left out, the role's |
 
 ## Service connection file
 

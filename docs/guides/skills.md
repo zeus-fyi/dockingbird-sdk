@@ -116,6 +116,10 @@ into = "both"
 
 `fleet submit` reads the paths from the top of the checkout the definition is in, by a config's rules: no link, no hidden entry, the skills' bounds. It refuses `skills` in a swarm with no `[source]`, which has no clone. `fleet describe` reads no tree. Every start of the role's agents reads the trees from the swarm's clone, where its agents run, and places them as a config's skills are placed. The example names `tools/skills`, outside the clone's own `.agents/skills`, so a Codex role lists each skill once ([How each tool lists them](#how-each-tool-lists-them)).
 
+A `[[role]]` entry's `skills` replaces its library role's whole table, so name every path the role needs in one place. `fleet submit --set` cannot set `skills`. A skill of a plugin, or one in a person's own skills folder, is not reachable by its install name: copy its folder into the repository first, under `.agents/skills/` or in a `skills/` folder of the definition's own.
+
+Give a role a skill only when its task needs that skill's method, such as a SQL skill for the builder and the reviewer of a migration, or a verification skill for a tester. Each skill an agent has sits in its tool's listing for every agent of the role, for the whole swarm. A fact only one swarm needs, such as a table's name or a command's flags, goes in the role's brief. A role whose task needs no skill gets no `skills` key, and its library role's rules and its brief are its whole context.
+
 ```bash
 dockingbird fleet submit NAME
 ```
@@ -175,6 +179,7 @@ Past its budget, Codex shortens the descriptions, then leaves out whole skills, 
 
 | Bound | Figure |
 |---|---|
+| A skill's name | its folder's: 1 to 63 lowercase letters, digits and `-`, a letter or a digit first, no `--` and no `-` at the end; never `synced` |
 | Entries in one `skills.path` or one `--skills` | 16 |
 | Skills of one agent, a config's and a start's together | 32 |
 | Files in one skill | 64 |

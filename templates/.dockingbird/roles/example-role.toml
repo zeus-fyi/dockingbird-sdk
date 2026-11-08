@@ -8,16 +8,16 @@
 #
 # A swarm's own keys stay in the definition's [[role]]: use, count, min, max,
 # send_to, reviews, tests, kind and args. The keys system_prompt,
-# append_system_prompt and developer_instructions are refused.
+# append_system_prompt, developer_instructions and rules are refused.
+# {{name}} expands in every string value and text of this file: a parameter of
+# the swarm definition, or a built-in such as {{swarm}} or {{branch}}.
 
 # claude or codex: the tool its agents run.
 harness = "claude"
-# Its agents' model and effort. Default: the project file's [roles.<kind>] for
-# this harness, else your organisation's store.
-model = "opus"
-effort = "high"
-# The Markdown file of the first task; {{name}} in it expands a parameter of the
-# swarm definition.
+# model and effort: left out here, as the roles Dockingbird ships leave them
+# out. The project file's [roles.<name>] for this harness gives them, else your
+# organisation's store; a definition's [[role]] or fleet submit --set overrides.
+# The Markdown file of the first task.
 brief = "example-role/brief.md"
 # Text its agents get after Dockingbird's rules and the project's, never in
 # place of them.
@@ -51,8 +51,7 @@ EXAMPLE_STYLE = "short"
 [subagents.helper]
 # The helper's text; its first line is the helper's description.
 instructions = "example-role/helper.md"
-# The helper's model and effort.
-model = "sonnet"
+# The helper's effort. model: left out here, so the helper runs the role's own.
 effort = "high"
 # How many helpers run at once.
 max = 4
