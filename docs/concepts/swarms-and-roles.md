@@ -11,7 +11,7 @@ You describe a team of agents in one TOML file, for example four builders, a rev
 
 ## The definition
 
-A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders.
+A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders. Most swarms start from the standard definition that `dockingbird init` installs with the swarm skill: a build, a review and a test role whose counts, tool and fallback tool are parameters, which [the swarms guide](../guides/swarms.md#start-from-the-standard-definition) submits with `--set`.
 
 ## Roles
 

@@ -16,8 +16,8 @@ A swarm definition is a TOML file, `swarm.toml`, at `schema = 1`. Keep it at `.d
 | Key | Type | Default | Meaning |
 |---|---|---|---|
 | `schema` | integer | required, `1` | the definition's version |
-| `project` | string | required, or given by `--project` | the project's slug |
-| `key` | string | `NAME` and the UTC time as `YYYYMMDDhhmmss`, or `--key` | a repeat of a key answers the swarm queued first |
+| `project` | string | the slug of the checkout's `.dockingbird/project.toml`, else `--project`, else your org login's project | the project's slug; every source given must name the same one |
+| `key` | string | `NAME` and the UTC time as `YYYYMMDDhhmmss`, or `--key` | a repeat of a key answers the swarm queued first; like `priority` and `[source]`, it takes no placeholder |
 | `priority` | `P0`, `P1`, `P2` or `P3` | required | the queue priority |
 | `[source]` `repository` | string | required unless every role has `workspace = "scratch"` | the repository the agents work on, such as `example-org/example-app` |
 | `[source]` `branch` | string | required with `repository` | the branch they work on |

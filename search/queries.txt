@@ -53,3 +53,4 @@ built-in parameters of a swarm	docs/reference/files/swarm-definition.md
 role library index.toml defaults	docs/reference/files/roles-and-connections.md
 fallback tool when a turn fails	docs/guides/your-own-commands.md|docs/concepts/glossary.md
 which model for a reviewer	docs/guides/swarms.md|docs/concepts/claude-code-and-codex.md
+submit the standard swarm definition with --set	docs/guides/swarms.md#start-from-the-standard-definition

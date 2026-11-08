@@ -23,7 +23,7 @@ commands:
 
 # Swarms
 
-This guide for teams writes a swarm definition, submits it to the pool and changes the swarm while it runs. A swarm is a team of agents the fleet scheduler starts from a definition. The model is on [the swarms and roles concept page](../concepts/swarms-and-roles.md), and every key of the definition is in [the definition reference](../reference/files/swarm-definition.md).
+This guide for teams submits a swarm to the pool and changes it while it runs. A swarm is a team of agents the fleet scheduler starts from a definition. Most swarms start from the standard definition, sized and set with `--set` at the submit; a team that needs more roles writes its own. The model is on [the swarms and roles concept page](../concepts/swarms-and-roles.md), and every key of the definition is in [the definition reference](../reference/files/swarm-definition.md).
 
 ## Before you start
 
@@ -46,9 +46,87 @@ flowchart TD
 
 Text alternative. A definition names roles, their counts and who each may message. `fleet submit` queues it as pending. The admitter places it on a host and a home that fit, the roles start and message along their `send_to` edges, and `fleet done` or `fleet cancel` ends it. `fleet prune` then deletes the agents' kept copies.
 
+## Start from the standard definition
+
+`dockingbird init` installs the standard definition with the swarm skill, in `.agents/skills/dockingbird-swarm/library/standard/`: `swarm.toml` and the three briefs `build.md`, `review.md` and `test.md`. It has three roles from the shipped role library, and every count and choice is a parameter.
+
+| Role | Library role | Effort | Its count |
+|---|---|---|---|
+| `build` | `dockingbird/implementer` | `medium` | `implementers`, 1 to 12, default 2; the agent whose name ends in `build-N` takes task N of the plan |
+| `review` | `dockingbird/reviewer` | `high` | `reviewers`, 1 to 4, default 1; each implementer gets a reviewer in turn |
+| `test` | `dockingbird/tester` | `high` | `testers`, 1 to 3, default 1 |
+
+| Parameter | Type | Default | What it sets |
+|---|---|---|---|
+| `implementers`, `reviewers`, `testers` | `int` | 2, 1, 1 | the three roles' counts |
+| `harness` | `choice`: `claude` or `codex` | `claude` | the tool of all three roles |
+| `fallback-harness` | `choice`: `codex` or `claude` | `codex` | the tool each role's agents move to after a turn a safety system refused; never the same word as `harness` |
+| `plan` | `text`, at most 120 characters | the path the coordinator's first message names | the plan's path in the repository, which the three briefs name |
+
+The file names no model. Each role takes its model from the project file's `[roles.NAME]` or your organisation's store, as [Choose each role's model and effort](#choose-each-roles-model-and-effort) shows, and so does its fallback tool. Each role's `[role.fallback]` names `placement = "any"` and no `[role.fallback.on]`, so every transient failure retries on the role's own tool and only a refusal moves an agent.
+
+1. Copy the folder into the checkout, on the branch the swarm will work on, and fill the two lines of `[source]`. `[source]`, `key` and `priority` take no placeholder, and a copy left unfilled is refused at `source.repository` and `source.branch`.
+
+   ```bash
+   mkdir -p .dockingbird/swarms
+   cp -R .agents/skills/dockingbird-swarm/library/standard .dockingbird/swarms/TEAM
+   ```
+
+   ```toml
+   [source]
+   repository = "example-org/example-app"
+   branch = "feature/example"
+   ```
+
+   Commit the copy and your plan, and push the branch. The step is done when `git status` prints `nothing to commit, working tree clean`.
+
+2. Record a model for each kind of role on each tool the swarm may run: `implementer`, `reviewer` and `tester` on the role's tool, and the same three on the fallback tool. The submit refuses a role with no model at `role[N].model`, and a fallback with none at `role[N].fallback.model`.
+
+   ```bash
+   dockingbird org roles set implementer --harness codex --model MODEL --effort EFFORT
+   ```
+
+   The step is done when each row prints, such as `implementer with codex now runs MODEL at effort EFFORT.` A row for the fallback tool needs both a model and an effort, since the standard file names neither for it. `[roles.NAME]` in `.dockingbird/project.toml` serves for the role's own tool instead.
+
+3. Describe it. `fleet describe` prints every parameter and setting with its bounds and what it resolves to, and connects to nothing. It reads no store, so a model only the store gives shows as `required`, and it never shows a missing fallback model.
+
+   ```bash
+   dockingbird fleet describe TEAM
+   ```
+
+   The step is done when the JSON document prints.
+
+4. Submit it, sized for the work. `--key TEAM` makes a repeat answer the swarm queued first.
+
+   ```bash
+   # a one-file fix: one implementer at high, one reviewer, one tester
+   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set implementers=1 --set build.effort=high
+   # a feature of five tasks: five implementers, two reviewers, two testers
+   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set implementers=5 --set reviewers=2 --set testers=2
+   # the Codex tool, with Claude Code as the fallback
+   dockingbird fleet submit TEAM --key TEAM --set plan=PATH --set harness=codex --set fallback-harness=claude
+   ```
+
+   `PATH` is the plan's path in the repository. The same values fit one JSON document for `--values`, and a `--set` beside it beats the file for the same key.
+
+   ```json
+   {
+     "params": {"plan": "PATH", "implementers": 5, "reviewers": 2, "testers": 2},
+     "roles": {"build": {"effort": "high"}, "review": {"effort": "xhigh"}}
+   }
+   ```
+
+   The step is done when the swarm is queued.
+
+   ```text
+   {id} pending, position {position}
+   ```
+
+The file's priority is `P2`; `fleet set ID --priority P1` changes it after the submit. Write a definition of your own, a copy of the standard one edited, only for what its parameters cannot express: more roles, such as a coordinator or readers, one brief per task, attachments, or a role's `skills`, `connections`, `send_to`, `subagents`, `harness_config` or `[role.fallback.on]`, which `--set` cannot set. The steps below write one.
+
 ## 1. Write a definition
 
-Keep the definition at `.dockingbird/swarms/NAME/swarm.toml` in the checkout. It names the project, the priority, the source, the hosts to try in order and the roles. Each role's brief is a Markdown file under the definition's folder. The step is done when the file exists, and step 2 reads it back.
+A definition of your own lives at `.dockingbird/swarms/NAME/swarm.toml` in the checkout. It names the project, the priority, the source, the hosts to try in order and the roles. Each role's brief is a Markdown file under the definition's folder. The step is done when the file exists, and step 2 reads it back.
 
 ```toml
 schema = 1
