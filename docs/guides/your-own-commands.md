@@ -227,3 +227,4 @@ Your own Claude Code or Codex can start these commands too, through `dockingbird
 - [`FALLBACK_NO_LOGIN`](../troubleshooting.md#fallback_no_login) means the pick-up, or a start under `placement = "require-login"`, needs the fallback tool signed in here. Nothing was started. Run the `dockingbird login` the line names.
 - [`FALLBACK_NONE`](../troubleshooting.md#fallback_none) means the agent recorded no tool to move to. Name one, as in `--fallback codex`.
 - [`FALLBACK_MAX`](../troubleshooting.md#fallback_max) means the agent has moved as often as one agent may. Pick it up on the tool it runs now, without `--fallback`.
+- [`STATUS_FALLBACK_FAILED`](../troubleshooting.md#status_fallback_failed) says every pick-up the fallback watcher tried was refused, and names the last refusal. Mend its cause, then run the `--fallback` pick-up the note names.
