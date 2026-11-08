@@ -47,3 +47,10 @@ which ports does the control plane open	docs/reference/ports-and-hosts.md
 # Agent skills: at a start, from a config, on a running agent
 give an agent skills	docs/guides/skills.md
 add skills to a running agent	docs/guides/skills.md|docs/guides/delegating-tasks.md
+
+# Swarm parameters, the role library, fallback rules and a model for each role
+built-in parameters of a swarm	docs/reference/files/swarm-definition.md
+role library index.toml defaults	docs/reference/files/roles-and-connections.md
+fallback tool when a turn fails	docs/guides/your-own-commands.md|docs/concepts/glossary.md
+which model for a reviewer	docs/guides/swarms.md|docs/concepts/claude-code-and-codex.md
+submit the standard swarm definition with --set	docs/guides/swarms.md#start-from-the-standard-definition

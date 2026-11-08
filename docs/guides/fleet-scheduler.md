@@ -102,6 +102,8 @@ cloud: {hold}, {figure} {reading}, bound {line_bound}
 
 A swarm held for a missing checkout names the home and the host, and ends `fleet release ID` as the next step. Link the checkout, then release it. A release starts a new attempt that first fetches and fast-forwards the worker's own clone, so a fix you pushed reaches it.
 
+A swarm with a role whose `[role.fallback]` says `placement = "require-login"` is held off each host whose home is not signed in to the role's tool and its fallback tool, as of the host's last sample, and `fleet why ID` names the hold `no_fallback_login`. Sign in in that home with `dockingbird login claude` or `dockingbird login codex`. Each pass of the admitter judges the hold again.
+
 ## 5. Control a workload
 
 Each control takes the workload's id. `hold` keeps a waiting workload out of every pass until `release`. `pause`, `resume`, `cancel` and `done` act on a running team, and each agent stops after its running turn, never during it. `set` changes a priority in any state but an ended one and keeps the workload's age.

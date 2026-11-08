@@ -1,8 +1,8 @@
 {
   "params": {"batch": 10},
   "roles": {
-    "coord":  {"model": "opus", "effort": "max"},
-    "grader": {"count": 4, "model": "opus", "effort": "xhigh",
-               "subagents": {"helper": {"model": "sonnet", "effort": "xhigh", "max": 4}}}
+    "coord":  {"effort": "xhigh"},
+    "grader": {"count": 4, "effort": "xhigh",
+               "subagents": {"helper": {"effort": "xhigh", "max": 4}}}
   }
 }

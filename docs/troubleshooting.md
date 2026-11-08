@@ -4354,7 +4354,7 @@ Exit status: 1 (a problem Dockingbird printed).
 
 ### AGENT_UNKNOWN
 
-When: You named an agent, with `stop`, `status`, `send`, `read`, `results` or `inspect config --agent`, that isn't running and has no work kept, or one that isn't running with `wait`.
+When: You named an agent, with `stop`, `status`, `send`, `read`, `results`, `wait` or `inspect config --agent`, that isn't running and has no work kept.
 
 ```text
 No agent named {name} is running or has work kept. See: dockingbird status
@@ -8752,7 +8752,7 @@ Exit status: 0 (done).
 
 ### STATUS_FALLBACK_ASKED
 
-When: Under "Needs your attention": an agent stopped after a failed turn because a rule of its `[fallback]` table moves it to its fallback tool, with why the turn failed and the tool it moves to. Its copy is kept. When nothing here picks it up, the note names the command that does: `dockingbird start --as NAME --fallback` starts it on the fallback tool with the messages that waited for it and its conversation so far, which it reads first.
+When: Under "Needs your attention": an agent stopped after a failed turn because a rule of its `[fallback]` table moves it to its fallback tool, with why the turn failed, when that is known, and the tool it moves to. Its copy is kept. While the fleet, or Dockingbird's fallback watcher on this computer, picks it up, the note says its pickup is running. When the watcher's tries were refused and it tries again, the note says how many of its tries were refused and the last refusal (look that message up for its cause, and mend it before its last try). When nothing here picks it up, the note names the command that does: `dockingbird start --as NAME --fallback` starts it on the fallback tool with the messages that waited for it and its conversation so far, which it reads first.
 
 ```text
 {name} is moving to {tool_name} after {error_class}; its pickup is running.
@@ -8772,10 +8772,41 @@ Or:
 dockingbird {subcommand} --as {name} --fallback
 ```
 
+Or:
+
+```text
+{name} is moving to {tool_name}; its pickup is running.
+```
+
+Or:
+
+```text
+{name} is moving to {tool_name} after {error_class}; its pickup was refused {attempts} of {attempts_max} times, the last for {refusal}.
+```
+
+Or:
+
+```text
+{name} is moving to {tool_name}; its pickup was refused {attempts} of {attempts_max} times, the last for {refusal}.
+```
+
 Next step, as the message gives it:
 
 - none, where the message only informs
 - dockingbird {subcommand} --as {name} --fallback
+
+Exit status: 0 (done).
+
+### STATUS_FALLBACK_FAILED
+
+When: Under "Needs your attention": Dockingbird tried to move an agent to its fallback tool after the agent asked for it, and every try was refused, so it stopped trying. The note names the refusal of the last try (look that message up for its cause, such as the fallback tool not being signed in on this computer) and the command that moves the agent by hand once the cause is mended: `dockingbird start --as NAME --fallback`. It also stops when it has made its tries for this agent already and the agent asks again.
+
+```text
+{name}'s move to {tool_name} was refused ({refusal}); run:
+dockingbird {subcommand} --as {name} --fallback
+```
+
+Next step: dockingbird {subcommand} --as {name} --fallback
 
 Exit status: 0 (done).
 
@@ -8874,7 +8905,7 @@ Exit status: 0 (done).
 
 ### STATUS_IDLE
 
-When: An agent that reported on its task (done, declined, or asked you for more information) and has no message still waiting for it, or (the at-prompt form) one whose tool says its turn ended and nothing waits. It keeps running until you stop it with `dockingbird stop NAME`; `done` is its report, not a verified result. Or (the picked-up form) an agent on the message bus that picked up from a summary of its conversation, with no task waiting for it: its row ends with the `dockingbird send` that gives it one.
+When: An agent that reported on its task (done, declined, or asked you for more information) and has no message still waiting for it, or (the at-prompt form) one whose tool says its turn ended and nothing waits. It keeps running until you stop it with `dockingbird stop NAME`; `done` is its report, not a verified result. Or (the picked-up form) an agent on the message bus that has run no turn and has no task waiting for it, because it picked up from a summary of its conversation or started with no message: its row ends with the `dockingbird send` that gives it one.
 
 One row of a table; its cells line up with the rows around it.
 
@@ -9666,7 +9697,7 @@ Exit status: 0 (done).
 
 ### STATUS_RESUME_ROW
 
-When: In `status NAME`: how an agent started with `--as NAME` picked up: its own conversation (its tool's saved state restored), or a summary of it when that state was missing or over its bound. Or an older conversation, when its last run saved nothing (it crashed): what that run did is not in it.
+When: In `status NAME`: how an agent started with `--as NAME` picked up: its own conversation (its tool's saved state restored), or a summary of it when that state was missing or over its bound. Or an older conversation, when its last run saved nothing (it crashed): what that run did is not in it. After a move to its fallback tool, the tool it moved from: that run began from the earlier conversation's document in its inbox.
 
 One row of a table; its cells line up with the rows around it.
 
@@ -9684,6 +9715,12 @@ Or:
 
 ```text
   resumed   picked up an older conversation: its last run saved nothing
+```
+
+Or:
+
+```text
+  resumed   moved from {tool_name} to its fallback tool
 ```
 
 Next step: none; it only informs.
@@ -13611,7 +13648,7 @@ Exit status: 1 (a problem Dockingbird printed).
 
 ### CONFIG_INVALID_FILE
 
-When: `dockingbird config add` or `dockingbird config remove` refused the file or the name you gave, or a start refused its config: the line names the setting that failed, never its value, and says why in one of these words: `has a key Dockingbird doesn't know` (the setting named has a key that isn't one of Dockingbird's), `the wrong type`, `not an allowed value`, `not a flag it takes (Claude: --effort, --fallback-model, --max-turns, --model; Codex: --model, -c, -m)` (a tool argument in a flag's place that the tool doesn't take here), `empty`, `too long`, `too many`, `out of range`, `has an unprintable character`, `has a secret in it`, `not a valid name`, `a name Dockingbird keeps`, `repeated`, `cannot go with another key here` (two settings that can't be used together, for example the `full` set of `tools` in a config that works in a `scratch` folder), `not an allowed path`, `not a file Dockingbird can read safely`, `missing`, `too large`, `not UTF-8 text`, `not well formed` (a config that isn't valid TOML), `only for a config you added`, `a repository's config cannot ask for a browser, its extensions or its policy; set them on a config you added` (a `browser`, its extensions or its policy in a checkout's own config), `a repository's config cannot ask for a local model; set it on a config you added` (a local model in a checkout's own config), `not a Chrome Web Store link, a 32-letter extension id or a folder path starting with / or ~/` (an extension the browser can't be given), `its signing key under configs/.extension-keys can't be read; remove it and add the config again for a new id` (the key Dockingbird keeps for a folder extension is damaged), `can't be read` (a file the config names), or `refused by the check` (a refusal that gave no reason). A config must be a regular `.toml` file of yours outside Dockingbird's folder, and a name is lowercase letters, digits and dashes. A config runs in its own `mode` and `harness` only, so `--terminal` or `--harness` can't change them.
+When: `dockingbird config add` or `dockingbird config remove` refused the file or the name you gave, or a start refused its config: the line names the setting that failed, never its value, and says why in one of these words: `has a key Dockingbird doesn't know` (the setting named has a key that isn't one of Dockingbird's), `the wrong type`, `not an allowed value`, `not a flag it takes (Claude: --effort, --fallback-model, --max-turns, --model; Codex: --model, -c, -m)` (a tool argument in a flag's place that the tool doesn't take here), `empty`, `too long`, `too many`, `out of range`, `has an unprintable character`, `has a secret in it`, `not a valid name`, `a name Dockingbird keeps`, `repeated`, `cannot go with another key here` (two settings that can't be used together, for example the `full` set of `tools` in a config that works in a `scratch` folder), `not an allowed path`, `not a file Dockingbird can read safely`, `missing`, `too large`, `not UTF-8 text`, `not well formed` (a config that isn't valid TOML), `only for a config you added`, `a repository's config cannot ask for a browser, its extensions or its policy; set them on a config you added` (a `browser`, its extensions or its policy in a checkout's own config), `a repository's config cannot ask for a local model; set it on a config you added` (a local model in a checkout's own config), `not a Chrome Web Store link, a 32-letter extension id or a folder path starting with / or ~/` (an extension the browser can't be given), `its signing key under configs/.extension-keys can't be read; remove it and add the config again for a new id` (the key Dockingbird keeps for a folder extension is damaged), `is Codex, the tool the agent runs` (its fallback is the tool it runs already, so it can't move there), `can't be read` (a file the config names), or `refused by the check` (a refusal that gave no reason). A config must be a regular `.toml` file of yours outside Dockingbird's folder, and a name is lowercase letters, digits and dashes. A config runs in its own `mode` and `harness` only, so `--terminal` or `--harness` can't change them.
 
 ```text
 {file}: invalid ({key}: {cause})
@@ -15331,6 +15368,20 @@ Next step: dockingbird {command} -h
 
 Exit status: 2 (usage).
 
+### INBOX_SINCE_INVALID
+
+When: You ran `dockingbird inbox --all --since TIME` with a TIME that isn't a date and time with its offset from UTC, such as `2026-11-07T00:00:00+00:00`. Nothing ran. The fleet engine lists a home's messages this way itself; you don't need the option.
+
+```text
+dockingbird {command}: --since takes an ISO 8601 instant with an offset
+(2026-11-07T00:00:00+00:00), not '{value}'.
+See: dockingbird {command} -h
+```
+
+Next step: dockingbird {command} -h
+
+Exit status: 2 (usage).
+
 ### INBOX_NAME_OPTION
 
 When: You ran `dockingbird inbox NAME` with an option that only works on your own inbox: `--priority`, `--questions`, `--page` or `--clear`. Nothing ran; an agent's inbox takes only `--all`.
@@ -15945,6 +15996,19 @@ Next step, as the message gives it:
 
 - none, where the message only informs
 - dockingbird inbox
+
+Exit status: 0 (done).
+
+### WAIT_ENDED
+
+When: You ran `dockingbird wait NAME` for an agent that has stopped, or it stopped while you waited, and its work is kept, so nothing new comes from it until it is continued with the command the line names. What it sent before it stopped is in `dockingbird inbox`.
+
+```text
+{name} has ended, so nothing more comes from it until it is continued:
+dockingbird {subcommand} --as {name}
+```
+
+Next step: dockingbird {subcommand} --as {name}
 
 Exit status: 0 (done).
 
@@ -18966,6 +19030,43 @@ so no more of its challenges are solved.
 Next step: none; it only informs.
 
 Exit status: 0 (done).
+
+### BROWSER_LOGIN_WATCH
+
+When: The log of the login courier that runs beside an agent's browser when its config names a vault (in your Dockingbird home's `logs` folder, `browser-login-<agent>.log`): a sign-in begun on a tab, how it ended, and the courier's own end when the browser's container no longer answers it (the browser was stopped, or its service refused). It never has a password or a code in it. Nothing to do unless a sign-in you expected ended otherwise than succeeded: the line says why.
+
+```text
+Signing in with a vault login in the agent's browser tab {target} ...
+```
+
+Or:
+
+```text
+The sign-in in the agent's browser tab {target} ended: {detail}
+```
+
+Or:
+
+```text
+The agent's browser's sign-in channel ended with status {status},
+so no more of its sign-ins are carried.
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### BROWSER_LOGIN_CHANNEL_FAILED
+
+When: The channel that carries an agent's vault sign-in between its browser and this computer failed, and the login courier's log carries this line. Either the browser's container could not open the channel (the browser was started without a vault in its config, or its service is gone), or docker could not be started, and the courier ended: the agent's sign-ins are refused until it starts again with a new browser. Or a line could not be handed back, the channel being gone by then: the agent was told the sign-in stopped. Start the agent again to get a new browser and courier.
+
+```text
+The agent's browser can't carry its sign-in: {detail}.
+```
+
+Next step: none; it only informs.
+
+Exit status: 1 (a problem Dockingbird printed).
 
 ### BROWSER_SOLVE_INPUT_RELEASED
 
@@ -22018,6 +22119,18 @@ Or:
 spread held: {roles} on {host}: the home {home} links no checkout of the repository, as of the host's last sample
 ```
 
+Or:
+
+```text
+spread held: {roles} on {host}: {hold}, role {role} needs {harness} signed in on {home}
+```
+
+Or:
+
+```text
+spread held: {roles} on {host}: {hold}, logins unread
+```
+
 Next step: none; it only informs.
 
 Exit status: 0 (done).
@@ -22979,16 +23092,40 @@ Exit status: 0 (done).
 
 ### FLEET_RETIRE_DONE
 
-When: `dockingbird fleet retire` asked an agent of a running swarm to retire: it stops once its running turn ends, never during it, and its share goes back to the pool; one that never started retires at once.
+When: `dockingbird fleet retire` asked an agent of a running swarm to retire: it retires at the first tick that finds it idle with no question or request open; a tick that finds it working or with one open refuses the ask, and the next `fleet retire` says so. Its share goes back to the pool; one that never started retires at once, and a `fleet retire` of an agent already asked changes nothing and says so.
 
 ```text
-{id} running: {name} retires once its running turn ends
+{id} running: {name} retires at the first tick that finds it idle
+with no question or request open; a tick that finds it working or with
+one open refuses the ask, and the next fleet retire says so
 ```
 
 Or:
 
 ```text
-{id} running: {name} retires once its running turn ends; still working: {names}
+{id} running: {name} retires at the first tick that finds it idle
+with no question or request open; a tick that finds it working or with
+one open refuses the ask, and the next fleet retire says so; still working: {names}
+```
+
+Or:
+
+```text
+{id} running: {name} was already asked to retire; it retires at the first tick
+that finds it idle with no question or request open
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### FLEET_RETIRE_REFUSED_BEFORE
+
+When: Your earlier `fleet retire` of this agent reached its host's worker while the agent was working or held a question or a request, so the worker refused it and cleared it. This ask is written again and applies at the first tick that finds the agent idle with nothing open.
+
+```text
+{id} running: the worker refused the earlier ask of {name} at {at}: {word};
+this ask is written again
 ```
 
 Next step: none; it only informs.
@@ -23021,16 +23158,23 @@ Exit status: 0 (done).
 
 ### FLEET_REPLACE_DONE
 
-When: `dockingbird fleet replace` asked an agent to stop once its running turn ends and start again by its name, its conversation kept; with `--fresh`, a new agent of its role takes its place under the next name.
+When: `dockingbird fleet replace` asked an agent to start again by its name, its conversation kept, at the worker's next pass if it runs no turn then and has no question or request open (a failed or crashed one starts again whatever is open); with `--fresh`, a new agent of its role takes its place under the next name. A running turn or an open question or request makes the worker refuse this ask and drop it: run this command again once it is idle with none open.
 
 ```text
-{id} running: {name} starts again once its running turn ends
+{id} running: {name} starts again at the worker's next pass if it runs no turn
+then and has no question or request open (a failed or crashed one starts again
+whatever is open).
+A running turn or an open question or request makes the worker refuse this
+ask and drop it: run this command again once it is idle with none open.
 ```
 
 Or:
 
 ```text
-{id} running: {name} retires once its running turn ends, and {new} starts in its place
+{id} running: {name} retires at the worker's next pass if it runs no turn then
+and has no question or request open, and {new} starts in its place.
+A running turn or an open question or request makes the worker refuse this
+ask and drop it: run this command again once it is idle with none open.
 ```
 
 Next step: none; it only informs.
@@ -23101,7 +23245,7 @@ Exit status: 0 (done).
 
 ### FLEET_WHY_STATE
 
-When: `dockingbird fleet why` of a workload that isn't waiting: its state, the host it is on, or why it is held; or of a waiting one that the fleet hasn't weighed yet, or that no host of the pool can take.
+When: `dockingbird fleet why` of a workload that isn't waiting: its state, the host it is on, or why it is held; or of a waiting one that the fleet hasn't weighed yet, or that no host of the pool can take; and, when the fleet's record of a pass was too large to keep whole, how many hosts it left out, or that it left out why a spread try placed it on no host.
 
 ```text
 {id} is {state}
@@ -23129,6 +23273,18 @@ Or:
 
 ```text
 {id}: no host of the pool can take it
+```
+
+Or:
+
+```text
+{id}: {count:more host is|more hosts are} left out of the pass's record
+```
+
+Or:
+
+```text
+{id}: its spread try placed it on no host; the pass's record leaves out why
 ```
 
 Next step: none; it only informs.
@@ -23215,6 +23371,18 @@ Or:
 {host}: role {role} is at its max {max}
 ```
 
+Or:
+
+```text
+{host}: {hold}, role {role} needs {harness} signed in on {home}
+```
+
+Or:
+
+```text
+{host}: {hold}, logins unread
+```
+
 Next step: none; it only informs.
 
 Exit status: 0 (done).
@@ -23285,6 +23453,18 @@ When: Under a host of `dockingbird fleet queue`: the agents its last sample saw 
 
 ```text
   agents: {host_agents} on the host, {engine_agents} in engine homes
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### FLEET_QUEUE_HOST_LOGINS
+
+When: Under a host of `dockingbird fleet queue`: each home's sign-in words in its last sample, for Claude Code and for Codex, as that home's `dockingbird status` prints them. A swarm whose role's fallback says `placement = "require-login"` starts only in a home that shows `signed` or `key` for its tool and its fallback's; `not-yet` and `unread` keep it waiting.
+
+```text
+  logins in the home {home}: {logins}
 ```
 
 Next step: none; it only informs.

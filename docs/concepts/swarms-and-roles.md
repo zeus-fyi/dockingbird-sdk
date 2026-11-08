@@ -1,6 +1,6 @@
 ---
 title: Swarms and roles
-summary: What a swarm definition holds, how roles, counts and send_to shape a team, how values are given at submit, and what a workload is.
+summary: What a swarm definition holds, how roles, counts and send_to shape a team, where a role's model and effort come from, how values are given at submit, and what a workload is.
 audience: team-admin
 commands: []
 ---
@@ -11,29 +11,31 @@ You describe a team of agents in one TOML file, for example four builders, a rev
 
 ## The definition
 
-A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders.
+A definition is a TOML file at `schema = 1`. It names a `project`, a `priority` from P0 to P3, the `[source]` repository and branch the agents work on, and an optional `[placement]` list of hosts. Each kind of agent is one `[[role]]` table. A `key` makes the definition repeatable: a second submit with the same key answers the swarm that was queued first. Without a `key`, every submit queues a new swarm, keyed by its name and the UTC time. The [team fleet example](../../examples/team-fleet/swarm.toml) places a reviewer, a tester and two builders. Most swarms start from the standard definition that `dockingbird init` installs with the swarm skill: a build, a review and a test role whose repository, branch, counts, tool and plan are parameters, which [the swarms guide](../guides/swarms.md#start-from-the-standard-definition) submits by its path with `--set`.
 
 ## Roles
 
 A role is one kind of agent. It names a `harness` (`claude` or `codex`), a `count`, and a `brief`, a Markdown file that is the agent's first task. It may add `min` and `max`, the fewest agents a retire leaves and the most an add reaches. Both default to the count. A role marks its job with `reviews` or `tests`, which name the roles whose commits it checks.
 
-The model and the effort come from the first place that gives them: the role, then `[roles.<kind>]` in `.dockingbird/project.toml`, then your organisation's store. A role that none of them covers is refused. A role's kind is `reviewer` when it reviews, `tester` when it tests and `implementer` otherwise, unless it names its own `kind`.
+The model and the effort come from the first place that gives them: a value given at submit, the role, its library role, then `[roles.<name>]` in `.dockingbird/project.toml` when its harness is the role's, then your organisation's store. A role that none of them covers is refused. The name the last two are read by is the role's `kind`, else `reviewer` when it reviews, `tester` when it tests and `implementer` otherwise, the names the library's `index.toml` gives. A role that uses a library role, or names another new key, tries its own name and its library role's name first. [The definition reference](../reference/files/swarm-definition.md#where-a-roles-model-and-effort-come-from) gives the whole order, and [the swarms guide](../guides/swarms.md#choose-each-roles-model-and-effort) recommends a model and an effort for each kind of role.
 
-A role can take its settings from a library. `use = "<name>"` reads `.dockingbird/roles/<name>.toml` in the project. `use = "dockingbird/<name>"` reads one of the roles Dockingbird ships: `coordinator`, `implementer`, `reviewer`, `tester` and `reader`. `dockingbird init` copies those into the project, and a copy you edited survives a later `init`. Each key the swarm gives replaces the library role's.
+A role can take its settings from a library. `use = "<name>"` reads `.dockingbird/roles/<name>.toml` in the project. `use = "dockingbird/<name>"` reads one of the roles Dockingbird ships: `coordinator`, `implementer`, `reviewer`, `tester`, `reader` and `hands`. None of them names a model or an effort. `dockingbird init` copies those into the project, and a copy you edited survives a later `init`. Each key the swarm gives replaces the library role's, but `needs` and a subagent's table, which merge field by field.
+
+A role can also name a fallback tool, a `[role.fallback]` table with the keys of a config's `[fallback]`. After a failed turn its agents retry, report, or move to the other tool with their conversation, as the table's rules say.
 
 A role's `send_to` lists the roles whose agents it may message besides its parent. An empty list means the parent alone. Leaving it out lets the agent message any agent of the project. Any other send is refused with `FORBIDDEN`.
 
 ## Values at submit
 
-A definition may declare `[params]`, each an `int`, a `choice` or a `text` with a default and bounds, and write `{{name}}` in its values and texts. `dockingbird fleet submit NAME --set N=4` gives one value, and `--set grader.count=6` sets a role's count. `--values FILE` takes a JSON document shaped `{"params": {...}, "roles": {"<role>": {...}}}`. A `--set` beats the file for the same key.
+A definition may declare `[params]`, each an `int`, a `choice` or a `text` with a default and bounds, and write `{{name}}` in its roles' values and texts and in its `key`, `priority` and `[source]`. The submit also supplies built-ins, outside `key`, `priority` and `[source]`: `{{swarm}}`, `{{project}}`, `{{repository}}` and `{{branch}}`, and in a text alone `{{roles}}` and `{{params}}`. `dockingbird fleet submit NAME --set N=4` gives one value, and `--set grader.count=6` sets a role's count. `--values FILE` takes a JSON document shaped `{"params": {...}, "roles": {"<role>": {...}}}`. A `--set` beats the file for the same key.
 
-A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`. `dockingbird fleet describe NAME` prints every parameter and settable field as JSON and connects to nothing. A submit checks every rule before it stores anything, prints each refusal as `refused: <field>: <rule>`, and exits 1.
+A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, a subagent's `model`, `effort` and `max`, and a role's fallback `harness`, `model`, `effort` and `placement`. `dockingbird fleet describe NAME` prints every parameter and settable field as JSON and connects to nothing. A submit checks every rule before it stores anything, prints each refusal as `refused: <field>: <rule>`, and exits 1. `fleet queue` and `fleet why` show the values a swarm was given.
 
 ## What a workload is
 
 A workload is the unit the scheduler queues, and it is either a swarm or a lease. A successful submit prints `<id> pending, position <n>`, and that id names the workload in every later command. The controls `hold`, `release`, `pause`, `resume`, `cancel` and `done` take it. [The fleet scheduler](fleet-scheduler.md) explains how a workload waits and how it is admitted.
 
-Agents the fleet starts get `--compact-at 500000` and `--session-hours 48` unless their role names its own. An agent that hands its parent a message beginning `status: done` is retired on its own word.
+Agents the fleet starts get `--compact-at 500000` and `--session-hours 48` unless their role names its own. The shipped roles name their compact point: `300k` for `coordinator` and `hands`, `500k` for the other four. A role's `compact_at`, or `--set ROLE.compact_at=POINT` at submit, overrides it. An agent that hands its parent a message beginning `status: done` is retired on its own word.
 
 ## What it never does
 
@@ -42,6 +44,7 @@ Agents the fleet starts get `--compact-at 500000` and `--session-hours 48` unles
 - It never starts a second swarm for a repeated `key`.
 - It never places a swarm on a host whose home has no checkout of the repository, and `fleet why` names that hold `no_seed`.
 - It never lets a role drop a tool of the bus set.
+- It never moves one agent between its tools more often than the installation allows, once by default, so an agent never moves back and forth.
 
 ## The picture
 

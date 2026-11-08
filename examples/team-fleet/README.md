@@ -85,7 +85,23 @@ The step is done when the host's line in `fleet queue` stops saying `no sample y
 
 ## 5. A swarm
 
-[swarm.toml](swarm.toml) places a reviewer, a tester and two builders on `lab` first, else `cloud`, in each host's home `/opt/dockingbird/homes/team-1`, on the branch `feature/example` of `example-org/example-app`. A home of the placement must already link a checkout of that repository on that branch, in a folder named `example-app`. `fleet submit` refuses a definition whose source no home of its placement has checked out. Write a brief for each role beside it, as `briefs/reviewer.md`, `briefs/tester.md` and `briefs/builder.md`. Then submit it.
+[swarm.toml](swarm.toml) places a reviewer, a tester and two builders on `lab` first, else `cloud`, in each host's home `/opt/dockingbird/homes/team-1`, on the branch `feature/example` of `example-org/example-app`. A home of the placement must already link a checkout of that repository on that branch, in a folder named `example-app`. `fleet submit` refuses a definition whose source no home of its placement has checked out. Write a brief for each role beside it, as `briefs/reviewer.md`, `briefs/tester.md` and `briefs/builder.md`.
+
+No role of the definition names a model or an effort. The reviewer looks them up as `reviewer`, the tester as `tester` and each builder as `implementer`: first in `[roles.NAME]` of the project's `.dockingbird/project.toml`, then in the store. The admin records each kind's row once, with the model and effort words of your choice in place of `MODEL` and `EFFORT`. [The swarms guide](../../docs/guides/swarms.md#choose-each-roles-model-and-effort) recommends a kind of model and an effort for each role.
+
+```bash
+dockingbird org roles set implementer --harness claude --model MODEL --effort EFFORT
+dockingbird org roles set reviewer --harness claude --model MODEL --effort EFFORT
+dockingbird org roles set tester --harness claude --model MODEL --effort EFFORT
+```
+
+Each prints its row.
+
+```text
+implementer with claude now runs MODEL at effort EFFORT.
+```
+
+Then submit the definition.
 
 ```bash
 dockingbird fleet submit swarm.toml

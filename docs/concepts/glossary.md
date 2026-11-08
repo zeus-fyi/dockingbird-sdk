@@ -57,6 +57,12 @@ A skill is a folder holding a `SKILL.md` and the files it uses, named by its fol
 
 Explained in [Give agents skills](../guides/skills.md).
 
+## fallback tool
+
+A fallback tool is the other tool, Claude Code or Codex, that a bus agent moves to with its conversation when a rule of its `[fallback]` table says so. The same table sets which failed turns are tried again and which are reported.
+
+Explained in [Your own commands](../guides/your-own-commands.md#a-fallback-tool).
+
 ## connection
 
 A connection is a named grant of one outside thing: a GitHub branch, a folder, a database, a service, an MCP server or a browser. Dockingbird holds the secret, and the agent only asks for the thing by its name.
@@ -86,6 +92,18 @@ Explained in [Swarms and roles](swarms-and-roles.md).
 A role is one kind of agent in a swarm definition, such as a reviewer, a tester or a builder. It names the tool, the model, the effort, the count, a brief and the roles its agents may message.
 
 Explained in [Swarms and roles](swarms-and-roles.md).
+
+## role library
+
+A role library is a folder of role files, `.dockingbird/roles/`, that a swarm's role names with `use` and overrides key by key. Dockingbird ships six roles, which `dockingbird init` copies there.
+
+Explained in [Swarms and roles](swarms-and-roles.md).
+
+## parameter
+
+A parameter is a value a swarm definition declares in `[params]` and writes as `{{name}}`, given at submit with `--set` or `--values`. The built-ins, such as `{{swarm}}` and `{{branch}}`, need no declaration.
+
+Explained in [Swarm definition file](../reference/files/swarm-definition.md#parameters).
 
 ## workload
 

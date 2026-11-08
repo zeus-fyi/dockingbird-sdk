@@ -37,30 +37,37 @@ hosts = ["lab"]
 # Default: a home the fleet picks.
 home.lab = "/opt/dockingbird/homes/team-1"
 
-# Parameters, written {{name}} in values and in briefs. fleet submit --set N=4
-# gives one, and --values FILE gives several as JSON. A parameter takes min and
-# max; a service file's arguments take minimum and maximum.
+# Parameters, written {{name}} in the roles' values and in their briefs and
+# instructions. fleet submit --set N=4 gives one, and --values FILE gives
+# several as JSON. A parameter takes min and max; a service file's arguments
+# take minimum and maximum. The built-ins {{swarm}}, {{project}},
+# {{repository}} and {{branch}} need no declaration, and so do {{roles}} and
+# {{params}}, which expand in a text alone.
 [params]
 # An int, with its default, min and max.
 N = { type = "int", default = 2, min = 1, max = 8 }
 # A choice, with the words it allows in choice.
-effort = { type = "choice", default = "high", choice = ["high", "xhigh", "max"] }
-# A text.
-model = { type = "text", default = "opus" }
+effort = { type = "choice", default = "medium", choice = ["medium", "high", "xhigh"] }
+# A text: one line with no quote and no backslash, at most max_chars
+# characters (120 when left out). The workers' brief writes it as {{focus}}.
+focus = { type = "text", default = "the login flow", max_chars = 80 }
 
 # A coordinator, from the roles Dockingbird ships.
 [[role]]
 # The role's name.
 name = "coord"
 # "dockingbird/NAME" takes a shipped role: coordinator, implementer, reviewer,
-# tester or reader. "NAME" takes .dockingbird/roles/NAME.toml.
+# tester, reader or hands. "NAME" takes .dockingbird/roles/NAME.toml.
 use = "dockingbird/coordinator"
 # claude or codex. Required, unless the library role or the project file gives it.
 harness = "claude"
 # Overrides of the model and effort. Default: the library role's, else the
-# project file's [roles.<kind>] for this harness, else your organisation's store.
-model = "{{model}}"
-effort = "max"
+# project file's [roles.<name>] for this harness, else your organisation's
+# store, looked up as coord (the role's name), coordinator (its library
+# role's) and implementer (what the role does), in that order.
+# The model is left out here; the effort is the one the swarms guide
+# recommends for a coordinator.
+effort = "xhigh"
 # Agents of the role at the start, at most 24 per home.
 count = 1
 # The roles its agents may message besides their parent. Default: any agent of
@@ -88,6 +95,10 @@ send_to = ["coord"]
 [role.subagents.helper]
 max = 2
 # tools: the helper's tools. Left out here.
+
+# [role.fallback] and [role.fallback.on]: the tool the workers move to after a
+# failed turn and each error class's rule, as a config's [fallback] takes them;
+# a table given here replaces the library role's whole. Left out here.
 
 # A reviewer with a brief of its own.
 [[role]]

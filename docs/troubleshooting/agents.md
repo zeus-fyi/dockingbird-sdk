@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: agents, status, sync and clean"
-summary: "The 325 message ids about starting agents, their status, sync, stop and clean, each with when it appears."
+summary: "The 326 message ids about starting agents, their status, sync, stop and clean, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: agents, status, sync and clean
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 325 ids about starting agents, their status, sync, stop and clean.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 326 ids about starting agents, their status, sync, stop and clean.
 
 | Id | When it appears |
 |---|---|
@@ -56,7 +56,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`EGRESS_RESET`](../troubleshooting.md#egress_reset) | You ran `dockingbird egress --reset`, which removes `egress.toml` (or finds none). |
 | [`EGRESS_ENTRY_INVALID`](../troubleshooting.md#egress_entry_invalid) | You gave `dockingbird egress` an `--allow` entry that isn't a host such as `docs.python.org`, or `*.corp.example` for every name under it, or a preset (`registries`, `github`), or more entries than an allow list takes. |
 | [`AGENT_RUNNING_ARGS`](../troubleshooting.md#agent_running_args) | You gave `--as` with arguments for the tool, with `--egress`, or with `--new`, for an agent that is already running. |
-| [`AGENT_UNKNOWN`](../troubleshooting.md#agent_unknown) | You named an agent, with `stop`, `status`, `send`, `read`, `results` or `inspect config --agent`, that isn't running and has no work kept, or one that isn't running with `wait`. |
+| [`AGENT_UNKNOWN`](../troubleshooting.md#agent_unknown) | You named an agent, with `stop`, `status`, `send`, `read`, `results`, `wait` or `inspect config --agent`, that isn't running and has no work kept. |
 | [`START_MERGE_OFFER`](../troubleshooting.md#start_merge_offer) | You started an agent on a branch where you and the agents both have new commits. |
 | [`BOTH_MOVED_ROW`](../troubleshooting.md#both_moved_row) | One commit in a list of new commits on both sides, yours or the agents'. |
 | [`AGENT_RECONNECTING`](../troubleshooting.md#agent_reconnecting) | You started the tool with no arguments, or with `--as` and the name of one of its agents, while that agent was still working without a terminal, so this terminal reconnects to it. |
@@ -161,7 +161,8 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`STATUS_KEPT_WORKTREE`](../troubleshooting.md#status_kept_worktree) | You ran `dockingbird status NAME` for an agent whose kept copy has a git worktree with commits on no branch, so the copy can't be picked up as it is: a start under that name gets a fresh copy, and the kept one stays as it is. |
 | [`STATUS_OPTIONS_MISMATCH`](../troubleshooting.md#status_options_mismatch) | Under "Needs your attention": a running agent's tool reports another model or effort than the one you asked, for example a level its model or your organization does not allow, which the tool lowers without a word, or one Dockingbird typed into the agent's screen again and again without the tool taking it. |
 | [`STATUS_FAILED_NOTE`](../troubleshooting.md#status_failed_note) | Under "Needs your attention": a running agent's last turn failed, for example because Claude or Codex refused the request (an access or billing problem on the tool's side), with the tool's own error line when it gave one. |
-| [`STATUS_FALLBACK_ASKED`](../troubleshooting.md#status_fallback_asked) | Under "Needs your attention": an agent stopped after a failed turn because a rule of its `[fallback]` table moves it to its fallback tool, with why the turn failed and the tool it moves to. |
+| [`STATUS_FALLBACK_ASKED`](../troubleshooting.md#status_fallback_asked) | Under "Needs your attention": an agent stopped after a failed turn because a rule of its `[fallback]` table moves it to its fallback tool, with why the turn failed, when that is known, and the tool it moves to. |
+| [`STATUS_FALLBACK_FAILED`](../troubleshooting.md#status_fallback_failed) | Under "Needs your attention": Dockingbird tried to move an agent to its fallback tool after the agent asked for it, and every try was refused, so it stopped trying. |
 | [`STATUS_RULE_RETRY`](../troubleshooting.md#status_rule_retry) | Under "Needs your attention": an agent's last turn failed, and a rule of its `[fallback]` table tries the work again after a wait: the note names why it failed, which try this is of how many, and when the next one runs. |
 | [`STATUS_WORKING`](../troubleshooting.md#status_working) | An agent working in a terminal: the files it is working on, and for how long. |
 | [`STATUS_WAITING`](../troubleshooting.md#status_waiting) | An agent waiting for a file another agent is working on. |

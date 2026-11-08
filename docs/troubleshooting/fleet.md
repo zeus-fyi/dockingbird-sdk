@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: the fleet, swarms and the work queue"
-summary: "The 222 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears."
+summary: "The 224 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears."
 audience: team-admin
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: the fleet, swarms and the work queue
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 222 ids about hosts, the fleet scheduler, the control plane, swarms and the work queue.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 224 ids about hosts, the fleet scheduler, the control plane, swarms and the work queue.
 
 | Id | When it appears |
 |---|---|
@@ -133,16 +133,17 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`FLEET_SUBMITTED`](../troubleshooting.md#fleet_submitted) | The fleet queued your swarm: its id, and its place in the queue, which the fleet admits by priority, then age. |
 | [`FLEET_DESCRIBED`](../troubleshooting.md#fleet_described) | `dockingbird fleet describe --json` printed what a definition lets you set when you queue it: its declared parameters and each role's settings, each with its default and where it comes from, as one document. |
 | [`FLEET_STATE_NOW`](../troubleshooting.md#fleet_state_now) | A control of a workload took effect: the state it entered, and the agents still working, each of which stops after its running turn, never during it. |
-| [`FLEET_RETIRE_DONE`](../troubleshooting.md#fleet_retire_done) | `dockingbird fleet retire` asked an agent of a running swarm to retire: it stops once its running turn ends, never during it, and its share goes back to the pool; one that never started retires at once. |
+| [`FLEET_RETIRE_DONE`](../troubleshooting.md#fleet_retire_done) | `dockingbird fleet retire` asked an agent of a running swarm to retire: it retires at the first tick that finds it idle with no question or request open; a tick that finds it working or with one open refuses the ask, and the next `fleet retire` says so. |
+| [`FLEET_RETIRE_REFUSED_BEFORE`](../troubleshooting.md#fleet_retire_refused_before) | Your earlier `fleet retire` of this agent reached its host's worker while the agent was working or held a question or a request, so the worker refused it and cleared it. |
 | [`FLEET_RETIRE_REFUSED`](../troubleshooting.md#fleet_retire_refused) | `dockingbird fleet retire` or `fleet replace` refused before changing anything: the swarm is not running, it has no agent of that name, the agent neither runs nor waits to start, or retiring it would take its role below its minimum. |
 | [`FLEET_ADD_DONE`](../troubleshooting.md#fleet_add_done) | `dockingbird fleet add` added agents to a running swarm under their role's next names; each starts, is briefed and is named to the others once its host has room for it. |
-| [`FLEET_REPLACE_DONE`](../troubleshooting.md#fleet_replace_done) | `dockingbird fleet replace` asked an agent to stop once its running turn ends and start again by its name, its conversation kept; with `--fresh`, a new agent of its role takes its place under the next name. |
+| [`FLEET_REPLACE_DONE`](../troubleshooting.md#fleet_replace_done) | `dockingbird fleet replace` asked an agent to start again by its name, its conversation kept, at the worker's next pass if it runs no turn then and has no question or request open (a failed or crashed one starts again whatever is open); with `--fresh`, a new agent of its role takes its place under the next name. |
 | [`FLEET_ASSIGN_DONE`](../troubleshooting.md#fleet_assign_done) | `dockingbird fleet assign` set who reviews and who tests an agent of a running swarm; an option you left out kept its agent. |
 | [`FLEET_ASSIGN_REFUSED`](../troubleshooting.md#fleet_assign_refused) | `dockingbird fleet assign` refused before changing anything: the swarm is not running, it has no agent of that name, or the reviewer or tester you named is no agent of the swarm, has retired or is retiring, died, or is the agent itself. |
 | [`FLEET_PRUNE_DONE`](../troubleshooting.md#fleet_prune_done) | `dockingbird fleet prune` queued one prune job for a done or cancelled swarm: its host's worker deletes each of its agents whose container has stopped, and never a running one. |
 | [`FLEET_PRUNE_REFUSED`](../troubleshooting.md#fleet_prune_refused) | `dockingbird fleet prune` refused before changing anything: `--merged` was not a full commit id, or the workload is not a swarm, is not done or cancelled, or never ran. |
 | [`FLEET_PRIORITY_NOW`](../troubleshooting.md#fleet_priority_now) | `dockingbird fleet set --priority` changed a workload's priority; it keeps its place by age, and its next admission uses the new priority. |
-| [`FLEET_WHY_STATE`](../troubleshooting.md#fleet_why_state) | `dockingbird fleet why` of a workload that isn't waiting: its state, the host it is on, or why it is held; or of a waiting one that the fleet hasn't weighed yet, or that no host of the pool can take. |
+| [`FLEET_WHY_STATE`](../troubleshooting.md#fleet_why_state) | `dockingbird fleet why` of a workload that isn't waiting: its state, the host it is on, or why it is held; or of a waiting one that the fleet hasn't weighed yet, or that no host of the pool can take; and, when the fleet's record of a pass was too large to keep whole, how many hosts it left out, or that it left out why a spread try placed it on no host. |
 | [`FLEET_WHY_WAITING`](../troubleshooting.md#fleet_why_waiting) | `dockingbird fleet why` of a running swarm, after its state: its agents waiting to start, then what keeps them waiting, host by host with its figures, or that the fleet hasn't weighed them yet; and its agents about to start. |
 | [`FLEET_WHY_HOST`](../troubleshooting.md#fleet_why_host) | `dockingbird fleet why` of a waiting workload: for each host of the pool, the first thing that keeps the workload off it, with its figures: a gate line past its bound, what the host has against what the workload needs, a home's room, a lease of the same kind running there, or a home that links no checkout of the swarm's repository, as of the host's last sample. |
 | [`FLEET_WHY_DENIED`](../troubleshooting.md#fleet_why_denied) | `dockingbird fleet why` of a swarm: an agent started without a connection its role lists, because `dockingbird connect NAME --revoke --role ROLE` denied it to that role. |
@@ -150,6 +151,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`FLEET_LEDGER_EMPTY`](../troubleshooting.md#fleet_ledger_empty) | `dockingbird fleet ledger` of a workload for which no reviewer's approval and no tester's result has been seen yet. |
 | [`FLEET_QUEUE_HOST`](../troubleshooting.md#fleet_queue_host) | `dockingbird fleet queue` shows each host of the pool: whether it is live and drained, whether it takes swarms, how old its last sample is, its cores and memory reserved against what it may reserve, the load of everything the fleet didn't start, and each gate line with its value, its colour and its bounds. |
 | [`FLEET_QUEUE_HOST_AGENTS`](../troubleshooting.md#fleet_queue_host_agents) | Under a host of `dockingbird fleet queue`: the agents its last sample saw running on the host, in every home, and how many of them run in the homes the fleet starts agents in. |
+| [`FLEET_QUEUE_HOST_LOGINS`](../troubleshooting.md#fleet_queue_host_logins) | Under a host of `dockingbird fleet queue`: each home's sign-in words in its last sample, for Claude Code and for Codex, as that home's `dockingbird status` prints them. |
 | [`FLEET_QUEUE_WORKLOAD`](../troubleshooting.md#fleet_queue_workload) | `dockingbird fleet queue` shows each workload not yet ended, in the order the fleet admits them: its project, kind, priority, state and age, the cores, memory and agents it needs, and the host it is on, why it is held, or what keeps it waiting first. |
 | [`FLEET_QUEUE_WORKING`](../troubleshooting.md#fleet_queue_working) | Under a workload of `dockingbird fleet queue`: its agents still working, each one started and not stopped, dead, retired or held after a failed start; agents waiting to start or starting have a line of their own. |
 | [`FLEET_QUEUE_VALUES`](../troubleshooting.md#fleet_queue_values) | Under a swarm of `dockingbird fleet queue` or `fleet why`: the values its invocation gave with `--set` and `--values`, as one JSON document; the defaults it runs with are not shown. |
