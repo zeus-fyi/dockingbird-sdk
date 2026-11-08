@@ -1,9 +1,10 @@
 ---
 title: Swarms
-summary: Write a swarm definition, check it, submit it with values, follow it in the queue and change it while it runs.
+summary: Write a swarm definition, choose each role's model and effort, check it, submit it with values, follow it in the queue and change it while it runs.
 audience: team-admin
 commands:
   - fleet describe
+  - fleet where
   - fleet submit --set
   - fleet submit --values
   - fleet add
@@ -66,8 +67,6 @@ home.lab = "/opt/dockingbird/homes/team-1"
 [[role]]
 name = "builder"
 harness = "claude"
-model = "opus"
-effort = "high"
 count = 2
 min = 1
 max = 4
@@ -77,14 +76,42 @@ send_to = ["reviewer"]
 [[role]]
 name = "reviewer"
 harness = "claude"
-model = "sonnet"
-effort = "high"
 count = 1
 brief = "briefs/reviewer.md"
 reviews = ["builder"]
 ```
 
 A role may take its settings from a role library with `use = "NAME"`, as [the cookbook on role libraries](../../examples/swarm-from-a-role-library/README.md) shows. A definition may leave `[placement]` out. Its swarm then goes to every pool host that takes swarms, in pool rank order.
+
+### Choose each role's model and effort
+
+The example names no model and no effort, so the project decides them once for every swarm. Each role looks them up by name: the reviewer as `reviewer`, and the builder, which names the newer key `send_to`, as `builder` first, then as `implementer`. The project file's `[roles.NAME]` gives them for a role on that table's tool, else your organisation's store, `dockingbird org roles set NAME --harness H --model M --effort E`. A role's own `model` and `effort`, its library role's, or `--set` at submit override both, and a role that no source covers is refused at submit.
+
+```toml
+# .dockingbird/project.toml
+[roles.implementer]
+harness = "claude"
+model = "MODEL"
+effort = "medium"
+
+[roles.reviewer]
+harness = "claude"
+model = "MODEL"
+effort = "high"
+```
+
+Write a model word of the role's tool in place of `MODEL`. For a project that has set nothing yet, these are the recommended kinds of model and efforts. The highest-reasoning kind is the slowest and costs the most per turn, the fast kind the least. [Claude Code and Codex](../concepts/claude-code-and-codex.md#model-and-effort-per-role) names the model of each kind for each tool.
+
+| Role | Kind of model | Effort |
+|---|---|---|
+| coordinator | mid | `xhigh` |
+| implementer | mid | `medium` for a task the plan specifies in full; `high` for a fix in existing code, concurrency, or a task that leaves it a judgment |
+| reviewer | highest reasoning | `high`; `xhigh` for concurrency, security, query generation or ranking, or a large diff |
+| tester | fast | `high`; `xhigh` when it must judge a flaky or partial result |
+| reader | fast | `medium`; `high` when its brief needs strict instruction following |
+| hands | mid | `max` |
+
+Raise an effort above the table's only for a gain you measured, since a higher effort costs more on every turn of the role's agents. [The definition reference](../reference/files/swarm-definition.md#where-a-roles-model-and-effort-come-from) gives the whole lookup order.
 
 ## 2. Describe it
 
@@ -110,7 +137,7 @@ dockingbird fleet submit NAME --set grader.count=6 --set grader.helper.max=4
 dockingbird fleet submit NAME --values values.json
 ```
 
-`--set KEY=VALUE` is repeatable. A key is a parameter the definition declares, a role's setting or a subagent's. `--values FILE` is a JSON document of the shape `{"params": {...}, "roles": {"ROLE": {...}}}`. A `--set` beats the file for the same key. A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, and a subagent's `model`, `effort` and `max`.
+`--set KEY=VALUE` is repeatable. A key is a parameter the definition declares, a role's setting, a subagent's or a key of a role's fallback. `--values FILE` is a JSON document of the shape `{"params": {...}, "roles": {"ROLE": {...}}}`. A `--set` beats the file for the same key. A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, a subagent's `model`, `effort` and `max`, and a role's fallback `harness`, `model`, `effort` and `placement`, as in `--set builder.fallback.harness=codex`. `fleet queue` and `fleet why` show the values a swarm was given. [The definition reference](../reference/files/swarm-definition.md#parameters) has the parameters' types, the built-ins such as `{{branch}}`, and the rule each refusal names.
 
 The step is done when the swarm is queued.
 
@@ -158,6 +185,22 @@ dockingbird fleet prune ID --merged SHA
 Queued the prune of {id} as job {job_id}.
 ```
 
+## Spread a swarm over hosts
+
+A swarm whose definition says `spread = true` under `[placement]` may run on more than one host of its list. A role may name `hosts = [...]`, the hosts of the list its agents may take, in order. The roles that publish commits, each role that reviews and each role another reviews or tests, share one host. `fleet where` names where each agent runs.
+
+```bash
+dockingbird fleet where ID
+```
+
+The step is done when the swarm's line prints, then one line for each agent.
+
+```text
+{id} {state}: {hosts}
+{name} {role} {step} on {host} in {home}
+{name} {role} {step} not placed
+```
+
 ## This home's record of swarms
 
 A home keeps a record of the swarm each of its agents belongs to, its role there, and who reviews and tests its work. The `swarm` commands edit that record and nothing else. No agent starts, stops or hears about the edit. They suit agents you started by hand with `start --swarm NAME`. The fleet edits its own swarms through `fleet`, and `swarm` refuses them. The five lines under the commands answer them in order.
@@ -191,6 +234,7 @@ These ids come from `fleet describe` and `fleet submit`. Each line says what the
 - [`FLEET_NOT_A_MEMBER`](../troubleshooting.md#fleet_not_a_member) means you are not a member of the project. An admin runs `org members add`.
 - [`FLEET_NO_CONNECTION`](../troubleshooting.md#fleet_no_connection) holds a swarm because its home lacks a connection a role lists. Connect it there, then run `fleet release ID`.
 - [`FLEET_WHY_STATE`](../troubleshooting.md#fleet_why_state) prints `{id} is held: skills_refused` when a start's clone lacks a path a role's `skills` names. Push the fix, then run `fleet release ID`, as [the skills guide](skills.md) shows.
+- [`FLEET_WHY_SPREAD`](../troubleshooting.md#fleet_why_spread) names, for a waiting swarm that may spread, the first group of its roles that fits on no host and what keeps it off each host.
 
 ### Changing a running swarm
 

@@ -1,6 +1,6 @@
 ---
 title: Claude Code and Codex
-summary: Where the two tools an agent runs differ in Dockingbird, covering sign-in, naming, one-shot forms, API keys, config keys, rules files and versions.
+summary: Where the two tools an agent runs differ in Dockingbird, covering sign-in, naming, one-shot forms, API keys, config keys, rules files, versions, and the model and effort recommended for each swarm role on each tool.
 audience: first-day
 commands: []
 ---
@@ -26,6 +26,7 @@ Both tools run in a container with their own copy of your branch. Both use the b
 | Your rules file | `--agent-md` and `--claude-md` | `--agent-md` only, because `dockingbird codex --claude-md PATH` is refused |
 | `harness_args` in a config | `--model`, `--fallback-model`, `--max-turns` and `--effort` | `--model`, `-m` and `-c model_reasoning_effort=LEVEL` |
 | Effort levels | `low`, `medium`, `high`, `xhigh`, `max` | The levels its model takes |
+| Effort word checked | By Dockingbird, against those five words, in a config's `harness_args`, in `set --effort` and at a swarm submit | By Codex, at the agent's first request; Dockingbird passes the word as `-c model_reasoning_effort=LEVEL` and refuses only one with `=` in it |
 | Compact point | 100K to 1M | Any count of tokens |
 | `set` on a running agent | A running Claude gets `/model`, `/effort` and `/autocompact` before its next turn | At a terminal Codex takes no typed command, so `set` names the stop and the pick-up that apply the change |
 | Where it reads the skills Dockingbird gives | `~/.claude/skills`, where Claude Code finds personal skills | `~/.agents/skills`, where Codex finds a user's |
@@ -48,6 +49,23 @@ A name belongs to the tool that first used it. `dockingbird codex --as keep7` fo
 ## Choosing the tool
 
 `dockingbird start` runs Claude unless `--harness codex` says otherwise. A config's `harness` key takes `claude` or `codex`, defaults to `claude`, and is fixed once set, so `--harness` cannot change it. A swarm role names its `harness` too. Dockingbird downloads each tool into its program store at the first start and keeps the version you pin in `versions.toml`. `dockingbird pin --clear claude` follows the latest release again.
+
+An agent on the bus can move to the other tool after a failed turn, with its conversation, when its `[fallback]` table says so. By default only a turn a safety system refused moves it, and it moves once at most. [Your own commands](../guides/your-own-commands.md#a-fallback-tool) sets the table up.
+
+## Model and effort per role
+
+A swarm role's model and effort come from the project, never from Dockingbird: `[roles.NAME]` in `.dockingbird/project.toml`, your organisation's store (`dockingbird org roles set NAME --harness H --model M --effort E`), the role's own `model` and `effort`, or `fleet submit --set ROLE.model=M --set ROLE.effort=E` for one swarm. [The swarms guide](../guides/swarms.md#choose-each-roles-model-and-effort) recommends a kind of model and an effort for each role. For a project that has set nothing yet, these are the models of each kind for each tool.
+
+| Role | Claude Code model | Codex model | Effort |
+|---|---|---|---|
+| coordinator | `claude-opus-5-5` | `gpt-6.1-sol` | `xhigh` |
+| implementer | `claude-opus-5-5` | `gpt-6.1-sol` | `medium`; `high` for a fix in existing code, concurrency, or a task left to its judgment |
+| reviewer | `claude-fable-5-1` | `gpt-6-astra` | `high`; `xhigh` for concurrency, security, query generation or ranking, or a large diff |
+| tester | `claude-sonnet-5-5` | `gpt-6-luna` | `high`; on Claude Code, `xhigh` when it must judge a flaky or partial result |
+| reader | `claude-sonnet-5-5`, or `claude-haiku-5-5` for inventories, extraction and short rewrites | `gpt-6-luna` | `medium`; on Claude Code, `high` for strict instruction following |
+| hands | `claude-opus-5-5` | `gpt-6.1-sol` | `max` on Claude Code; `high` on Codex |
+
+The Codex column maps the same kinds onto Codex's models by Codex's own descriptions, so measure it on your work before you rely on it. An account sees the models its plan or API organisation offers, so check Codex's `/model` before a submit. A `[roles.NAME]` table answers a role only when its `harness` is the role's, and the project file holds one table per name. A project that runs both tools keeps the second tool's rows in the store, one row per name and tool.
 
 ## What it never does
 

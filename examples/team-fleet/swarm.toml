@@ -20,11 +20,13 @@ home.cloud = "/opt/dockingbird/homes/team-1"
 
 # The agents. Each role's brief is a Markdown file of yours, in this folder;
 # reviews and tests name the roles whose commits this one reviews or tests.
+# No role names a model or an effort: each comes from the project file's
+# [roles.<kind>] for the role's harness, else from the store's row that
+# dockingbird org roles set records for reviewer, tester and implementer.
+# fleet submit swarm.toml --set builder.effort=high overrides one submit.
 [[role]]
 name = "reviewer"
 harness = "claude"
-model = "sonnet"
-effort = "high"
 count = 1
 brief = "briefs/reviewer.md"
 reviews = ["builder"]
@@ -32,8 +34,6 @@ reviews = ["builder"]
 [[role]]
 name = "tester"
 harness = "claude"
-model = "sonnet"
-effort = "high"
 count = 1
 brief = "briefs/tester.md"
 tests = ["builder"]
@@ -41,7 +41,5 @@ tests = ["builder"]
 [[role]]
 name = "builder"
 harness = "claude"
-model = "opus"
-effort = "high"
 count = 2
 brief = "briefs/builder.md"
