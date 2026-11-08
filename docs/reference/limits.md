@@ -23,6 +23,11 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Agent numbers | 9999 per tool or command | past it a start without `--as` starts nothing and exits 1 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | Container limits | none unless set | `--cpus`, `--memory` and `[limits] cpus` and `memory` set them | [commands.md](commands.md) |
 | Sign-in retries | 3 | a Claude turn that Anthropic refused for its sign-in is tried again after 30, 60 and 120 seconds | [sign-in-and-api-keys.md](../guides/sign-in-and-api-keys.md) |
+| Rule retries in a row | 3 by default, 1 to 100 | the retries of one delivery under a `[fallback]` rule; set with `retry_max` | [app-config.md](files/app-config.md#keys-of-fallback) |
+| Wait before a rule retry | 5 minutes by default, 1 second to 24 hours | set with `[fallback]` `retry_wait` | [app-config.md](files/app-config.md#keys-of-fallback) |
+| Usage-limit retries | after 1, 5 and 15 minutes, then every 30 minutes, until 24 hours after the first failure | a `usage_limit` failure under a `[fallback]` rule; `retry_wait` and `retry_max` do not apply | [app-config.md](files/app-config.md#keys-of-fallback) |
+| Moves to the fallback tool | 1 per agent by default | an agent never moves back and forth between its tools | [your-own-commands.md](../guides/your-own-commands.md#a-fallback-tool) |
+| Fallback pick-ups | 3 per agent | the pick-ups the fallback watcher on this computer runs for an agent before `status` names the command | [your-own-commands.md](../guides/your-own-commands.md#a-fallback-tool) |
 | `fleet probe` | 20 seconds per read, 60 seconds in all | a read of this Mac and its Docker | [hosts.md](../guides/hosts.md) |
 
 ## Files and sizes
@@ -43,6 +48,18 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Service program output | 64 MiB and 10,000 entries | what a program you connected as a service may write to its output folder | [connections.md](../guides/connections.md) |
 | First image build | about 1 GB, about 5 minutes | the download of the first `dockingbird claude`, once | [first-run.md](../getting-started/first-run.md) |
 | Ubuntu package pool | 441 MB | the folder the first build fills, once per snapshot | [first-run.md](../getting-started/first-run.md) |
+
+## Swarm definitions
+
+| Bound | Figure | What it limits | Explained in |
+|---|---|---|---|
+| Definition file | 64 KiB | one `swarm.toml` | [swarm-definition.md](files/swarm-definition.md) |
+| Brief or instructions file | 1 MiB | one text a role names | [swarm-definition.md](files/swarm-definition.md) |
+| Parameters | 32 | the entries of one definition's `[params]` | [swarm-definition.md](files/swarm-definition.md#parameters) |
+| Parameter name | 32 characters | letters, digits and `-` | [swarm-definition.md](files/swarm-definition.md#parameters) |
+| `text` parameter value | 120 characters, or the parameter's `max_chars` | one printable line | [swarm-definition.md](files/swarm-definition.md#parameters) |
+| Agents of a swarm at its start | 24 | the roles' counts together, and each role's `count` and `max` | [swarm-definition.md](files/swarm-definition.md#role-keys) |
+| Helpers at once | 20 | a role's subagent `max` | [roles-and-connections.md](files/roles-and-connections.md#subagent-block) |
 
 ## License
 

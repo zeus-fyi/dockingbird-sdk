@@ -1,7 +1,8 @@
-# A template: copy it to .dockingbird/app.toml in your repo. It names two files
-# of yours beside it, .dockingbird/skills/review.md (skill) and
-# .dockingbird/review-role.md (instructions); write them, or leave those keys
-# out. The operator guide's "Your own commands (configs)" has every key.
+# A template: copy it to .dockingbird/app.toml in your repo. It names three files
+# of yours beside it, .dockingbird/skills/review.md (skill),
+# .dockingbird/review-role.md (instructions) and
+# .dockingbird/claude-settings.json (harness_config); write them, or leave those
+# keys out. The operator guide's "Your own commands (configs)" has every key.
 #
 # .dockingbird/app.toml: adds dockingbird review in this checkout. Every key is optional.
 
@@ -21,6 +22,8 @@ harness = "claude"
 workspace = "repo"
 # bus: in the background, through messages; terminal: at your terminal. Default: bus. Set, it is fixed.
 mode = "bus"
+# kept: one conversation for all its deliveries; fresh: every task delivery starts a new conversation, under the same rules (bus only). Default: kept.
+context = "kept"
 # true: load the repo's own Claude Code or Codex settings, hooks and MCP servers, once trusted. Default: false.
 repo_settings = false
 # Its tools: "bus" (messages and files), "default" (claims and commits) or "full" (both). Default: "bus".
@@ -31,6 +34,8 @@ egress = "allowlist"
 allow = ["registries", "github"]
 # Fixed arguments for the tool, such as its model. Default: none.
 harness_args = ["--model", "claude-haiku-5-5"]
+# Its harness's own settings file, the base under Dockingbird's own keys: a path beside this file, or a table by harness. Default: none.
+harness_config = { claude = "claude-settings.json" }
 # mise's environments for its agents, comma-separated: "ci" makes mise read mise.ci.toml over mise.toml (MISE_ENV). Default: none.
 mise_env = "ci"
 
@@ -46,3 +51,29 @@ turn_minutes = 20
 # The agent stops itself after this many hours; at least 1, and at most
 # the installation's maximum (168 by default). Default: 12.
 session_hours = 4
+
+# What a failed turn does on the bus: a retry, or a move to the other tool with the agent's conversation (the operator guide's "A fallback tool"). Default: none (every failure is reported).
+[fallback]
+# The tool to move to: claude or codex, never the harness above. Default: none (no move; the rules still retry and report).
+harness = "codex"
+# That tool's model. Default: the tool's own.
+model = "gpt-6-luna"
+# That tool's effort. Default: the tool's own.
+effort = "high"
+# any: start anyway where that tool isn't signed in, with the move off; require-login: start only where it is. Default: any.
+placement = "any"
+# The wait before a retry, in seconds, minutes or hours (30s, 5m, 1h), at most 24h. Default: 5m.
+retry_wait = "5m"
+# The retries in a row of one delivery, from 1 to 100. Default: 3.
+retry_max = 3
+
+# Each class's rule: retry, retry-then-fallback, fallback or report (exited is always report). A class left out takes its default.
+[fallback.on]
+refusal = "fallback"
+server = "retry"
+
+# Skills its tool lists (Claude Code's Skill tool and / menu, Codex's $ mention): one skills folder, or skill folders, each a path from this checkout's top. Default: none.
+[skills]
+path = ".agents/skills"
+# Where they go in the agent's home: both (~/.claude/skills and ~/.agents/skills), claude or agents. Default: both.
+into = "both"

@@ -1,6 +1,6 @@
 ---
 title: app.toml, the keys of a config
-summary: Every key of a config file such as .dockingbird/app.toml, with its values, its default and what it fixes.
+summary: Every key of a config file such as .dockingbird/app.toml, its [fallback] table and error classes among them, with its values, its default and what it fixes.
 audience: daily
 commands:
   - dockingbird config add
@@ -44,8 +44,10 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `egress` | `allowlist`, `models`, `none` or `full` | `full`, or what `dockingbird egress` set | what the agent may reach on the network |
 | `allow` | list of hosts and presets | the list `dockingbird egress` set, else nothing beyond the tool's own hosts | with `allowlist`, the presets `registries` and `github`, or hosts such as `docs.python.org` and `*.corp.example` |
 | `harness_args` | list of words | none | fixed arguments for the tool: Claude takes `--model`, `--fallback-model`, `--max-turns` and `--effort` (`low`, `medium`, `high`, `xhigh` or `max`); Codex takes `--model`, `-m` and `-c model_reasoning_effort=LEVEL`; anything else is refused |
+| `harness_config` | a path, or a table by tool such as `{ claude = "claude-settings.json" }` | none | the tool's own settings file, a path beside this file, which the agent's tool takes as its base under Dockingbird's own keys |
 | `mise_env` | text | none | mise's environments for the agent's toolchain, comma separated; `ci` makes mise read `mise.ci.toml` over `mise.toml` |
 | `[env]` | table of text | none | variables the agent's tool sees; settings, never secrets, because the agent can read and send them |
+| `[fallback]` | table | none, so every failed turn is reported | what a failed turn on the bus does: a retry, a report or a move to the other tool; [its keys](#keys-of-fallback) are below |
 
 ## Keys of `[skills]`
 
@@ -64,6 +66,52 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `memory` | text such as `"4g"` | none | the agent container's memory limit |
 | any key named here | as above | as above | fixed for the config's agents: `--session-hours`, `--cpus` and `--memory` with another value are refused, the same value is not |
 
+## Keys of `[fallback]`
+
+The table sets what a failed turn of an agent on the bus does: try it again, report it, or move the agent to the other tool with its conversation. A command's `[commands.NAME]` table may hold its own `[fallback]`, which replaces the config's whole.
+
+```toml
+[fallback]
+harness = "codex"
+retry_wait = "5m"
+retry_max = 3
+
+[fallback.on]
+refusal = "fallback"
+server = "retry"
+```
+
+| Key | Values | Default | What it does |
+|---|---|---|---|
+| `harness` | `claude` or `codex`, never the config's own tool | none: no move, and the rules still retry and report | the tool the agent moves to |
+| `model` | that tool's model word | that tool's own | the fallback tool's model; given only beside `harness` |
+| `effort` | that tool's effort word | that tool's own | the fallback tool's effort; given only beside `harness` |
+| `placement` | `any` or `require-login` | `any` | `any` starts the agent where the fallback tool is not signed in, with its move off; `require-login` starts it only where that tool is signed in |
+| `retry_wait` | a time in seconds, minutes or hours, such as `30s`, `5m` or `1h`, from 1 second to 24 hours | `5m` | the wait before a retry |
+| `retry_max` | whole number, 1 to 100 | `3` | the retries in a row of one delivery |
+| `[fallback.on]` | a table of error class and action | each class's default, below | each class's rule; a class left out takes its default |
+
+An action is `retry` (the turn again after `retry_wait`, at most `retry_max` times in a row), `retry-then-fallback` (those retries, then the move), `fallback` (the move at once) or `report` (the failure reported and left, as with no table). Each failed turn has one class.
+
+| Class | What ended the turn | Default with `harness` | Default without |
+|---|---|---|---|
+| `rate_limit` | a 429 against the request quota | `retry` | `retry` |
+| `usage_limit` | the plan's usage window, used up | `retry` | `retry` |
+| `auth` | a sign-in refused or expired | `retry`, after Claude's sign-in retries | `report` |
+| `billing` | payment, credits or the plan's quota | `retry` | `report` |
+| `server` | the provider's side failed | `retry` | `report` |
+| `network` | the request got no answer | `retry` | `retry` |
+| `invalid_request` | the request itself was refused | `report` | `report` |
+| `context` | the conversation no longer fits the model's window | `report` | `report` |
+| `cap` | the tool's own cap ended the turn | `retry` | `retry` |
+| `refusal` | a safety system refused the model's response or the request | `fallback`, at once with no retry | `report` |
+| `exited` | the tool's process ended with no result; it takes `report` alone | `report` | `report` |
+| `other` | none of the above | `report` | `report` |
+
+With a `harness`, `refusal` is the one class that moves the agent by default, since a retry sends the same conversation to the same safety system. Every transient class retries on the agent's own tool, because a move changes the model in the middle of a task. A table that wants a move for another class names it, as in `server = "fallback"`. The column without a `harness` also applies to an agent that has already moved as often as it may, and to one whose fallback is off on this computer.
+
+A `usage_limit` retry takes neither `retry_wait` nor `retry_max`. It waits 1, 5 and 15 minutes, then every 30 minutes, until 24 hours after the first failure, and is then reported, or under `retry-then-fallback` the agent moves. A retry that completes starts the waits over.
+
 ## Keys of an added config only, refused in a repo's own config
 
 | Key | Values | What it does |
@@ -81,9 +129,10 @@ Every key is optional, and a key you leave out takes the default in the tables b
 |---|---|
 | `harness_args` | not applied until `dockingbird trust` marks the checkout trusted |
 | `[env]` | not applied until `dockingbird trust` marks the checkout trusted |
+| `harness_config` | not applied until `dockingbird trust` marks the checkout trusted; `dockingbird -h` and `config list` say `.dockingbird/app.toml: harness_config applies after dockingbird trust` |
 | `[skills]` | not applied until `dockingbird trust` marks the checkout trusted; `dockingbird -h` and `config list` say `.dockingbird/app.toml: skills applies after dockingbird trust`; an added config's `[skills]` apply everywhere |
 | `repo_settings = true` | the repo's own settings, hooks and MCP servers do not load |
-| an added config's `harness_args`, `[env]` and `[skills]` | still apply everywhere, because you chose to add the config |
+| an added config's `harness_args`, `[env]`, `[skills]` and `harness_config` | still apply everywhere, because you chose to add the config |
 
 ## Smallest useful files
 
