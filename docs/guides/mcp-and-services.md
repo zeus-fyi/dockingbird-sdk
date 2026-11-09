@@ -7,6 +7,7 @@ commands:
   - connect --service
   - connect --browser
   - serve
+  - serve --once
   - serve --all
   - serve --unit
   - watch
@@ -33,7 +34,14 @@ An MCP connection registers a streamable-HTTP server for the roles of a swarm th
 dockingbird connect search --mcp https://mcp.example/mcp
 ```
 
-The URL is `https`, with a lowercase host, an optional port, a path and a query, no user name and no fragment, at most 2048 characters. Dockingbird keeps nothing else, and a server that needs a key is not yet available. The catalogue lists no done line for this form. The step is done when the command exits 0 and `dockingbird connections` lists `search`.
+The URL is `https`, with a lowercase host, an optional port, a path and a query, no user name and no fragment, at most 2048 characters. Dockingbird keeps the URL and nothing else, so the connection holds no secret, and a server that needs a key is not yet served. The command grants the connection to no one. A swarm role gets it when its `connections` key lists `search`, and a single agent started from an added config does not. The step is done when the command prints these lines ([`CONNECTED_REGISTERED`](../troubleshooting.md#connected_registered)) and `dockingbird connections` lists `search`.
+
+```text
+Saved search.
+A config you add with dockingbird config add may name it in its connections.
+```
+
+A URL Dockingbird cannot use stops the command with [`CONNECT_MCP_INVALID`](../troubleshooting.md#connect_mcp_invalid) and exit 2. Add `--to AGENT --until ISO` to grant the server to one running agent as well, as [connections.md](connections.md) shows.
 
 ## A program as a service
 
@@ -67,11 +75,11 @@ choices = ["fast", "best"]
 | Key | Meaning |
 |---|---|
 | `program` | the program to run, with `checkout` and `commit` to pin the code it runs |
-| `timeout_s` | most seconds one run may take, then `SIGTERM`, and `SIGKILL` 10 seconds later |
-| `argv` | the program's words, each `{NAME}` replaced by a declared argument and `{output}` by the output folder |
+| `timeout_s` | most seconds one run may take, from 1 to 86,400, then `SIGTERM`, and `SIGKILL` 10 seconds later; the home's own cap of 7,200 seconds still applies |
+| `argv` | the program's words, at most 64, each `{NAME}` replaced by a declared argument and `{output}` by the output folder, which stands exactly once |
 | `uses` | the database connection whose credential each run gets, such as `uses = ["scores"]` |
 | `[call]` | in place of `argv`, a Python function in the checkout, named by `python`, `module` and `function` |
-| `[arguments.NAME]` | one argument an agent may fill in |
+| `[arguments.NAME]` | one argument an agent may fill in; a file declares at most 16, and `argv` must use each one |
 
 The same keys are listed in [the roles and connections reference](../reference/files/roles-and-connections.md).
 
@@ -81,7 +89,7 @@ The same keys are listed in [the roles and connections reference](../reference/f
 | `choice` | `choices` | one word from the list |
 | `text` | `max_chars` | text up to that many characters, passed on as typed |
 
-A `text` argument reaches the program as the agent typed it. If the program reads one as a path or a command's name, the agent gains that reach. Declare `choice` or `int` where the program takes a path, a name or a mode.
+A word, a `choice` word or a `text` value is at most 1,024 characters. A `text` argument reaches the program as the agent typed it. If the program reads one as a path or a command's name, the agent gains that reach. Declare `choice` or `int` where the program takes a path, a name or a mode.
 
 1. Connect the file. Dockingbird checks every key, checks that `argv` uses each declared argument, and checks that the checkout is at the commit. It runs nothing.
 
@@ -103,12 +111,14 @@ A `text` argument reaches the program as the agent typed it. If the program read
    dockingbird serve convert
    ```
 
-   The step is done when the command prints this line. Each request then prints how its run ended.
+   The step is done when the command prints this line ([`SERVE_READY`](../troubleshooting.md#serve_ready)). Each request then prints how its run ended ([`SERVE_RAN`](../troubleshooting.md#serve_ran)).
 
    ```text
    Serving convert: agents' requests to it run here, as you, one at a time.
    Ran convert for runner-1: done in 3 s.
    ```
+
+   `dockingbird serve convert --once` runs the request that waits now, if there is one, and stops. Ctrl-C prints `Stopped serving convert.` ([`SERVE_STOPPED`](../troubleshooting.md#serve_stopped)), and requests wait until you serve again.
 
 A run starts the program alone, never through a shell. It gets the file's words with the checked arguments in place and runs in its checkout. It sees five variables and nothing else of your shell: `PATH`, your `HOME`, `LANG=C.UTF-8`, a `TMPDIR` of its own and `DOCKINGBIRD_SERVICE_OUTPUT`, the output folder's path. The output folder is the result. It holds what the program wrote plus `stdout.txt` and `stderr.txt`, at most 64 MiB and 10,000 entries, with links left out. It lands in the agent's log folder under `log/connections/<job>/`.
 
@@ -130,6 +140,8 @@ An agent of a config that names `chrome` asks for the browser and waits until `s
 | Chrome | open `chrome://inspect/#remote-debugging`, turn remote debugging on, keep Chrome running, and click Allow when it asks, which it does for each use |
 | Firefox | quit Firefox before the first request; `serve` starts it with remote control on and closes it when `serve` stops, and a Firefox you opened by hand is refused |
 | Safari | in Settings > Advanced turn on "Show features for web developers", then in Settings > Developer turn on "Allow Remote Automation" and "Allow JavaScript from Apple Events", and click OK when macOS asks |
+
+A vault's logins are typed into this browser too, while you serve it. `serve` takes a service or a browser by name, and a vault name ends with [`SERVE_NOT_A_SERVICE`](../troubleshooting.md#serve_not_a_service). The sign-in itself is covered in [secrets-vault.md](secrets-vault.md).
 
 In your own browser the agent can act as you on every site you are signed in to, and Dockingbird restricts nothing it does on any website. The browser loads pages with your Mac's network, so the agent's egress setting does not limit what it reaches there. A fresh browser has none of your logins and is removed afterwards. The agent keeps the browser until it lets go, its container ends, the browser closes, the session's time limit passes, or you press Ctrl-C.
 
@@ -161,6 +173,8 @@ Building the agent's browser ... done ({elapsed})
 Starting the agent's browser ... done ({elapsed})
 ```
 
+For extensions, policies, the local network list, the sidecar's life and its failure messages, see [agent-browser.md](agent-browser.md).
+
 `dockingbird watch surf-1` shows that screen in your VNC viewer, Screen Sharing on a Mac, and lets you take over. The address it prints, `vnc://127.0.0.1:<port>`, takes connections from this Mac alone. Anything you type or paste there, the agent can read. The command is done when it prints these lines, and `--no-open` prints the address and opens no viewer.
 
 ```text
@@ -179,16 +193,26 @@ dockingbird serve --all
 dockingbird serve --unit
 ```
 
-`serve --all` never starts Docker or Dockingbird. While Docker does not answer, or no coordinator runs, it exits 1, and the unit starts it again every 10 seconds until they answer. `dockingbird stop` ends it with exit 0, and the unit leaves it stopped. Browsers are lent from a Mac only, so a Linux unit serves services.
+`serve --all --once` runs the requests that wait now and stops. `--unit` takes no name, no `--all` and no `--once`, and any of them ends with `OPTIONS_NOT_BOTH`. `serve --all` never starts Docker or Dockingbird. While Docker does not answer, or no coordinator runs, it exits 1, and the unit starts it again every 10 seconds until they answer. `dockingbird stop` ends it with exit 0, and the unit leaves it stopped. Browsers are lent from a Mac only, so a Linux unit serves services.
+
+## Serving through an update
+
+An update stops Dockingbird for a short time. While it does, `serve` and `serve --all` wait and print `Dockingbird is updating, so convert waits for it to finish.` ([`SERVE_UPDATE_WAITING`](../troubleshooting.md#serve_update_waiting)). The wait is bounded by 600 seconds. When the update ends, `serve` prints `Dockingbird is back after <elapsed>; serving convert again.` ([`SERVE_UPDATE_OVER`](../troubleshooting.md#serve_update_over)) and takes requests again. Requests wait meanwhile, and Ctrl-C and `dockingbird stop` still end `serve`.
+
+An update that runs past 600 seconds stops `serve` with exit 1 ([`SERVE_UPDATE_TOO_LONG`](../troubleshooting.md#serve_update_too_long)). Run it again, or let the unit start `serve --all` again.
+
+From v0.15.25, `serve` also moves to the release the home runs once an update has replaced Dockingbird, between two requests and with no job cut: `Dockingbird <version> runs this home now, so serving convert moves to it.` ([`SERVE_FOLLOWING`](../troubleshooting.md#serve_following)). When the system refuses that move, `serve` stops with [`SERVE_FOLLOW_FAILED`](../troubleshooting.md#serve_follow_failed) and the reason. A `serve` that started before v0.15.25 stops at the update, and its unit starts it again on the new release. `dockingbird status` names a `serve` still on an older release.
 
 ## When it fails
 
 - [`CONNECT_MCP_INVALID`](../troubleshooting.md#connect_mcp_invalid): the URL is not an `https` address with a lowercase host, no user and no fragment, or it is too long.
 - [`CONNECT_SERVICE_INVALID`](../troubleshooting.md#connect_service_invalid): the service file is missing, readable by others, a link, too large, or holds a key to fix. The line names the key and never its value.
 - [`CONNECT_SERVICE_CHECKOUT_MOVED`](../troubleshooting.md#connect_service_checkout_moved): the checkout is not at the file's commit. Check that commit out, or write the commit it is at.
-- [`SERVE_NOT_A_SERVICE`](../troubleshooting.md#serve_not_a_service): the name is a GitHub repo, a folder or a database, which `serve` does not run.
+- [`SERVE_NOT_A_SERVICE`](../troubleshooting.md#serve_not_a_service): the name is a GitHub repo, a folder, a database, an MCP server or a vault, which `serve` does not run. `dockingbird connections` lists the kinds.
 - [`SERVE_CHECKOUT_MOVED`](../troubleshooting.md#serve_checkout_moved): the checkout moved since `connect`, and nothing ran. Connect the service again.
-- [`SERVE_COORDINATOR_GONE`](../troubleshooting.md#serve_coordinator_gone): Dockingbird stopped while `serve` waited. Start `serve` again.
+- [`SERVE_COORDINATOR_GONE`](../troubleshooting.md#serve_coordinator_gone): Dockingbird stopped while `serve` waited, and `serve` never starts it again itself. Start `serve` again.
+- [`SERVE_UPDATE_TOO_LONG`](../troubleshooting.md#serve_update_too_long): the update ran past 600 seconds, so `serve` stopped. Run it again.
+- [`SERVE_FOLDER_FAILED`](../troubleshooting.md#serve_folder_failed): Dockingbird could not make a folder for a run in its own `tmp` folder, so it refused the request and stopped. Check that folder and the disk, then run `serve` again.
 - [`SERVE_ALL_NONE`](../troubleshooting.md#serve_all_none): the home has no service or browser connection to serve.
 - [`SERVE_UNIT_UNNAMED`](../troubleshooting.md#serve_unit_unnamed): the home has no name, so the unit cannot start it. Pass `--home NAME`.
 - [`CONNECT_BROWSER_UNSUPPORTED`](../troubleshooting.md#connect_browser_unsupported): `--browser` takes `chrome`, `firefox` or `safari`.
