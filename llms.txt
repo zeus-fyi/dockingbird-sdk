@@ -14,7 +14,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [First run](docs/getting-started/first-run.md): Make a repository ready with init, start the first agent, sign it in, and learn what the product prints at each point.
 - [Choose a topology](docs/getting-started/choose-a-topology.md): Pick one computer, two computers over ssh, a cloud VM or a team pool, and see which pages and examples each needs.
 - [Agent set-up prompt](docs/agent-setup-prompt.md): A block of plain text to paste into Claude Code or Codex so that it sets up Dockingbird on this computer with you.
-- [Frequently asked questions](docs/faq.md): Thirteen first-week questions, each answered in three lines with one link to the page that holds the detail.
+- [Frequently asked questions](docs/faq.md): Fourteen first-week questions, each answered in three lines with one link to the page that holds the detail.
 
 ## Concepts
 
@@ -31,6 +31,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Hosting paradigms](docs/concepts/hosting-paradigms.md): The three ways to arrange the organisation's store and the hosts, who runs each part in each, and which one a customer can use today.
 - [Security model](docs/concepts/security-model.md): What an agent can reach, what it cannot, where secrets live, how the four egress modes limit its network, and what clean --all removes.
 - [Observability](docs/concepts/observability.md): Dockingbird gives numbers from three sources, each agent, each host and the fleet scheduler's admitter, and never any message text or repository content.
+- [Message persistence](docs/concepts/message-persistence.md): Where bus messages and deliveries are stored, what survives a restart, an update, a roll to a new engine and a take-over, what each delivery state means, and when old message bodies expire.
 
 ## Guides
 
@@ -57,7 +58,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Connect agents to GitHub](docs/guides/github.md): Connect one GitHub branch so agents fetch and push it while the ssh key stays with Dockingbird.
 - [MCP servers, services and browsers for agents](docs/guides/mcp-and-services.md): Give agents an MCP server by URL, a program of yours with typed arguments, or a browser, and serve them as yourself.
 - [Give agents a database](docs/guides/databases.md): Connect a PostgreSQL database so agents query it, and write to it through a broker, without ever seeing its address or password.
-- [Sign agents in with a password vault](docs/guides/secrets-vault.md): Connect a gopass store so Dockingbird types a login's password and one-time code into an agent's browser, and the agent sees neither.
+- [Sign agents in with a password vault](docs/guides/secrets-vault.md): Connect a gopass store so Dockingbird types a login's password and one-time code into an agent's browser, in its own Docker browser or on your Mac's Chrome, and the agent sees neither.
 - [Swarms](docs/guides/swarms.md): Write a swarm definition, choose each role's model and effort, check it, submit it with values, follow it in the queue and change it while it runs.
 - [The work queue](docs/guides/work-queue.md): Keep one board of items, agents and requests in the organisation's store that people, scripts and agents read and write from any computer.
 - [Install a team fleet](docs/guides/team-fleet.md): Install the PostgreSQL store, the roles, the worker and admitter services and the control plane that let a team share hosts and message across computers.
@@ -66,7 +67,9 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Collect the metrics with Prometheus](docs/guides/prometheus.md): Run the example exporter on each host and point a Prometheus at it, and at the fleet scheduler's admitter, with two scrape jobs.
 - [Draw the metrics in Grafana](docs/guides/grafana.md): Import the default Dockingbird dashboard into your own Grafana, read its five rows, add a host, and set three alerts.
 - [Harbor benchmark tasks](docs/guides/harbor.md): Run a Harbor benchmark task's two baselines and one real trial with your own login, then list, read and clean its jobs.
-- [The GUI](docs/guides/gui.md): What the Dockingbird GUI is, that its install is not yet available to customers, and what dockingbird ui prints today.
+- [The GUI](docs/guides/gui.md): Install the Dockingbird GUI with dockingbird ui --install, open and stop it, read its agent tabs, inbox and hosts sidebar, use its keys and mouse, and fix its message ids.
+- [Host load protection](docs/guides/host-load-protection.md): Why a start is refused with HOST_AGENT_CAP or HOST_OVERLOADED, what the start guard checks, how to wait for room with start --wait, and how to read the host's load.
+- [Reliable messages](docs/guides/reliable-messages.md): Mark a message so it stays open until its target replies, demand a reply to a task, expect a message and be alerted when it never arrives, and send one message to a group of agents.
 - [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
 
 ## Cookbooks and examples
@@ -129,9 +132,9 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [The home folder layout](docs/reference/files/home-layout.md): What lives where under a Dockingbird home, which files you may edit, and how a second home by name works.
 - [The fleet store](docs/reference/files/fleet-store.md): The three schemas of the organisation's PostgreSQL 18 store, its role groups, the order of a migration and which migrations need older workers restarted first.
 - [Environment variables](docs/reference/environment-variables.md): The DOCKINGBIRD_ variables you may set, how Dockingbird treats a setting, and the variables of other tools it reads.
-- [Limits](docs/reference/limits.md): The bounds on sessions, files, names, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
+- [Limits](docs/reference/limits.md): The bounds on sessions, agents per home, files, names, repositories, connections, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
 - [Ports and hosts](docs/reference/ports-and-hosts.md): Every port and route Dockingbird opens or expects, on which interface, with the timeouts of each and the hosts an egress preset reaches.
-- [Metrics reference](docs/reference/metrics.md): Every metric family Dockingbird serves, with its type, labels and unit, the agent families first, the fleet families second and the exporter's own gauges last.
+- [Metrics reference](docs/reference/metrics.md): Every metric family Dockingbird serves, with its type, labels and unit, the agent families first, the fleet scheduler's second, the control-plane relay's third and the exporter's own gauges last.
 - [Fleet tools](docs/reference/fleet-tools.md): The ten fleet tools an agent on a joined home gets beside its bus tools, with who each can reach.
 - [Search the docs](docs/search.md): Search these docs from a clone with one Python command, offline, and see how it ranks what it finds.
 
