@@ -34,18 +34,18 @@ The agent works through a turn. After each turn it sends you a status message su
 
 A delivery is one message in an inbox. A question row is one line of `dockingbird questions`: a question an agent asks you, with the number it got when you first saw it. The number stays until you answer. `dockingbird answer 3 --option 2` or `dockingbird answer 3 "Use Vue."` answers it.
 
-A question can come from a choice the tool put up, a plan to approve, the end of a Codex turn at a terminal, or a message the agent sent you with kind `question`. An agent that asks and waits shows `asks` in `dockingbird status` and does not go on until you answer. An agent that asks without waiting keeps working, and its question stays listed. A question a stopped agent asked is withdrawn.
+A question can come from a choice the tool put up, a plan to approve, the end of a Codex turn at a terminal, or a message the agent sent you with kind `question`. A question stays open until you answer it. A message that an agent or you send with `--requires-ack` or `--reply-required` stays open until its target replies or acknowledges it, shows again on a reminder schedule, and tells its sender once at its deadline. [Reliable messages](../guides/reliable-messages.md) marks and expects them. An agent that asks and waits shows `asks` in `dockingbird status` and does not go on until you answer. An agent that asks without waiting keeps working, and its question stays listed. A question a stopped agent asked is withdrawn.
 
 ## Between agents
 
-An agent sends to another agent of the project by name, with `to=<name>` in its `bus_send`. Dockingbird delivers the message to that inbox. A name no agent has, or an agent that has ended, is refused with `AGENT_UNKNOWN` or `AGENT_ENDED`. An agent in a swarm role that names `send_to` can reach only its parent and the roles listed, and any other send is refused with `FORBIDDEN` and the reason `NOT_IN_SEND_RULES`.
+An agent sends to another agent of the project by name, with `to=<name>` in its `bus_send`. Dockingbird delivers the message to that inbox. One message can also go to a group: `all`, `role` or `swarm` in `bus_send`, and `--all`, `--role` and `--swarm` in `dockingbird send`. A name no agent has, or an agent that has ended, is refused with `AGENT_UNKNOWN` or `AGENT_ENDED`. An agent in a swarm role that names `send_to` can reach only its parent and the roles listed, and any other send is refused with `FORBIDDEN` and the reason `NOT_IN_SEND_RULES`.
 
 Agents on the same repository and branch hear of each other. The first delivery names the others, and `Agent <name> joined your work` and `Agent <name> left your work` follow. You can read what they send each other with `dockingbird inbox claude-2`, and reading changes nothing for that agent.
 
 ## What it never does
 
 - It never lets an agent reach another agent by any path but the bus. Each agent has its own network, and a proxy refuses every address that is not public.
-- It never deletes a message. `dockingbird inbox --clear` marks a stopped agent's notices read and closes its open questions, and every message still reads by its id.
+- It never deletes a message envelope. `dockingbird inbox --clear` marks a stopped agent's notices read and closes its open questions. A message body past 90 days is deleted, and a read of it is refused with `CONTENT_EXPIRED`. [Message persistence](message-persistence.md) has the retention table.
 - It never applies `set` to a turn in flight. A new model, effort or compact point takes effect from the agent's next turn.
 - It never types a message into an agent's screen while you have unsent text there.
 - It never brings an agent's commits to you on the bus. With the default `tools = "bus"`, an agent reports by messages and files, and its commits do not reach `sync`.
@@ -102,6 +102,8 @@ Text alternative. The host commands `start` and `send` put a task or a reply on 
 | Guide | What it adds |
 |---|---|
 | [Delegating tasks](../guides/delegating-tasks.md) | Hands out a task, waits, answers a question and saves results. |
+| [Reliable messages](../guides/reliable-messages.md) | Marks a message so it stays open until answered, expects a message, and sends to a group. |
+| [Message persistence](message-persistence.md) | Says where messages live, what a restart keeps and when a body expires. |
 | [Your own commands](../guides/your-own-commands.md) | Fixes whether a command runs on the bus or at a terminal. |
 | [The MCP server](../guides/mcp-server.md) | Lets your own Claude Code or Codex start and steer agents. |
 | [Swarms](../guides/swarms.md) | Starts teams whose roles message each other. |
