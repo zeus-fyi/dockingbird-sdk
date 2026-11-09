@@ -74,6 +74,7 @@ Each `[[host]]` has a `name` and one route: `ssh`, or `gcloud` with `zone` and `
 | `project` | gcloud | the instance's project |
 | `gcloud_program` | gcloud | this computer's `gcloud`, as an absolute path, when it is neither on your `PATH` nor in the Google Cloud SDK's usual places; written by hand, and kept by a `set` that keeps the gcloud route |
 | `repoint` | any | your own command that restarts the host's Dockingbird services, its worker and the admitter where it runs; `dockingbird fleet update` runs it over the host's route after it moves the host to a release |
+| `login_push` | ssh, gcloud | a list of the tools whose login this computer's fleet worker copies to the host: `["codex"]`, the one word it takes; see `login_push` below |
 | `local` | none | `true` for this computer when it is a pool host, written with neither `ssh` nor `gcloud`; its lines run here under `sh`, and `fleet hosts` shows it as `this computer` |
 
 ## `[[host.home]]` and `[[home]]`: a home's own program
@@ -119,6 +120,34 @@ repoint = "systemctl --user restart --no-block UNIT"
 On Linux `UNIT` is the systemd user unit of the worker. On a Mac the line is `launchctl kickstart -k gui/$UID/LABEL`, with the label of the worker's launchd unit in place of `LABEL`.
 A Dockingbird older than the release that reads `repoint` and `local` refuses the whole file with `FLEET_HOSTS_FILE_INVALID` until it is updated, so write both keys on a computer that runs the newer release.
 
+## `login_push`: a Codex login for a pool host
+
+A pool host with no Codex login of its own, such as a cloud VM, cannot run Codex agents. `login_push = ["codex"]` on its `[[host]]` table in the `hosts.toml` of a fleet worker's home gives it one: the worker copies the Codex login of the computer it runs on.
+
+```toml
+[[host]]
+name = "lab"
+ssh = "lab.example"
+login_push = ["codex"]
+```
+
+- The worker reads `~/.codex/auth.json` on its own computer. Within 30 seconds of each change (`FLEET_LOGIN_PUSH_INTERVAL_S`), it writes a copy over the host's route as `~/.codex/auth.json` of the user that route signs in as, mode 0600. Every home on the host then uses that copy as the computer's own login.
+- The copy has no refresh token. It works until its access token expires, and only a new Codex sign-in on the worker's computer, or Codex there renewing the token, gives the host a new one.
+- `dockingbird status` shows when the pushed Codex copy expires, and an expired copy is refused. [sign-in-and-api-keys.md](../../guides/sign-in-and-api-keys.md) says how to renew it.
+- A host that already holds a Codex login of its own keeps it. The worker never writes over it and logs that once.
+- When the login on the worker's computer is gone, the worker removes the copy from the host.
+- `set` keeps the key and has no option for it. Write it by hand.
+
+`codex` is the only word the key takes, because Claude reaches a pool host through its gateway and a Claude login is never copied. The key is refused on a `local = true` entry, which is this computer.
+
+To stop the copy, take these steps in order. A new login on the worker's computer does not revoke a copy already pushed, which works until its token expires.
+
+1. Remove `login_push` from the worker's `hosts.toml` and restart the worker.
+2. Delete `~/.codex/auth.json` on the host.
+3. Run `dockingbird logout codex` in each of the host's homes.
+
+A Dockingbird older than v0.15.5 does not know the key and refuses the whole file with `FLEET_HOSTS_FILE_INVALID`, so write it on a computer that runs the newer release.
+
 ## The rules
 
 Dockingbird reads the file before every fleet command that uses it and refuses one that breaks a rule.
@@ -131,6 +160,7 @@ Every value reaches a command as one word, so the rules refuse a value that coul
 | a `[[host]]` | a `name` and exactly one of `ssh` and `gcloud`, or `local = true` with neither; `gcloud` with both `zone` and `project`; `ssh` with none of `zone`, `project` and `gcloud_program`; every value text |
 | `ssh` | not empty, no leading `-`, no whitespace |
 | `gcloud`, `zone`, `project` | not empty, no leading `-`, lowercase letters, digits, `-`, `.` and `:` alone |
+| `login_push` | a list of one or two texts, none twice, each `codex`, and never on a `local = true` entry |
 | `path` | not empty |
 | `docker_host` | not empty, no whitespace |
 | `gcloud_program`, and each home's `path`, `program` and `clones` | an absolute path |
