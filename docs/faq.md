@@ -78,5 +78,5 @@ See [offline behavior](guides/licensing.md#offline-behavior-and-day-counts).
 
 ## Is there a GUI?
 Yes. `dockingbird ui --install` installs it, and `dockingbird ui` opens one window with a tab for each agent and your inbox beside them.
-It runs on Apple silicon Macs and arm64 Linux, and the install needs your git to read the GUI's private repository over SSH.
+It runs on Apple silicon Macs and arm64 Linux.
 See [the GUI](guides/gui.md).
