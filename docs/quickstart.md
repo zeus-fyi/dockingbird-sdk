@@ -153,7 +153,7 @@ dockingbird stop
 - A one-shot works too: `dockingbird claude -p "Summarize the open TODOs"` prints only the answer.
 - `dockingbird login claude` signs in again, `dockingbird update` gets the latest versions, and `dockingbird clean` frees disk space.
 - A second computer joins with `dockingbird fleet hosts set NAME --ssh DEST`, or with `--gcloud VM --zone ZONE --project PROJECT`. [Choose a topology](getting-started/choose-a-topology.md) compares the options.
-- The GUI (`dockingbird ui`) is not yet available to customers, so use the terminal commands on this page.
+- `dockingbird ui --install` installs the GUI, and `dockingbird ui` shows every agent in one window with your inbox beside it. See [the GUI](guides/gui.md).
 
 ## 6. Delegate
 

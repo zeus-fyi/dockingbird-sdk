@@ -112,6 +112,7 @@ Exit codes are 0 for done, 1 for a problem with its next step printed, and 2 for
 
 - [Quickstart](docs/quickstart.md) is the one-page path from install to a first commit.
 - [Prerequisites](docs/getting-started/prerequisites.md), [install](docs/getting-started/install.md), [activate](docs/getting-started/activate.md), [first run](docs/getting-started/first-run.md) and [choose a topology](docs/getting-started/choose-a-topology.md): one page for each step of the set-up.
+- [The GUI](docs/guides/gui.md) installs with `dockingbird ui --install` and shows every agent in one window, with your inbox beside it.
 - [Troubleshooting](docs/troubleshooting.md) lists every message Dockingbird prints, by its id, with the next step.
 - [Operator guide](docs/operator-guide.md) is the long form, with sign-ins, update, clean, licensing and what lives where.
 - [llms.txt](llms.txt) indexes every page, one line each, for a coding agent.
