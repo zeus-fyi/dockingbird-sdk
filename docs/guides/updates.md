@@ -63,7 +63,7 @@ This update changes Dockingbird's records.
 Once it takes over, it can't go back to 0.15.2.
 ```
 
-On a Mac, `update` then installs the Dockingbird GUI that this release pins, version 0.1.20 in 0.15.28, when none is installed or another version is, and links `dockingbird-gui` beside `dockingbird` on your `PATH`. It fetches the GUI with git over SSH, so git must reach the GUI's repository with your GitHub SSH key. When the fetch fails, Dockingbird itself is already updated: `update` says so, ends with the GUI message and exits 1. Run `dockingbird ui --install` again once git can reach the repository. On any other computer, such as a cloud VM, `update` downloads no GUI and leaves one already there as it is. A `dockingbird-gui` link that already opens a GUI of this release from another home stays where it is. See [the GUI](gui.md).
+On a Mac, `update` then installs the Dockingbird GUI that this release pins, version 0.1.20 in 0.15.28, when none is installed or another version is, and links `dockingbird-gui` beside `dockingbird` on your `PATH`. When the GUI install fails, Dockingbird itself is already updated: `update` says so, ends with the GUI message and exits 1. Run `dockingbird ui --install` again to retry it. On any other computer, such as a cloud VM, `update` downloads no GUI and leaves one already there as it is. A `dockingbird-gui` link that already opens a GUI of this release from another home stays where it is. See [the GUI](gui.md).
 
 ### Where the release is installed
 

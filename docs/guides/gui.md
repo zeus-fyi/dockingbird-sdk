@@ -25,7 +25,6 @@ Every action prints the `dockingbird` command it runs, in a popup or in the agen
 - Dockingbird is set up. `dockingbird --version` prints a version, and the first run is done.
 - This computer is an Apple silicon Mac or arm64 Linux. The GUI has no build for another system, and the install says so with [`GUI_PLATFORM_UNSUPPORTED`](../troubleshooting.md#gui_platform_unsupported).
 - A terminal window is open. `dockingbird ui` draws on the terminal and reads its keys and mouse, so it refuses a pipe or a script.
-- Your own git can read the GUI's repository over SSH. See [install the GUI](#1-install-the-gui).
 
 ## 1. Install the GUI
 
@@ -42,8 +41,6 @@ Open it: dockingbird ui
 ```
 
 The first line is `GUI_INSTALLING`, with the repository's name in place of `GUI_REPO`. The last four lines are `GUI_INSTALLED`. The install needs no terminal, so it runs in a script too.
-
-The GUI comes from a private repository, and the install reaches it with your own git over SSH. Dockingbird fetches the tag `bin-v` plus the version (`bin-v0.1.20`) from `git@github.com:GUI_REPO.git`, where the repository is the one `GUI_INSTALLING` names. The GitHub SSH key your git uses must be able to read that repository. When it cannot, [`GUI_FETCH_FAILED`](../troubleshooting.md#gui_fetch_failed) shows git's own words, such as a refused key, and the repository your git must read. Nothing is installed and any GUI you had stays.
 
 Dockingbird compares the file's SHA-256 with the checksum it pins for that version before it writes anything. A different checksum installs nothing ([`GUI_CHECKSUM_MISMATCH`](../troubleshooting.md#gui_checksum_mismatch)), and a build with no pinned checksum is not installed at all.
 
@@ -135,7 +132,7 @@ Every message below links to its entry in the [catalogue](../troubleshooting.md)
 | [`GUI_SESSION_EMPTY`](../troubleshooting.md#gui_session_empty) | `DOCKINGBIRD_GUI_SESSION`, a variable for development, is set but empty. Exit 1. | `unset DOCKINGBIRD_GUI_SESSION` |
 | [`GUI_INSTALLING`](../troubleshooting.md#gui_installing) | The install, or `update`, is getting the GUI. It informs, exit 0. | None |
 | [`GUI_INSTALLED`](../troubleshooting.md#gui_installed) | The GUI is in place, or its link was made again. Exit 0. | `dockingbird ui` |
-| [`GUI_FETCH_FAILED`](../troubleshooting.md#gui_fetch_failed) | git could not read the GUI's private repository over SSH, found no such version, is not on your `PATH`, timed out or answered with too much. Exit 1. | Fix your git's access, then `dockingbird ui --install` |
+| [`GUI_FETCH_FAILED`](../troubleshooting.md#gui_fetch_failed) | the GUI download failed or timed out, or no such version exists. Exit 1. | Run `dockingbird ui --install` again |
 | [`GUI_CHECKSUM_MISMATCH`](../troubleshooting.md#gui_checksum_mismatch) | The download is not the build this Dockingbird pins. Nothing was installed. Exit 1. | None |
 | [`GUI_PLATFORM_UNSUPPORTED`](../troubleshooting.md#gui_platform_unsupported) | No build for this system, or no checksum yet for its build. Exit 1. | None |
 | [`GUI_LINK_IN_THE_WAY`](../troubleshooting.md#gui_link_in_the_way) | A file of your own sits where the `PATH` link goes. It informs, exit 0. | Remove the file and install again |
