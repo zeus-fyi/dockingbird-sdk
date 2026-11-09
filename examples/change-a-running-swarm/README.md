@@ -55,7 +55,7 @@ An agent that waits shows what holds it, and `fleet why ID` names it host by hos
 
 ## 3. Retire one agent
 
-`fleet retire` takes one agent out once its running turn ends and gives its share back to the pool. An agent that never started retires at once. The host's worker refuses while the agent is working, asking or waiting, or has a question or a request open. It records the refusal and sends the agent nothing.
+`fleet retire` takes one agent out at the first tick of its host's worker that finds it idle, and gives its share back to the pool. An agent that never started retires at once. A tick that finds the agent working, asking or waiting, or with a question open or a request it has not taken yet, refuses the ask, records the refusal and sends the agent nothing. A request the agent already took holds nothing. Run the command again once the agent is idle.
 
 ```bash
 dockingbird fleet retire ID build-3 --reason "its task is merged"
@@ -64,7 +64,10 @@ dockingbird fleet retire ID build-3 --reason "its task is merged"
 The step is done when this line prints. A `still working` form names the agents that have not stopped.
 
 ```text
-{id} running: {name} retires once its running turn ends
+{id} running: {name} retires at the first tick that finds it idle
+with no question open and no request it has not taken yet; a tick
+that finds it working or with either refuses the ask, and the
+next fleet retire says so
 ```
 
 Retire is refused before anything changes when the swarm is not running, has no such agent, or the role is at its `min`. A role with `min = 0` can be emptied if it neither reviews nor tests.

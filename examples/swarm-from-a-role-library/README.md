@@ -137,7 +137,10 @@ To start larger, set `--set grader.count=6 --set grader.max=12` at the submit. B
 
 ```text
 {id} running: added {names}; each starts once its host has room
-{id} running: {name} retires once its running turn ends
+{id} running: {name} retires at the first tick that finds it idle
+with no question open and no request it has not taken yet; a tick
+that finds it working or with either refuses the ask, and the
+next fleet retire says so
 ```
 
 ## 6. Revoke and give back a connection

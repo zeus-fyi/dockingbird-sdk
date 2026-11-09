@@ -245,16 +245,29 @@ dockingbird fleet replace ID build-1 --fresh
 dockingbird fleet assign ID build-2 --reviewer review-2 --tester test-1
 ```
 
-`add` adds agents of a role up to its `max`, under the role's next names. Each starts once its host has room and is briefed with the roster, and the others are told the new one. `retire` ends one agent and gives its share back. It is refused when the swarm is not running, the agent is unknown, or the role is at its `min`. The agent's worker also refuses while the agent is working, asking or waiting. `replace` stops an agent and starts it again by its name with its conversation kept, and `--fresh` starts a new agent of its role under the next name. `assign` names the reviewer and tester of one agent, and an option you leave out keeps its old value.
+`add` adds agents of a role up to its `max`, under the role's next names. Each starts once its host has room and is briefed with the roster, and the others are told the new one. `retire` ends one agent and gives its share back. It is refused when the swarm is not running, the agent is unknown, or the role is at its `min`. `replace` stops an agent and starts it again by its name with its conversation kept, and `--fresh` starts a new agent of its role under the next name. `assign` names the reviewer and tester of one agent, and an option you leave out keeps its old value.
 
-An agent whose last turn failed, or whose process crashed while its container runs, takes no turn. `fleet replace ID NAME` is its recovery. An agent that hands its parent back a `status: done` message is retired on its own word, and `status: partial` or `status: blocked` retires nothing.
+`retire` and `replace` act at the first tick of the agent's host worker that finds the agent idle, with no question open and no request it has not taken yet. A request the agent already took holds nothing, and retiring the agent ends that work. A tick that finds the agent working, asking or waiting, or holding a question or an untaken request, refuses the ask and drops it. The next `fleet retire` of that agent names the refusal first, and you run the command again once the agent is idle. A second `fleet retire` of an agent already asked changes nothing and says so.
+
+An agent whose start was refused is held. `fleet queue` prints `  held: NAME: REASON` under its swarm, with the refusal the start gave, and `fleet why ID` prints `NAME is held after REASON; fleet replace or fleet retire frees its slot.` Run `fleet replace ID NAME` to start it again or `fleet retire ID NAME` to give its slot back. A start that is refused because the swarm's clone holds an unfinished merge does not hold the agent at once. The fleet puts the start back in the queue for up to 10 claims, about five minutes, and holds the agent only if the merge is still open then.
+
+An agent whose last turn failed, or whose process crashed while its container runs, takes no turn. `fleet replace ID NAME` is its recovery, and the worker takes it whatever is open. An agent that hands its parent back a `status: done` message is retired on its own word, and `status: partial` or `status: blocked` retires nothing.
 
 When a review request or an approved commit waits five minutes for a reviewer or tester, the fleet hands that implementer to an idle agent of the role or adds one within the role's `max`. It never stops, restarts or moves an agent that is working.
 
 ```text
 {id} running: added {names}; each starts once its host has room
-{id} running: {name} retires once its running turn ends
-{id} running: {name} starts again once its running turn ends
+{id} running: {name} retires at the first tick that finds it idle
+with no question open and no request it has not taken yet; a tick
+that finds it working or with either refuses the ask, and the
+next fleet retire says so
+{id} running: {name} starts again at the worker's next pass if
+it runs no turn then and has no question open and no request it
+has not taken yet (a failed or crashed one starts again whatever
+is open).
+A running turn, an open question or a request it has not taken
+yet makes the worker refuse this ask and drop it: run this
+command again once it is idle with neither.
 {id}: {name} is reviewed by {reviewer} and tested by {tester};
 its host tells {name} and the agents it moved from and to at its next tick.
 ```
@@ -270,6 +283,10 @@ dockingbird fleet prune ID --merged SHA
 ```text
 Queued the prune of {id} as job {job_id}.
 ```
+
+## One branch per task
+
+Give a role `branch = "t1"` and its agents work on `<source branch>-t1` in a clone of their own, while roles without the key stay on the source branch. The fleet pushes the task branch to `origin` when it is not there, then clones it. A reviewer or tester serves one branch, so a `reviews` or `tests` that names a role on another branch is refused at submit as `branch-mismatch`. [The swarm definition reference](../reference/files/swarm-definition.md#task-branches) has the rules. The shipped example is `.agents/skills/dockingbird-swarm/library/task-branches/`.
 
 ## Spread a swarm over hosts
 
@@ -327,6 +344,8 @@ These ids come from `fleet describe` and `fleet submit`. Each line says what the
 These ids come from the commands of steps 4 and 5 and from the home's own `swarm` record.
 
 - [`FLEET_RETIRE_REFUSED`](../troubleshooting.md#fleet_retire_refused) covers `retire` and `replace`: the swarm is not running, the agent is unknown, or the role sits at its minimum.
+- [`FLEET_QUEUE_HELD`](../troubleshooting.md#fleet_queue_held) prints under a swarm of `fleet queue` for each agent held after a refused start.
+- [`FLEET_WHY_HELD`](../troubleshooting.md#fleet_why_held) says the same in `fleet why` and names `fleet replace` and `fleet retire` as the way to free the slot.
 - [`FLEET_ASSIGN_REFUSED`](../troubleshooting.md#fleet_assign_refused) means the swarm is not running, or the reviewer or tester is no live agent of it.
 - [`FLEET_PRUNE_REFUSED`](../troubleshooting.md#fleet_prune_refused) means `--merged` was not a full commit id, or the workload is not a finished swarm.
 - [`SWARM_ENGINE_OWNED`](../troubleshooting.md#swarm_engine_owned) means the fleet runs that swarm. Use `fleet retire`, `replace`, `assign` or `add` on it.
