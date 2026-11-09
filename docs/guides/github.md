@@ -81,6 +81,8 @@ This page connects one branch of a GitHub repo to your agents. They fetch and pu
    tools = "default"
    ```
 
+   The four tools that use a connection, `bus_connections`, `bus_request`, `bus_request_status` and `bus_request_cancel`, sit in the `default` and `full` sets and not in `bus`, which is what `tools` holds when you leave it out. A config that names `github` with no `tools` line gives its agents no tool to fetch or push. In a swarm role, `tools` takes `bus`, `full` or a list, so use `full`, or a list that holds those four tools and every `bus` tool. [The agent tools page](../reference/agent-tools.md) lists each set, and [How a secret is brokered](connections.md#how-a-secret-is-brokered) follows a request through the broker.
+
    ```bash
    dockingbird config add fixer.toml
    ```

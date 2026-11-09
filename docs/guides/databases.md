@@ -72,13 +72,15 @@ An agent that needs rows from PostgreSQL asks Dockingbird for one statement, and
 
    ```toml
    command = "analyst"
-   workspace = "scratch"
    connections = ["app-db"]
+   tools = "default"
    ```
 
    ```bash
    dockingbird config add analyst.toml
    ```
+
+   The four tools that use a connection, `bus_connections`, `bus_request`, `bus_request_status` and `bus_request_cancel`, sit in the `default` and `full` sets and not in `bus`, which is what `tools` holds when you leave it out. A config that names `app-db` with no `tools` line gives its agents no tool to query. `default` and `full` also hold `bus_claim` and its kin, so a config with `workspace = "scratch"` cannot use either: `config add` refuses it with [`CONFIG_INVALID_FILE`](../troubleshooting.md#config_invalid_file) at `tools`. Leave `workspace` at its default, `repo`. [The agent tools page](../reference/agent-tools.md) lists each set, and [How a secret is brokered](connections.md#how-a-secret-is-brokered) follows a request through the broker.
 
    An agent of that config sends one SQL statement that returns rows and reads the rows as a file of JSON lines in its log folder. It never sees the database, its address or the password. A statement that writes, changes the transaction or runs past its time limit fails and changes nothing, and the database's own words are never shown. Dockingbird checks the role again before every query.
 
@@ -119,6 +121,8 @@ An agent that needs rows from PostgreSQL asks Dockingbird for one statement, and
    ```text
    scores-db: granted to role grader until 2026-12-01T00:00:00+00:00, 2 running agents
    ```
+
+   A swarm role that uses the grant needs `tools = "full"`, or a list that holds the four tools above and every `bus` tool. A role left at `bus` holds none of them.
 
 6. Take the database back. A role revoke stops every running agent of the role at its next request, with no restart, and keeps it from agents of the role that start later. `--swarm KEY` narrows it to one swarm. A disconnect removes the connection and the password it kept, for everyone.
 
