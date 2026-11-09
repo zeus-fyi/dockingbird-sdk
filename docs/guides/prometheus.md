@@ -6,6 +6,7 @@ commands:
   - fleet probe
   - fleet scrape
   - fleet queue --metrics
+  - fleet admitter
 ---
 
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
@@ -23,7 +24,7 @@ This page puts a host's agent figures, the host's own load and the fleet queue i
 
 ## Copy the exporter to each host
 
-Put [exporter.py](../../examples/observability/exporter.py) on each host that runs homes. Python is all it needs. Each 30 seconds it runs `dockingbird --json fleet probe`. Each 60 seconds it runs `dockingbird --home NAME --json fleet scrape` for every home you name, so a slow home never holds up the others. From each envelope it keeps `id` and `fields`, and drops `lines`.
+Put [exporter.py](../../examples/observability/exporter.py) on each host that runs homes. Python is all it needs. Each 30 seconds it runs `dockingbird --json fleet probe`. Each 60 seconds it runs `dockingbird --home NAME --json fleet scrape` for every home you name, so a slow home never holds up the others. To collect the control plane's relay families, name the control plane's home with `--home`: `fleet scrape` prints them on that home only. From each envelope it keeps `id` and `fields`, and drops `lines`.
 
 ## Run it
 
@@ -52,6 +53,7 @@ dockingbird_scrape_up{home="NAME"} 1
 | `dockingbird_host_*` | gauge | The probe's typed figures, such as `dockingbird_host_load_one`, `dockingbird_host_memory_free_bytes` and `dockingbird_host_docker_containers_running`, and `dockingbird_host_category_*{category}` per kind of process |
 | `dockingbird_probe_up` | gauge | 1 when the last probe read worked and its schema is `dockingbird.fleet.probe/1`, else 0 |
 | `dockingbird_agent_*` | gauge | Each home's own text, passed through with one added label, `home` |
+| `dockingbird_relay_*` | gauge, counter, histogram | The control plane's relay: eight families, passed through with one added label, `home`, from the control plane's home only |
 | `dockingbird_scrape_up{home}` | gauge | 1 when the home's last read worked, else 0 |
 
 A home that fails to read serves no agent figures, only `scrape_up` 0. A home that is off, because it turned itself off after 30 minutes with no agent, reads as not ready and also shows 0. On a Linux host the probe cannot run, so `probe_up` is 0 and the agent figures still arrive. [The metrics reference](../reference/metrics.md) lists every family.
@@ -65,7 +67,7 @@ Copy the jobs from [prometheus.yml](../../examples/observability/prometheus.yml)
 | `dockingbird_hosts` | `lab.example:9105`, one per host, with a `host` label | 30 s | The probe refreshes every 30 s |
 | `dockingbird_fleet` | `control-plane.example:9107`, the admitter | 60 s | One admission pass at least every 30 s, so 60 s sees each change |
 
-The admitter serves its families at the fleet database's host, on the port that `FLEET_SCHED_METRICS_PORT` names. Use that port in the target. Leave the job out when your organisation runs no fleet scheduler. Restart Prometheus, or send it SIGHUP, so it reads the file.
+The admitter serves its families at the fleet database's host, on the port that `FLEET_SCHED_METRICS_PORT` names, 9107 by default. Use that port in the target. To serve on another port, start the admitter with `dockingbird fleet admitter --metrics-port N`. `--metrics-port 0` asks the kernel for a free port, which the log line `FLEET_METRICS_SERVING` names. When the admitter cannot open its address, it logs `FLEET_METRICS_UNSERVED`, keeps admitting and tries the address again before each pass, so the fleet job shows the target down until the port is free. Leave the job out when your organisation runs no fleet scheduler. Restart Prometheus, or send it SIGHUP, so it reads the file.
 
 ## Check the targets
 
@@ -82,5 +84,6 @@ The first returns one series per home. The second counts agents by state. [The q
 
 - [`FLEET_PROBE_NOT_MACOS`](../troubleshooting.md#fleet_probe_not_macos): the host is not a Mac, so `dockingbird_probe_up` is 0. The agent figures still arrive.
 - [`FLEET_SCRAPE_NO_STATUS`](../troubleshooting.md#fleet_scrape_no_status): the home's status failed or Dockingbird is not ready there. Its `scrape_up` is 0.
+- [`FLEET_METRICS_UNSERVED`](../troubleshooting.md#fleet_metrics_unserved): the admitter could not open its metrics address. Admission goes on. Free the port or wait for the address.
 - [`FLEET_DB_UNREACHABLE`](../troubleshooting.md#fleet_db_unreachable): the admitter's database did not answer, so the fleet job has no target. Ends 69.
 - [`FLEET_DB_REFUSED`](../troubleshooting.md#fleet_db_refused): the database turned the admitter's login down. Ends 78. Run `dockingbird org status`.
