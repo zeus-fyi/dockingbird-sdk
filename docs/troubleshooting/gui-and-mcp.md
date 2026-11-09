@@ -11,7 +11,7 @@ commands: []
 
 Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 27 ids about the GUI, the MCP server and shell completion.
 
-The Dockingbird GUI is not yet available to customers.
+Install the Dockingbird GUI with `dockingbird ui --install`; [the GUI guide](../guides/gui.md) has the steps.
 
 | Id | When it appears |
 |---|---|

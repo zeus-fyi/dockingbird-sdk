@@ -121,8 +121,9 @@ myapp (main): up to date.
 
 ## 5. `dockingbird ui`
 
-The Dockingbird GUI is not yet available to customers. Today `dockingbird ui` prints `The Dockingbird GUI isn't
-installed.` and exits 1, and [the GUI](../../docs/guides/gui.md) says what that message means.
+`dockingbird ui` opens the Dockingbird GUI in this terminal: one tab per agent, with your inbox beside them. The first
+time, install it with `dockingbird ui --install`; `dockingbird update` keeps it current on a Mac. [The GUI](../../docs/guides/gui.md)
+covers the install, its keys and what each message means.
 
 The [operator guide](../../docs/operator-guide.md) has the rest: sign-ins and API keys, update and clean, and what
 lives where. `dockingbird stop` turns it all off, and nothing is lost.
@@ -133,4 +134,4 @@ lives where. `dockingbird stop` turns it all off, and nothing is lost.
 |---|---|---|
 | `SIGNIN_NEEDED` | The tool is not signed in. Run `dockingbird login` for it, as the message says, or use an API key. | [catalogue](../../docs/troubleshooting.md#signin_needed) |
 | `HOME_NOT_EMPTY` | The folder for Dockingbird's files holds files it did not make. Unset `DOCKINGBIRD_HOME` or point it at an empty or new folder. | [catalogue](../../docs/troubleshooting.md#home_not_empty) |
-| `GUI_MISSING` | `dockingbird ui` found no GUI on this computer. The GUI is not yet available to customers. | [catalogue](../../docs/troubleshooting.md#gui_missing) |
+| `GUI_MISSING` | `dockingbird ui` found no GUI on this computer. Install it with `dockingbird ui --install`. | [catalogue](../../docs/troubleshooting.md#gui_missing) |
