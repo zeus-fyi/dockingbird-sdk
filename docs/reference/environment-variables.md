@@ -14,7 +14,7 @@ commands:
 
 Settings reach Dockingbird through the shell that runs it, and each one is spelled `DOCKINGBIRD_` followed by its name.
 Dockingbird hands every exported setting to the containers that read it, which is why a setting never sits at its default without you knowing.
-Only one variable names a folder, `DOCKINGBIRD_HOME`, and one runtime setting, the database statement timeout, is documented by name.
+Only one variable names a folder, `DOCKINGBIRD_HOME`, and two runtime settings, the database statement timeout and the MCP response size, are documented by name.
 
 ## Variables you may set
 
@@ -22,7 +22,30 @@ Only one variable names a folder, `DOCKINGBIRD_HOME`, and one runtime setting, t
 |---|---|---|---|
 | `DOCKINGBIRD_HOME` | an absolute path | `~/.local/share/dockingbird` | the folder of one Dockingbird installation, its home; another path gives a second, fully separate installation with its own containers, volumes and image tag |
 | `DOCKINGBIRD_DB_QUERY_TIMEOUT_S` | a whole number within its bounds | its built-in value | how long one database statement may run, for the check of `connect --database` and for the agents' queries; `export DOCKINGBIRD_DB_QUERY_TIMEOUT_S=60` raises it |
+| `DOCKINGBIRD_MCP_MAX_CHARS` | a whole number from 1350 to 8000 | 8000 | the most Unicode characters one response of Dockingbird's MCP tools holds, which bounds the context a tool response costs the agent; a value outside 1350 to 8000 stops the command before it runs, since 0.15.11 raised the minimum from 1200, and a home that set a value from 1200 to 1349 must raise it to 1350 or unset it |
 | `DOCKINGBIRD_<NAME>` | a whole number within its bounds | its built-in value | any other runtime setting of Dockingbird: a poll interval, a timeout or a page size; the name is upper case and spelled exactly |
+
+## Variables Dockingbird sets inside an agent's container
+
+Dockingbird tells the tools that spread work across CPUs how many CPUs the container may use.
+The agent's harness and every command it runs get these variables, each set to the container's CPU limit rounded up to a whole CPU.
+You do not set them on your computer.
+
+| Variable | Read by |
+|---|---|
+| `DOCKINGBIRD_CPUS` | the agent's own scripts; it names the budget itself |
+| `PYINK_NUM_WORKERS`, `BLACK_NUM_WORKERS` | pyink and black |
+| `PYTEST_XDIST_AUTO_NUM_WORKERS` | pytest-xdist, as the count of `-n auto` |
+| `OMP_NUM_THREADS` | OpenMP |
+| `MKL_NUM_THREADS` | MKL |
+| `OPENBLAS_NUM_THREADS` | OpenBLAS |
+| `CARGO_BUILD_JOBS` | cargo |
+| `GOMAXPROCS` | Go |
+
+Inside a container these tools count the host's CPUs on their own, so a check that started one worker per host CPU in a two-CPU container could use more memory than the container has. With the variables set, it starts two.
+A value you set for one of the worker counts in the config's `[env]` or through mise stays yours.
+A container with no CPU limit keeps the host's count, even when its memory limit is small.
+Set the limit with `--cpus N` on `claude`, `codex` or `start` ([commands.md](commands.md)). The `[env]` table is in [app-config.md](files/app-config.md).
 
 ## What `DOCKINGBIRD_HOME` refuses
 
