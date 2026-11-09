@@ -29,7 +29,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [The control plane](docs/concepts/control-plane.md): The control plane is a home of its own that other computers join, so an agent on one computer can message an agent on another.
 - [Licensing model](docs/concepts/licensing-model.md): What a seat and a computer are, what a check-in does, how a license behaves offline and at the end of its term, and that this release does not enforce it.
 - [Hosting paradigms](docs/concepts/hosting-paradigms.md): The three ways to arrange the organisation's store and the hosts, who runs each part in each, and which one a customer can use today.
-- [Security model](docs/concepts/security-model.md): What an agent can reach, what it cannot, where secrets live, how the four egress modes limit its network, and what clean --all removes.
+- [Security model](docs/concepts/security-model.md): What an agent can reach, what it cannot, where secrets live and how a connection brokers them, how the four egress modes limit its network, and what clean --all removes.
 - [Observability](docs/concepts/observability.md): Dockingbird gives numbers from three sources, each agent, each host and the fleet scheduler's admitter, and never any message text or repository content.
 - [Message persistence](docs/concepts/message-persistence.md): Where bus messages and deliveries are stored, what survives a restart, an update, a roll to a new engine and a take-over, what each delivery state means, and when old message bodies expire.
 
@@ -37,7 +37,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 
 - [The daily loop](docs/guides/daily-loop.md): Start an agent at your terminal, read status, take its commits with sync, stop, and recover when a laptop sleeps, a terminal closes or an agent ends with work not shared.
 - [Delegating tasks](docs/guides/delegating-tasks.md): Hand an agent a task on the bus, wait for it, read its messages, answer its questions, send more work and save its files.
-- [Connections](docs/guides/connections.md): A connection lets agents use a GitHub repo, a folder, a database, a program, an MCP server or a browser while the secret stays with Dockingbird.
+- [Connections](docs/guides/connections.md): A connection lets agents use a GitHub repo, a folder, a database, a program, an MCP server or a browser while the secret stays with Dockingbird; this page lists every connect option, how a request is brokered, and how access ends.
 - [Your own commands](docs/guides/your-own-commands.md): Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo, with a fallback tool for its failed turns.
 - [Give agents skills](docs/guides/skills.md): Give an agent skills its tool lists as its own, at one start, from a config, on a running agent or for a swarm role.
 - [Toolchains and dependencies](docs/guides/toolchains.md): See, install, lock and change the language versions agents get from your repo's mise.toml or .tool-versions.
@@ -129,7 +129,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [org.toml and the password file](docs/reference/files/org-file.md): The keys of org.toml, the file that names your organisation's store, and the ~/.pgpass line that holds each role's password.
 - [Swarm definition file](docs/reference/files/swarm-definition.md): Every top-level key and every role key of a swarm definition at schema 1, its parameters and placeholders, where a role's model and effort come from, its fallback table and the values a submit takes.
 - [app.toml, the keys of a config](docs/reference/files/app-config.md): Every key of a config file such as .dockingbird/app.toml, its [fallback] table and error classes among them, with its values, its default and what it fixes.
-- [Role and connection files](docs/reference/files/roles-and-connections.md): The keys of a library role file and the library's index.toml, a service connection file with its argument keys, and a subagent block.
+- [Role and connection files](docs/reference/files/roles-and-connections.md): The keys of a library role file and the library's index.toml, a service connection file with its argument keys, a reviewed connection catalog, and a subagent block.
 - [What dockingbird init writes](docs/reference/files/project-file.md): The files dockingbird init writes into a repo, and every key of .dockingbird/project.toml.
 - [The home folder layout](docs/reference/files/home-layout.md): What lives where under a Dockingbird home, which files you may edit, and how a second home by name works.
 - [The fleet store](docs/reference/files/fleet-store.md): The three schemas of the organisation's PostgreSQL 18 store, its role groups, the order of a migration and which migrations need older workers restarted first.
