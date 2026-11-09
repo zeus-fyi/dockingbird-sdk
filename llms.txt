@@ -68,6 +68,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Draw the metrics in Grafana](docs/guides/grafana.md): Import the default Dockingbird dashboard into your own Grafana, read its five rows, add a host, and set three alerts.
 - [Harbor benchmark tasks](docs/guides/harbor.md): Run a Harbor benchmark task's two baselines and one real trial with your own login, then list, read and clean its jobs.
 - [The GUI](docs/guides/gui.md): Install the Dockingbird GUI with dockingbird ui --install, open and stop it, read its agent tabs, inbox and hosts sidebar, use its keys and mouse, and fix its message ids.
+- [Run your own control plane](docs/guides/control-plane-setup.md): Make a home the control plane, run its NATS hub, serve port 4222 to your private network, join and remove computers, check the hub, back it up, upgrade it and read what fails.
 - [Host load protection](docs/guides/host-load-protection.md): Why a start is refused with HOST_AGENT_CAP or HOST_OVERLOADED, what the start guard checks, how to wait for room with start --wait, and how to read the host's load.
 - [Reliable messages](docs/guides/reliable-messages.md): Mark a message so it stays open until its target replies, demand a reply to a task, expect a message and be alerted when it never arrives, and send one message to a group of agents.
 - [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
