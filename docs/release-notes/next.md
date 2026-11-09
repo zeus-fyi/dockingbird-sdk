@@ -13,5 +13,5 @@ commands:
 | | |
 |---|---|
 | Entries | none yet |
-| Released versions | one file per tag in this folder; the first is [v0.6.5.md](v0.6.5.md) |
+| Released versions | [v0.6.5.md](v0.6.5.md) has its own page, and [v0.7.0 to v0.15.28](changes-v0.7.0-to-v0.15.28.md) share one page |
 | Changelog | [CHANGELOG.md](../../CHANGELOG.md) |

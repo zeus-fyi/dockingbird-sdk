@@ -3,4 +3,5 @@
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](llms.txt).
 
 - [Next release, draft](docs/release-notes/next.md): changes that will ship in the next release, added one by one as they land.
+- [v0.7.0 to v0.15.28](docs/release-notes/changes-v0.7.0-to-v0.15.28.md): one page for the 42 releases after v0.6.5, newest first, with each release's new commands and flags, changed defaults and upgrade steps.
 - [v0.6.5](docs/release-notes/v0.6.5.md): adds `dockingbird fleet hosts set`, `rename` and `forget`, which edit `hosts.toml` for you. The fleet now places a swarm in the pool's host order.
