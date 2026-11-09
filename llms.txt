@@ -46,7 +46,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Egress and what agents can reach](docs/guides/egress-and-network.md): Choose how far an agent reaches on the network, with four egress modes, an allowlist, and what a blocked host sees.
 - [Hosts](docs/guides/hosts.md): Add a second computer or a cloud VM as a host, read every agent on every host, attach to one, and read one Mac's load.
 - [Licensing](docs/guides/licensing.md): Activate a computer, read its status, list and free seats, move a seat to a new laptop, give a seat back, start a trial, and read each license message.
-- [Updates](docs/guides/updates.md): Check for a new release, update with or without agents running, pin a tool version, read homes on other versions, and move a fleet to a release.
+- [Updates](docs/guides/updates.md): Check for a new release, update with or without agents running, know which changes cannot be undone, pin a tool version, read homes on other versions, and move a fleet to a release.
 - [Start agents from your own Claude Code or Codex](docs/guides/mcp-server.md): Install dockingbird mcp into your own harness so it starts agents, messages them, reads their replies and saves their results through eleven tools.
 - [Clean and uninstall](docs/guides/clean-and-uninstall.md): Free disk, delete stopped agents, remove everything Dockingbird made, give the seat back and uninstall the tool.
 - [Backup and restore](docs/guides/backup-and-restore.md): What a Dockingbird home and its Docker volumes hold, what to save before you replace a computer, and how to start fresh on the new one.
