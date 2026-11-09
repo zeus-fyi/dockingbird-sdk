@@ -25,7 +25,7 @@ Commit all of them with `git add .dockingbird .agents .claude && git commit`, so
 | `.dockingbird/rules.md` | the lines every agent of the project gets after Dockingbird's own rules; an agent's whole rules text may be 64 KB at most | never rewritten |
 | `.dockingbird/swarms/example/` | an example swarm; fill its `[placement] hosts` from `dockingbird fleet hosts`, then `dockingbird fleet submit .dockingbird/swarms/example` | never rewritten |
 | `.dockingbird/roles/` | the role library: `index.toml` and one file for each shipped role (`coordinator`, `implementer`, `reviewer`, `tester`, `reader` and `hands`) with its texts, which you edit freely; see [roles-and-connections.md](roles-and-connections.md) | changed only where a new release changed a file you have not edited; `--force` replaces an edited one |
-| `.agents/skills/` | this release's skills | changed only where a new release changed a file |
+| `.agents/skills/` | this release's skills; `dockingbird-swarm` holds the swarm skill's text, scripts and `library/` of ready swarm definitions, `standard/` and `task-branches/` (see [the swarms guide](../../guides/swarms.md)) | changed only where a new release changed a file |
 | `.claude/skills` | a link to `../.agents/skills` | kept |
 | `.claude/agents/` | this release's agent definitions | changed only where a new release changed a file |
 | `.dockingbird/skills.lock` | every file `init` installed, each with its digest and its source; it names no release | changes with the files it lists; a lock in the older format, which named a release, counts as out of date for `init --check`, and the next `init` rewrites it once |

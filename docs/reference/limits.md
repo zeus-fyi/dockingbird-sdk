@@ -33,6 +33,28 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Fallback pick-ups | 3 per agent | the pick-ups the fallback watcher on this computer runs for an agent before `status` names the command | [your-own-commands.md](../guides/your-own-commands.md#a-fallback-tool) |
 | `fleet probe` | 20 seconds per read, 60 seconds in all | a read of this Mac and its Docker | [hosts.md](../guides/hosts.md) |
 
+## Messages and retention
+
+Every setting here is a `DOCKINGBIRD_` variable. [environment-variables.md](environment-variables.md#message-settings) gives its full name and says how a change reaches Dockingbird, and a value outside its bounds stops the command before it runs.
+
+| Bound | Figure | What it limits | Explained in |
+|---|---|---|---|
+| Message bodies | 90 days by default, 1 to 365 | a body is marked expired after this long, a read of it is then refused with `CONTENT_EXPIRED`, and the next retention pass deletes it; the envelope stays; `MESSAGE_BODY_RETENTION_DAYS` | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| Events | 30 days by default, 1 to 3,650 | the bus's replay history; `EVENT_RETENTION_DAYS` | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| Request receipts | 90 days by default, 3 to 3,650 | the records that make a retried send return its first result; `REQUEST_RECEIPT_RETENTION_DAYS` | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| Rows deleted per table in one pass | 10,000 by default, 1 to 1,000,000 | a retention pass runs at the start of a host command, at most once an hour, so a large backlog takes several passes; `RETENTION_PRUNE_BATCH_ROWS` | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| Pending delivery expiry | 7 days by default, 1 to 90 | a delivery that stays `pending` this long expires, accepted work never does; `MESSAGE_EXPIRY_DEFAULT_DAYS` | [message-persistence.md](../concepts/message-persistence.md#limits-on-pending-work) |
+| Pending deliveries of one session | 200 by default, 10 to 10,000 | with this many waiting, the next send to that session is refused with `PROJECT_BUSY` and the reason `BACKPRESSURE`; `PENDING_DELIVERIES_MAX` | [message-persistence.md](../concepts/message-persistence.md#limits-on-pending-work) |
+| Time between reminders of one message | 300 seconds by default, 60 to 3,600 | how long a pending delivery waits before the target sees it again; `SURFACE_REMINDER_INTERVAL_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Reminders per message | 2 by default, 0 to 5 | the times a delivery is shown again; `STOP_REMINDERS_MAX` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Reply deadline of a P0 message | 120 seconds by default, 10 to 3,600 | the time after the send when the sender gets one `reply overdue:` alert for a marked message; `P0_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Reply deadline of a P1 message | 900 seconds by default, 60 to 86,400 | the same for P1; `P1_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Reply deadline of a P2 message | 14,400 seconds by default, 300 to 604,800 | the same for P2; `P2_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Reply deadline of a P3 message | 86,400 seconds by default, 3,600 to 604,800 | the same for P3; `P3_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Recipients of one send | none by default (0), any whole number from 0 | a positive value refuses a send whole when it lists, or a group expands to, more recipients; `RECIPIENTS_MAX` | [reliable-messages.md](../guides/reliable-messages.md) |
+
+P0 must stay below P1, and P1 below P2.
+
 ## Files and sizes
 
 | Bound | Figure | What it limits | Explained in |

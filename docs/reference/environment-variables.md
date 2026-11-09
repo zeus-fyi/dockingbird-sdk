@@ -14,7 +14,7 @@ commands:
 
 Settings reach Dockingbird through the shell that runs it, and each one is spelled `DOCKINGBIRD_` followed by its name.
 Dockingbird hands every exported setting to the containers that read it, which is why a setting never sits at its default without you knowing.
-Only one variable names a folder, `DOCKINGBIRD_HOME`, and two runtime settings, the database statement timeout and the MCP response size, are documented by name.
+Only one variable names a folder, `DOCKINGBIRD_HOME`. The database statement timeout, the MCP response size and the message settings below are documented by name.
 
 ## Variables you may set
 
@@ -24,6 +24,28 @@ Only one variable names a folder, `DOCKINGBIRD_HOME`, and two runtime settings, 
 | `DOCKINGBIRD_DB_QUERY_TIMEOUT_S` | a whole number within its bounds | its built-in value | how long one database statement may run, for the check of `connect --database` and for the agents' queries; `export DOCKINGBIRD_DB_QUERY_TIMEOUT_S=60` raises it |
 | `DOCKINGBIRD_MCP_MAX_CHARS` | a whole number from 1350 to 8000 | 8000 | the most Unicode characters one response of Dockingbird's MCP tools holds, which bounds the context a tool response costs the agent; a value outside 1350 to 8000 stops the command before it runs, since 0.15.11 raised the minimum from 1200, and a home that set a value from 1200 to 1349 must raise it to 1350 or unset it |
 | `DOCKINGBIRD_<NAME>` | a whole number within its bounds | its built-in value | any other runtime setting of Dockingbird: a poll interval, a timeout or a page size; the name is upper case and spelled exactly |
+
+## Message settings
+
+These runtime settings follow the rules of [how a setting behaves](#how-a-setting-behaves). Set one in the shell that runs `dockingbird`, then run `dockingbird stop` and the next command, as [the persistence page](../concepts/message-persistence.md#change-the-retention) shows. [limits.md](limits.md#messages-and-retention) lists the same bounds beside the others.
+
+| Variable | Values | Default | What it does | Explained in |
+|---|---|---|---|---|
+| `DOCKINGBIRD_MESSAGE_BODY_RETENTION_DAYS` | a whole number from 1 to 365 | 90 days | how long a message body is kept before a read of it is refused with `CONTENT_EXPIRED` and the next retention pass deletes it | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| `DOCKINGBIRD_EVENT_RETENTION_DAYS` | a whole number from 1 to 3,650 | 30 days | how long the bus's replay history is kept | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| `DOCKINGBIRD_REQUEST_RECEIPT_RETENTION_DAYS` | a whole number from 3 to 3,650 | 90 days | how long the records that make a retried send return its first result are kept | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| `DOCKINGBIRD_RETENTION_PRUNE_BATCH_ROWS` | a whole number from 1 to 1,000,000 | 10,000 | the most rows one retention pass deletes from each table | [message-persistence.md](../concepts/message-persistence.md#retention) |
+| `DOCKINGBIRD_MESSAGE_EXPIRY_DEFAULT_DAYS` | a whole number from 1 to 90 | 7 days | how long a delivery may stay `pending` before it expires; a sender that names no expiry gets it | [message-persistence.md](../concepts/message-persistence.md#limits-on-pending-work) |
+| `DOCKINGBIRD_PENDING_DELIVERIES_MAX` | a whole number from 10 to 10,000 | 200 | the pending deliveries one target session holds; the next send past it is refused with `PROJECT_BUSY` and the reason `BACKPRESSURE` | [message-persistence.md](../concepts/message-persistence.md#limits-on-pending-work) |
+| `DOCKINGBIRD_SURFACE_REMINDER_INTERVAL_S` | a whole number from 60 to 3,600 | 300 seconds | the time between reminders of one pending delivery | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_STOP_REMINDERS_MAX` | a whole number from 0 to 5 | 2 | the reminders of one delivery | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_P0_ACCEPTANCE_DEADLINE_S` | a whole number from 10 to 3,600 | 120 seconds | the time after the send when a P0 marked message is overdue | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_P1_ACCEPTANCE_DEADLINE_S` | a whole number from 60 to 86,400 | 900 seconds | the same for P1 | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_P2_ACCEPTANCE_DEADLINE_S` | a whole number from 300 to 604,800 | 14,400 seconds | the same for P2 | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_P3_ACCEPTANCE_DEADLINE_S` | a whole number from 3,600 to 604,800 | 86,400 seconds | the same for P3 | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| `DOCKINGBIRD_RECIPIENTS_MAX` | 0 or a positive whole number | 0, which bounds nothing | the most recipients one send lists or a group expands to; a send over a positive value is refused whole | [reliable-messages.md](../guides/reliable-messages.md#4-send-one-message-to-a-group) |
+
+P0 must stay below P1, and P1 below P2. A value that breaks that order stops the command before it runs.
 
 ## Variables Dockingbird sets inside an agent's container
 
