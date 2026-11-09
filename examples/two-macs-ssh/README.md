@@ -15,7 +15,7 @@ commands:
 
 # Two Macs, over ssh
 
-You work on one Mac, and another Mac, `lab`, runs agents of its own. Once this Mac knows how to reach `lab`, the fleet commands show `lab`'s homes and agents beside this Mac's own, `local`. The GUI that shows them in one window is not yet available. [Hosts](../../docs/guides/hosts.md) is the guide behind this example.
+You work on one Mac, and another Mac, `lab`, runs agents of its own. Once this Mac knows how to reach `lab`, the fleet commands show `lab`'s homes and agents beside this Mac's own, `local`. The [GUI](../../docs/guides/gui.md) lists the hosts in its sidebar and adds, renames or forgets one. [Hosts](../../docs/guides/hosts.md) is the guide behind this example.
 
 ## Before you start
 

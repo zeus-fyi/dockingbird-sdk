@@ -22,7 +22,7 @@ An agent whose tools include `bus_send`, started on a home that joined a control
 | `fleet_wait` | waits for a delivery | the agent's own fleet inbox |
 | `fleet_thread` | works with a fleet thread | the agent's own fleet session |
 | `fleet_withdraw` | withdraws a message | the agent's own fleet session |
-| `fleet_artifact_put` | puts an attachment, at most 1,048,576 bytes, that a message can name | the agent's own fleet session |
+| `fleet_artifact_put` | puts an attachment, text of at most 262,144 bytes, that a message can name | the agent's own fleet session |
 | `fleet_artifact_get` | gets an attachment a message names | the agent's own fleet session |
 | `fleet_whoami` | tells the agent who it is in the fleet | the agent's own fleet session |
 

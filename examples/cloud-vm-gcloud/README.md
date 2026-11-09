@@ -11,7 +11,7 @@ commands:
 
 # A Mac and a cloud VM, over gcloud
 
-Your Mac reaches a Compute Engine VM, `cloud-1` in the zone `europe-west1-b` of the project `example-project`, that runs Dockingbird on arm64 Linux with Docker Engine. Under the name `cloud`, the fleet commands show its homes and agents beside your Mac's own, `local`. The GUI that shows them in one window is not yet available. [Cloud VMs](../../docs/guides/cloud-vms.md) is the guide behind this example.
+Your Mac reaches a Compute Engine VM, `cloud-1` in the zone `europe-west1-b` of the project `example-project`, that runs Dockingbird on arm64 Linux with Docker Engine. Under the name `cloud`, the fleet commands show its homes and agents beside your Mac's own, `local`. The [GUI](../../docs/guides/gui.md) lists the hosts in its sidebar and adds, renames or forgets one. [Cloud VMs](../../docs/guides/cloud-vms.md) is the guide behind this example.
 
 ## Before you start
 

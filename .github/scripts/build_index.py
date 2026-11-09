@@ -65,7 +65,7 @@ DOMAINS = (
 )
 DOMAIN_OF = {prefix: domain[0] for domain in DOMAINS for prefix in domain[4].split()}
 DOMAIN_TITLES = {domain[0]: domain[1][:1].upper() + domain[1][1:] for domain in DOMAINS}
-DOMAIN_NOTES = {"gui-and-mcp": "The Dockingbird GUI is not yet available to customers."}
+DOMAIN_NOTES = {"gui-and-mcp": "Install the Dockingbird GUI with `dockingbird ui --install`; [the GUI guide](../guides/gui.md) has the steps."}
 
 
 def paths(folder, names, suffix=""):
@@ -77,15 +77,15 @@ PAGE_GROUPS = (
     ("Start here", ("docs/getting-started/",), ["README.md", "docs/quickstart.md"] + paths(
         "docs/getting-started/", "prerequisites.md install.md activate.md first-run.md choose-a-topology.md")
      + ["docs/agent-setup-prompt.md", "docs/faq.md"]),
-    ("Concepts", ("docs/concepts/",), paths("docs/concepts/", "architecture.md glossary.md agents-and-the-bus.md "
+    ("Concepts", ("docs/concepts/",), paths("docs/concepts/", "architecture.md glossary.md agents-and-the-bus.md message-persistence.md "
      "sync-model.md claude-code-and-codex.md swarms-and-roles.md fleet-and-hosts.md fleet-scheduler.md "
      "control-plane.md licensing-model.md hosting-paradigms.md security-model.md observability.md")),
-    ("Guides", ("docs/guides/",), paths("docs/guides/", "daily-loop.md delegating-tasks.md connections.md "
+    ("Guides", ("docs/guides/",), paths("docs/guides/", "daily-loop.md delegating-tasks.md reliable-messages.md connections.md "
      "your-own-commands.md skills.md toolchains.md trust-and-repo-settings.md sign-in-and-api-keys.md egress-and-network.md "
      "hosts.md licensing.md updates.md mcp-server.md clean-and-uninstall.md backup-and-restore.md "
-     "data-and-privacy.md networking.md tailscale.md other-networks.md cloud-vms.md github.md mcp-and-services.md "
-     "databases.md secrets-vault.md swarms.md work-queue.md team-fleet.md fleet-scheduler.md metrics.md "
-     "prometheus.md grafana.md harbor.md gui.md")),
+     "data-and-privacy.md networking.md tailscale.md other-networks.md cloud-vms.md github.md mcp-and-services.md agent-browser.md "
+     "databases.md secrets-vault.md swarms.md work-queue.md team-fleet.md control-plane-setup.md fleet-scheduler.md host-load-protection.md metrics.md "
+     "prometheus.md grafana.md harbor.md gui.md swarm-parameters.md")),
     ("Cookbooks and examples", ("examples/",), paths("examples/", (
         "one-mac recover-from-a-failed-install move-your-seat database-without-the-password your-own-review-command "
         "two-macs-ssh cloud-vm-gcloud lock-tool-versions restrict-egress update-with-agents-running "
@@ -99,9 +99,10 @@ PAGE_GROUPS = (
      "integration/json.md integration/mcp.md integration/compatibility.md files/hosts-file.md files/org-file.md "
      "files/swarm-definition.md files/app-config.md files/roles-and-connections.md files/project-file.md "
      "files/home-layout.md files/fleet-store.md environment-variables.md limits.md ports-and-hosts.md metrics.md "
-     "fleet-tools.md") + ["docs/search.md"]),
+     "agent-tools.md fleet-tools.md") + ["docs/search.md"]),
     ("Optional", ("docs/release-notes/", "docs/legal/", "docs/"), ["docs/operator-guide.md",
-     "docs/release-notes/next.md", "docs/legal/eula.md", "docs/legal/privacy.md"]),
+     "docs/release-notes/next.md",
+     "docs/release-notes/changes-v0.7.0-to-v0.15.28.md", "docs/legal/eula.md", "docs/legal/privacy.md"]),
 )
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
