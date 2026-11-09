@@ -30,7 +30,7 @@ Every choice starts with the one-computer set-up, so finish [first run](first-ru
 | One computer | One person, one Mac | Nothing | [One Mac](../../examples/one-mac/README.md) | [Quickstart](../quickstart.md), [daily loop](../guides/daily-loop.md) |
 | Two computers over ssh | You have a second Mac or Linux host you reach with ssh | A host, with `dockingbird fleet hosts set NAME --ssh DEST` | [Two Macs](../../examples/two-macs-ssh/README.md) | [Hosts](../guides/hosts.md), [hosts file](../reference/files/hosts-file.md) |
 | A cloud VM | The second computer is a Compute Engine VM | A host, with `dockingbird fleet hosts set NAME --gcloud VM --zone ZONE --project PROJECT` | [Cloud VM](../../examples/cloud-vm-gcloud/README.md) | [Cloud VMs](../guides/cloud-vms.md), [hosts](../guides/hosts.md) |
-| A team pool | Several people share hosts and a queue of swarms | A PostgreSQL 18 store, an org login, a worker on each host | [Team fleet](../../examples/team-fleet/README.md) | [Team fleet](../guides/team-fleet.md), [fleet scheduler](../guides/fleet-scheduler.md), [swarms](../guides/swarms.md) |
+| A team pool | Several people share hosts and a queue of swarms | A PostgreSQL 18 store, an org login, a worker on each host | [Team fleet](../../examples/team-fleet/README.md) | [Team fleet](../guides/team-fleet.md), [control plane setup](../guides/control-plane-setup.md), [fleet scheduler](../guides/fleet-scheduler.md), [swarms](../guides/swarms.md) |
 
 The license does not depend on the topology: one seat is one person with up to three computers.
 [Activate](activate.md) explains seats.
@@ -78,7 +78,7 @@ It needs a PostgreSQL 18 store that your organisation runs. It also needs one ad
 Each computer logs in once with `dockingbird org login HOST:PORT --as user --role ROLE`, and `dockingbird fleet submit` queues a swarm.
 
 Computers can also join a control plane, so agents on different computers can message each other. The control plane is a home of its own, made with `dockingbird cp init`.
-Each joining computer runs `dockingbird node join` with a bundle the control plane makes for it.
+Each joining computer runs `dockingbird node join` with a bundle the control plane makes for it. You run the control plane and its hub yourself, and [Run your own control plane](../guides/control-plane-setup.md) walks through it.
 
 A store that Zeusfyi hosts for you is not yet available.
 [Team fleet](../guides/team-fleet.md) installs the store and both features, in order.

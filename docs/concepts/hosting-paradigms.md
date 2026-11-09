@@ -21,7 +21,7 @@ In all three, the seat is one person with up to three computers, and license che
 
 ## Run it yourself
 
-This is the one arrangement you can use today. Your organisation runs a PostgreSQL 18 store and creates its schemas with `dockingbird org create`, run as the `fleet_admin` role. `dockingbird org login` points each computer at the store, and the login's password stays in `~/.pgpass`, never in the pointer file. Each pool machine runs a worker, and one machine that stays awake runs the admitter. Your own computers or cloud VMs are the hosts, reached over your own ssh or gcloud.
+This is the one arrangement you can use today. Your organisation runs a PostgreSQL 18 store and creates its schemas with `dockingbird org create`, run as the `fleet_admin` role. `dockingbird org login` points each computer at the store, and the login's password stays in `~/.pgpass`, never in the pointer file. Each pool machine runs a worker, and one machine that stays awake runs the admitter. Your own computers or cloud VMs are the hosts, reached over your own ssh or gcloud. A control plane, if your team uses one, is yours too: its NATS hub runs on your own computer or VM, as [Run your own control plane](../guides/control-plane-setup.md) shows.
 
 You do not need the store for every setup. One computer needs nothing beyond `dockingbird claude`. A second computer needs only a `hosts.toml` entry and an ssh or gcloud route. The store matters when a team shares a queue and a pool.
 
@@ -68,6 +68,7 @@ Text alternative. Only the first of the three setups works today. There, your or
 |---|---|
 | [Choose a topology](../getting-started/choose-a-topology.md) | Picks one computer, two computers, a cloud VM or a team pool. |
 | [Team fleet](../guides/team-fleet.md) | Installs the store, the worker, the admitter and the control plane. |
+| [Run your own control plane](../guides/control-plane-setup.md) | Runs the control plane and its hub alone, with no store. |
 | [The fleet scheduler](../guides/fleet-scheduler.md) | Runs the pool once the store exists. |
 | [Hosts](../guides/hosts.md) | Adds a second computer without a store. |
 | [The team fleet example](../../examples/team-fleet/README.md) | Shows a pool of two hosts. |
