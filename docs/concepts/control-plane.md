@@ -9,13 +9,13 @@ commands: []
 
 # The control plane
 
-This page is for teams. It explains what the control plane is, how a computer joins it and what it holds. The commands are on [the team fleet guide](../guides/team-fleet.md).
+This page is for teams. It explains what the control plane is, how a computer joins it and what it holds. [Run your own control plane](../guides/control-plane-setup.md) sets one up step by step, and [the team fleet guide](../guides/team-fleet.md) installs it with the scheduler's store.
 
 A control plane is one Dockingbird home that you turn into the fleet's meeting point with `cp init`. Other computers join it from one of their own homes with `node join`. Once a computer has joined, each agent started on it gets a fleet inbox on the control plane, beside the inbox on its own home. Through that inbox an agent can message an agent on another computer. The control plane and the [fleet scheduler](fleet-scheduler.md) are separate features. A team can use either alone or both together.
 
 ## How a computer joins
 
-The control plane's hub listens on a TCP port, 4222, on the control plane's computer. Docker publishes that port on the loopback address only. Until you serve the port to your private network, no other computer reaches it.
+You run the control plane and its hub on your own computer or VM. The hub is `nats-server` 2.15.1, which the Dockingbird image carries and `cp init` starts in a container named `dockingbird-cp-relay`. It listens on TCP port 4222 of the control plane's computer, and Docker publishes that port on the loopback address only. Until you serve the port to your private network, no other computer reaches it. The hub has no TLS and stores nothing: each client signs in with its own key, and every message, delivery and thread is a row in the control plane home's database.
 
 `cp token` adds one computer. You give it a label and a platform, and it prints one line, the bundle. The bundle holds the computer's hub address, node id, label, key and token. The control plane shows it once and stores it nowhere. You paste the bundle into `node join` on that computer's home. Each bundle joins once.
 
@@ -59,10 +59,11 @@ A home's work, runs, claims and publication stay on the home. A fleet thread and
 - It never accepts a bundle twice. Joining again takes `cp remove`, a new `cp token` and `node leave` first.
 - It never protects a frame better than your network does. Frames between computers are as private as the tailnet or network that carries them.
 
-A computer that was removed or lost its home joins again with a new bundle. The first `dockingbird cp status` after the control plane's computer restarts starts the control plane again. The fleet sessions survive as rows, and every member reconnects by itself.
+A computer that was removed or lost its home joins again with a new bundle. If the hub's container stops, Docker restarts it up to 5 times. After that, and after the control plane's computer restarts, the next command on its home, such as `dockingbird cp status`, starts it again. The fleet sessions survive as rows, and every member reconnects by itself.
 
 ## Where to go next
 
-- [Install and join with the team fleet guide](../guides/team-fleet.md).
+- [Run your own control plane](../guides/control-plane-setup.md): the hub, the serve step, joining, checking, upgrading and what fails.
+- [Install a team fleet](../guides/team-fleet.md), to add the scheduler's store.
 - [Put the hub on a tailnet](../guides/tailscale.md).
 - [Cookbook: join a second computer to a control plane](../../examples/join-a-computer-to-a-control-plane/README.md).
