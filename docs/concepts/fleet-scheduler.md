@@ -76,6 +76,27 @@ A workload waits while no host passes every check: its gate lines are green, the
 | a missing connection | the placed home has no enabled connection of a name one of its roles lists, so no agent started (`fleet why` says which) |
 | your own hold | you ran `fleet hold ID --reason TEXT` |
 
+### A held agent
+
+An agent whose start is refused is held. `fleet queue` prints `  held: NAME: REASON` under the swarm with the refusal the start gave. `fleet why ID` prints `NAME is held after REASON; fleet replace or fleet retire frees its slot.` `fleet replace ID NAME` starts the agent again, and `fleet retire ID NAME` gives its slot back. A start refused because the swarm's clone holds an unfinished merge does not hold the agent at once. The fleet puts the start back in the queue for up to 10 claims, about five minutes, and holds the agent only if the merge is still open then.
+
+## The start guard
+
+Before Dockingbird makes an agent's container, a guard on the host checks that the host has room. It runs for every start in every home of the host, whoever asks: you, a coordinator, the MCP server's `agent_start` or the fleet engine. No flag skips it, and it stops, pauses and moves nothing that already runs.
+
+| Order | Check | Refuses with | When |
+|---|---|---|---|
+| 1 | The agent cap | `HOST_AGENT_CAP` | the home runs 24 agents, counting the starts the host's worker has not sampled yet |
+| 2 | The age of the host's reading | `HOST_OVERLOADED`, stale form | the worker's file `guard.json` is older than 180 seconds or does not parse |
+| 3 | The host's gate lines | `HOST_OVERLOADED` | a line reads red on that reading, less what the starts not yet sampled hold |
+
+- The cap counts running agents only, in the default home too. A host that runs more than 24 agents needs a second home on it.
+- A computer outside the pool has no worker and no `guard.json`, so the cap is its one check.
+- A start the fleet engine announced is counted and never refused. So is a start inside a `fleet run` lease that the host runs.
+- `dockingbird start --wait TIME` decides again every 30 seconds until the host has room or the time is up.
+
+[Host load protection](../guides/host-load-protection.md) shows each refusal and what to do about it.
+
 ## What it never does
 
 - It never stops an agent during a turn. Pause, cancel, done, retire and replace each wait for the running turn to end.
@@ -88,4 +109,5 @@ A workload waits while no host passes every check: its gate lines are green, the
 - [Install and run both features](../guides/team-fleet.md).
 - [Run work on the pool](../guides/fleet-scheduler.md).
 - [Write and change swarms](../guides/swarms.md).
+- [Read a start refusal and wait for room](../guides/host-load-protection.md).
 - [The store's schemas and roles](../reference/files/fleet-store.md).
