@@ -58,7 +58,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Cloud VMs](docs/guides/cloud-vms.md): Prepare a Linux VM as a host, add it through gcloud or ssh, let the pool's admitter start it when stopped, size its disk, and join it to a fleet.
 - [Connect agents to GitHub](docs/guides/github.md): Connect one GitHub branch so agents fetch and push it while the ssh key stays with Dockingbird.
 - [MCP servers, services and browsers for agents](docs/guides/mcp-and-services.md): Give agents an MCP server by URL, a program of yours with typed arguments, or a browser, and serve them as yourself.
-- [An agent's own browser](docs/guides/agent-browser.md): Give an agent a full Google Chrome of its own in a container, turn it on in an added config, watch and take over its screen, and see how it ends with the agent.
+- [An agent's own browser](docs/guides/agent-browser.md): Give an agent a full Google Chrome of its own in a container, turn it on in an added config, watch and take over its screen, hand its captcha pages to a solver of yours, and see how it ends with the agent.
 - [Give agents a database](docs/guides/databases.md): Connect a PostgreSQL database so agents query it, and write to it through a broker, without ever seeing its address or password.
 - [Sign agents in with a password vault](docs/guides/secrets-vault.md): Connect a gopass store so Dockingbird types a login's password and one-time code into an agent's browser, in its own Docker browser or on your Mac's Chrome, and the agent sees neither.
 - [Swarms](docs/guides/swarms.md): Write a swarm definition, choose each role's model and effort, check it, submit it with values, follow it in the queue and change it while it runs.
