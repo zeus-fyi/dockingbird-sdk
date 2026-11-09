@@ -16,7 +16,9 @@ commands:
   - dockingbird env
   - dockingbird homes
   - dockingbird start
+  - dockingbird harbor
   - dockingbird send
+  - dockingbird expect
   - dockingbird inbox
   - dockingbird read
   - dockingbird questions
@@ -37,6 +39,8 @@ commands:
   - dockingbird org
   - dockingbird work
   - dockingbird inspect swarm
+  - dockingbird inspect capabilities|instances|config
+  - dockingbird repo release
   - dockingbird connect
   - dockingbird connections
   - dockingbird revoke
@@ -54,7 +58,7 @@ commands:
 
 Each table lists the commands of one group with their arguments, one line of purpose, the exit statuses they end with and the page that explains them.
 Statuses 0, 1 and 2 are on every command, and [exit-codes.md](integration/exit-codes.md) explains 69, 77, 78 and the tool's own.
-`dockingbird COMMAND -h` prints the same arguments from the installed release, and the unlisted `fleet`, `work` and `inspect swarm` commands are included here.
+`dockingbird COMMAND -h` prints the same arguments from the installed release, and the commands that `dockingbird -h` leaves out, such as `expect`, `fleet`, `work` and `inspect`, are included here.
 
 ## Global options
 
@@ -93,8 +97,9 @@ After a command, `--home NAME` belongs to `--host` on `status`, `swarm` and `ins
 
 | Command | Arguments | What it does | Exit | Guide |
 |---|---|---|---|---|
-| `start` | `[TASK] [--command NAME] [--terminal] [--bus] [--harness TOOL] [--fallback [TOOL]] [--fallback-model MODEL] [--fallback-effort LEVEL] [--fallback-placement any or require-login] [--egress MODE] [--cpus N] [--memory SIZE] [--compact-at N] [--session-hours N] [--cpu-shares N] [--pids-limit N] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [--skills PATHS] [--harness-config PATH] [--as NAME] [--swarm NAME] [--role ROLE] [--new] [--file PATH]... [--task -] [-- TOOL ARGS]` | gives an agent a task; it works in the background on the bus and `start` prints its name; `--fallback TOOL` and the three after it fill the keys of the `[fallback]` table a config leaves unset, and `--as NAME --fallback` picks up an agent that stopped to move on its fallback tool | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
-| `send` | `NAME TEXT [--file PATH]... [--reply-to ROW] [--kind KIND] [--payload JSON] [--withdraw ROW]` | answers an agent's question or gives it more to do | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
+| `start` | `[TASK] [--command NAME] [--terminal] [--bus] [--harness TOOL] [--fallback [TOOL]] [--fallback-model MODEL] [--fallback-effort LEVEL] [--fallback-placement any or require-login] [--egress MODE] [--cpus N] [--memory SIZE] [--compact-at N] [--session-hours N] [--cpu-shares N] [--pids-limit N] [--no-toolchain] [--no-deps] [--agent-md PATH] [--claude-md PATH] [--skills PATHS] [--harness-config PATH] [--as NAME] [--swarm NAME] [--role ROLE] [--new] [--wait TIME] [--file PATH]... [--task -] [-- TOOL ARGS]` | gives an agent a task; it works in the background on the bus and `start` prints its name; `--fallback TOOL` and the three after it fill the keys of the `[fallback]` table a config leaves unset, and `--as NAME --fallback` picks up an agent that stopped to move on its fallback tool; `--wait TIME`, such as `30m` or `2h`, waits up to that long for room when the host is busy, where a start otherwise refuses | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md), [host-load-protection.md](../guides/host-load-protection.md) |
+| `send` | `NAME TEXT [--file PATH]... [--reply-to ROW] [--kind KIND] [--payload JSON] [--withdraw ROW] [--requires-ack] [--reply-required]`, or `--all`, `--role ROLE`, `--swarm SWARM [--role ROLE]` followed by `TEXT` | answers an agent's question or gives it more to do; `--all`, `--role` and `--swarm` send one message to every live agent they name, of kind `status` unless `--kind` says another; `--requires-ack` keeps the message open until its target replies or acknowledges it; `--reply-required` demands a reply to a work message | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md), [reliable-messages.md](../guides/reliable-messages.md) |
+| `expect` | `KIND --from NAME --within SECONDS [--prefix TEXT] [--since TIME]`, `--list [--closed]`, `--withdraw ID` | registers a message you expect: one of KIND from the agent NAME, whose subject starts with `--prefix`, within SECONDS from now; the bus sends you one alert when none arrived in time; `--list` shows your open expectations, every state with `--closed`; `--withdraw` takes one back | 0, 1, 2 | [reliable-messages.md](../guides/reliable-messages.md) |
 | `inbox` | `[--all] [--page N] [--priority P0 to P3] [--questions] [--clear] [--swarm NAME,NAME] [--engine ID,ID] [--no-swarm]` | lists the questions and results waiting for you, one numbered row each | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `read` | `ROW [--keep] [--swarm NAME,NAME] [--engine ID,ID] [--no-swarm]` | reads one message in full; `--keep` leaves it unread | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `questions` | `[ROW]` | lists the open questions your agents ask, or shows one whole | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
@@ -102,12 +107,20 @@ After a command, `--home NAME` belongs to `--host` on `status`, `swarm` and `ins
 | `wait` | `[NAME] [--seconds SECONDS]` | waits up to 25 seconds by default for an agent's next message | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `results` | `NAME [--to DIR]` | saves the files an agent shared as files on your computer, overwriting nothing | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `search` | `TEXT` | finds the newest messages whose subject or body has every word of TEXT | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
-| `set` | `NAME [--model MODEL] [--effort LEVEL] [--compact-at POINT] [--harness-config PATH] [--skills PATHS] [--stop-after-turn] [--run-turns]` | changes a running bus agent's model, effort, compact point or tool settings file from its next turn; `--skills`, given alone, adds skills to a running agent; `--stop-after-turn` ends it after its running turn | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
+| `set` | `NAME [--model MODEL] [--effort LEVEL] [--compact-at POINT] [--harness-config PATH] [--skills PATHS] [--stop-after-turn] [--run-turns] [--switch-code KEY]` | changes a running bus agent's model, effort, compact point or tool settings file from its next turn; `--skills`, given alone, adds skills to a running agent; `--stop-after-turn` ends it after its running turn; `--switch-code KEY` asks it to take Dockingbird's code KEY at its next stopping point, and `-` takes the ask back; CPU and memory limits are set at start only | 0, 1, 2 | [delegating-tasks.md](../guides/delegating-tasks.md) |
 | `swarm list` | `[--json]` | lists each swarm of this home and how many agents it has | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
-| `swarm add` | `NAME --swarm SWARM [--role ROLE]` | puts an agent in a swarm and takes it out of any other | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
+| `swarm add` | `NAME --swarm SWARM [--role ROLE] [--send-to ROLES]` | puts an agent in a swarm and takes it out of any other; `--send-to` names the roles it may message (`a,b`), or `-` for its parent | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
 | `swarm remove` | `NAME` | takes an agent out of its swarm | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
-| `swarm role` | `NAME --role ROLE` | changes an agent's role in its swarm | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
+| `swarm role` | `NAME --role ROLE [--send-to ROLES]` | changes an agent's role in its swarm, and with `--send-to` the roles it may message | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
 | `swarm assign` | `NAME [--reviewer NAME] [--tester NAME] [--no-reviewer] [--no-tester]` | names the members that review and test an agent's work | 0, 1, 2 | [swarms.md](../guides/swarms.md) |
+| `harbor run` | `[--harbor-commit SHA] [--keep-images] [-p DIR] [-k N] [WORDS]` | runs a Harbor benchmark task of this folder on this computer, at the Harbor commit the task repo's CI pins; each WORD it does not read goes on to `harbor run` | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor baseline` | `[--harbor-commit SHA] [--keep-images] [-p DIR] [-k N] [WORDS]` | runs the task twice, with `-a oracle`, which must score 1, then `-a nop`, which must score 0, and names both jobs | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor jobs` | none | lists the jobs that ran | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor results` | `JOB` | shows one job's results | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor clean` | `[--all] [--yes]` | removes the jobs; `--all` removes Harbor itself too; `--yes` does not ask first | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor check` | `[--harbor-commit SHA] [WORDS]` | passes each WORD to `harbor check` | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `harbor version` | `[--harbor-commit SHA]` | prints the Harbor version of that commit, or of the one the repo's CI pins | 0, 1, 2 | [harbor.md](../guides/harbor.md) |
+| `repo release` | `--repository R [--json]` | drops one repository's registration: Dockingbird lists it no more, and the next start in its folder copies the branch again; R is the ID `repos.toml` records; a repository an agent still works in is refused | 0, 1, 2 | [home-layout.md](files/home-layout.md) |
 
 Each `swarm` action changes this home's record only: no agent starts, stops or is told.
 `swarm` also takes `--host NAME`, `--home NAME` and `--json`.
@@ -121,7 +134,7 @@ Each `swarm` action changes this home's record only: no agent starts, stops or i
 | `license status` | `[--refresh]` | shows the plan, the seats and the day the term ends; `--refresh` asks the license server first | 0, 1, 2 | [licensing.md](../guides/licensing.md) |
 | `license activations` | `[--release ID]` | lists the computers that hold a seat; `--release ID` frees one | 0, 1, 2 | [licensing.md](../guides/licensing.md) |
 | `license deactivate` | none | gives this computer's seat back | 0, 1, 2 | [licensing.md](../guides/licensing.md) |
-| `update` | `[--check]` | gets the newest Dockingbird with Claude Code and Codex; with agents running it stages the new version and switches when they end | 0, 1, 2 | [updates.md](../guides/updates.md) |
+| `update` | `[--check]` | gets the newest Dockingbird with Claude Code and Codex; with agents running, the new release takes over at once and each agent moves to it at its next stopping point, in the same container and with its conversation kept | 0, 1, 2 | [updates.md](../guides/updates.md) |
 | `pin` | `TOOL VERSION`, `--clear TOOL` | runs one version of Claude Code or Codex, or follows the latest again; writes `versions.toml` | 0, 1, 2 | [updates.md](../guides/updates.md) |
 | `clean` | `[NAME ...] [--all] [--yes]` | frees disk; with names, deletes those stopped agents; `--all` removes everything Dockingbird made after you type `delete` | 0, 1, 2 | [clean-and-uninstall.md](../guides/clean-and-uninstall.md) |
 | `completion` | `SHELL`, `--install [SHELL]` | prints the completion script for `zsh`, `bash` or `fish`, or installs it | 0, 1, 2 | [install.md](../getting-started/install.md) |
@@ -142,11 +155,12 @@ The scheduler's commands read your org login first; [org-file.md](files/org-file
 | `fleet hosts rename` | `OLD NEW` | renames a host in `hosts.toml` | 0, 1, 2, 69, 78 | [hosts.md](../guides/hosts.md) |
 | `fleet hosts forget` | `NAME` | removes a host from `hosts.toml` | 0, 1, 2, 69, 78 | [hosts.md](../guides/hosts.md) |
 | `fleet hosts add` | `NAME --os mac or linux --cores N --memory SIZE --line FIGURE=BOUND,CLEAR... [--agent-cap N] [--rank N] [--lease-headroom CORES,SIZE] [--no-swarms] [--power gcloud]` | adds a host to the pool | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
-| `fleet hosts policy` | `NAME [--takes-swarms yes or no] [--agent-cap N] [--rank N] [--line FIGURE=BOUND,CLEAR]...` | changes a pool host's policy | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| `fleet hosts policy` | `NAME [--takes-swarms yes or no] [--agent-cap N] [--rank N] [--line FIGURE=BOUND,CLEAR]... [--lease-headroom CORES,SIZE]` | changes a pool host's policy; `--lease-headroom` sets the part of its reservable share that swarms may not reserve into | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet hosts drain`, `undrain`, `remove` | `NAME` | drains a pool host so it takes no new work, undrains it, or removes it from the pool | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet describe` | `NAME or FOLDER or FILE [--project SLUG]` | prints a swarm definition's parameters and every role's settable fields as JSON, each with its type, its range or words, its default, where the default comes from and, for a parameter, the places it binds; connects to nothing | 0, 1, 2 | [swarm-parameters.md](../guides/swarm-parameters.md) |
 | `fleet submit` | `NAME or FOLDER or FILE [--set KEY=VALUE]... [--values FILE] [--key KEY] [--project SLUG]` | checks a swarm definition against every rule in one pass and queues it; `--set` is repeatable and takes a parameter (`N=6`), a role's setting (`grader.count=6`) or a subagent's (`grader.helper.max=4`); `--values` reads JSON of the shape `{"params": {...}, "roles": {...}}`, and a `--set` beats it for the same key; `--key` names the swarm | 0, 1, 2, 69, 77, 78 | [swarms.md](../guides/swarms.md) |
-| `fleet run` | `--cores N --memory SIZE --bound TIME [--wait TIME] [--hosts H,...] [--project SLUG] [--kind KIND --exclusive] -- CMD...` | leases capacity and runs a command under the lease | the command's own, 1, 2, 77, 78, 124 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| `fleet run` | `--cores N --memory SIZE --bound TIME [--wait TIME] [--hosts H,...] [--priority P] [--project SLUG] [--kind KIND --exclusive] -- CMD...` | leases capacity and runs a command under the lease; `--priority` is `P0` to `P3`, and a lease without it is `P2` | the command's own, 1, 2, 77, 78, 124 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| `fleet host-history` | `NAME [--since TIME]` | prints a pool host's samples, oldest first: the agents running there, the load Dockingbird did not start and each figure read; `--since` keeps those of that long back, a duration such as `30m` | 0, 1, 2, 69, 78 | [host-load-protection.md](../guides/host-load-protection.md) |
 | `fleet queue` | `[--host NAME] [--metrics]` | shows each host and workload | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet why`, `ledger`, `release`, `pause`, `resume`, `cancel`, `done` | `ID` | explains why a workload waits, shows its ledger, releases it, pauses it, resumes it, cancels it, or marks it done | 0, 1, 2, 69, 78 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet where` | `ID` | names the hosts a workload's agents are placed on, then one line per agent: its role, its step and the host and home it runs in, or `not placed` | 0, 1, 2, 69, 78 | [swarms.md](../guides/swarms.md) |
@@ -158,14 +172,14 @@ The scheduler's commands read your org login first; [org-file.md](files/org-file
 | `fleet prune` | `ID --merged SHA [--reason TEXT]` | prunes a swarm's agents after their commits merged | 0, 1, 2, 69, 78 | [swarms.md](../guides/swarms.md) |
 | `fleet update` | `[--release V] [--host NAME]` | moves the pool's hosts to a release, one after another, in the pool's order | 0, 1, 2, 69, 77, 78 | [updates.md](../guides/updates.md) |
 | `fleet worker` | `--host NAME` | runs a host's worker, a long-running service under the machine's service manager | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
-| `fleet admitter` | none | runs the admitter, a long-running service under the machine's service manager | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
-| `cp init` | `--hub-address IPV4` | makes this home the control plane; refused while agents run here | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
+| `fleet admitter` | `[--metrics-port N]` | runs the admitter, a long-running service under the machine's service manager; `--metrics-port` picks the port of its metrics, 9107 by default, and 0 asks for a free one | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
+| `cp init` | `--hub-address IPV4` | makes this home the control plane, its hub reached at IPV4 on your tailnet; refused while agents run here | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
 | `cp token` | `--host LABEL --platform P` | adds a computer and prints the join bundle once; P is `macos` or `linux` | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
 | `cp status` | none | lists the computers, their versions, their fleet inboxes and when each was last heard from | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
 | `cp remove` | `LABEL` | takes a computer out at once | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
-| `cp off` | none | makes this home a plain home again once no computer is in the fleet | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
-| `node join` | none | joins this computer to the fleet with the bundle read from standard input | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
-| `node leave` | none | leaves the fleet once no agent here still uses it | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
+| `cp off` | none | makes this home a plain home again once no computer is in the fleet; refused while agents run here | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
+| `node join` | none | joins this computer to the fleet with the bundle read from standard input, never from the command line; each agent started here from then on gets a fleet inbox beside its own; refused while agents run here | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
+| `node leave` | none | leaves the fleet once no agent here still uses it; the agents keep running | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
 | `org login` | `HOST[:PORT] --as KIND --role ROLE [--database NAME] [--project SLUG] [--password-stdin] [--replace]`, `--from-fleet-toml [PATH] --as KIND [--yes]` | signs this computer in to your organisation's store; KIND is `user`, `worker` or `admitter`; writes `org.toml` and `~/.pgpass` | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
 | `org status` | none | shows the login and connects once as `user` | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
 | `org logout` | `[--as KIND]` | takes the login away, or one kind's | 0, 1, 2 | [team-fleet.md](../guides/team-fleet.md) |
@@ -174,7 +188,7 @@ The scheduler's commands read your org login first; [org-file.md](files/org-file
 | `org roles` | `[set ROLE --harness H --model M [--effort E]]`, `[unset ROLE --harness H]` | lists or changes the model and effort of each kind of role; admin only | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
 | `org people` | `[add ROLE --account ACCOUNT]`, `[remove ROLE]` | lists or changes the store's persons; admin only | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
 | `org members` | `[--project SLUG]`, `[add or remove ROLE --project SLUG]` | lists or changes who is a member of which project; admin only | 0, 1, 2, 69, 78 | [team-fleet.md](../guides/team-fleet.md) |
-| `work status` | `[--area AREA] [--status STATUS] [--priority P] [--all]` | prints the items in work, by priority, then ETA, then id; `--all` adds the backlog | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
+| `work status` | `[--area AREA] [--status STATUS] [--priority P] [--agent NAME] [--owner KIND] [--all]` | prints the items in work, by priority, then ETA, then id; `--agent` keeps the items that agent holds, `--owner` those of that owner kind; `--all` adds the backlog | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
 | `work show` | `ID` | prints one item's fields, then its events, newest first | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
 | `work search` | `TEXT` | prints the best 50 hits over items, events, agents, requests and answers whose words match | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
 | `work needs-you` | none | prints the items waiting on you, each with the ask it waits on | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
@@ -194,6 +208,9 @@ The scheduler's commands read your org login first; [org-file.md](files/org-file
 | `work request info` | `N --text TEXT` | adds the requester's own word to a request that waits for more information | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
 | `work respond` | `N --decision DECISION [--item ID] (--text TEXT or --file PATH)` | answers a request | 0, 1, 2, 69, 78 | [work-queue.md](../guides/work-queue.md) |
 | `inspect swarm` | `[--swarm NAME] [--roster] [--host NAME] [--home NAME] [--json]` | reads this home's agents and, for every pair, whether one may message the other; reads only, and it reads homes of other versions | 0, 1, 2 | [updates.md](../guides/updates.md) |
+| `inspect capabilities` | `[--host NAME] [--home NAME] [--json]` | says what this Dockingbird can answer; reads only | 0, 1, 2 | [updates.md](../guides/updates.md) |
+| `inspect instances` | `[--host NAME] [--home NAME] [--json]` | lists the Dockingbird homes on this computer, as `homes` does; reads only | 0, 1, 2 | [updates.md](../guides/updates.md) |
+| `inspect config` | `[--agent NAME] [--host NAME] [--home NAME] [--json]` | shows this home's settings, or with `--agent` the settings that agent runs with: its model and effort, its limits, its tool versions and the names of its environment variables; a value that is not a tool's is never shown; reads only | 0, 1, 2 | [updates.md](../guides/updates.md) |
 
 Every `work` action takes `--json`, which prints one JSON line for each line it prints, and `--as KIND` to connect as `user`, `worker` or `admitter`.
 `fleet` takes `--as KIND` too.
@@ -226,6 +243,8 @@ Every `work` action takes `--json`, which prints one JSON line for each line it 
 |---|---|---|---|---|
 | `mcp install` | `[--show] [--connected NAME] [--check]` | connects Dockingbird's tools to each Claude Code and Codex on your path and prints how to undo it | 0, 1, 2 | [mcp-server.md](../guides/mcp-server.md) |
 | `mcp` | none | the stdio server your harness starts; you never run it yourself; tools in [mcp.md](integration/mcp.md) | 0, 1, 2 | [mcp-server.md](../guides/mcp-server.md) |
-| `ui` | `[stop] [--install]` | opens the Dockingbird GUI over every agent, stops its server, or installs it; not yet available | 0, 1, 2 | [gui.md](../guides/gui.md) |
+| `ui` | none | opens the Dockingbird GUI, `dockingbird-gui`, in this terminal over your inbox and every agent, one tab for each terminal agent; `ctrl+b q` leaves it with the agents working, and `ui` opens it again as it was; it needs a terminal and refuses a pipe or a script | 0, 1, 2 | [gui.md](../guides/gui.md) |
+| `ui stop` | none | stops the GUI's one server, which ends every attached view; needs no terminal | 0, 1, 2 | [gui.md](../guides/gui.md) |
+| `ui --install` | none | gets the `dockingbird-gui` this Dockingbird pins and installs it in Dockingbird's folder; needs no terminal | 0, 1, 2 | [gui.md](../guides/gui.md) |
 
-The GUI binary is not yet available, so `ui` and `ui --install` cannot open a GUI today.
+`ui` runs the GUI that `ui --install` put in Dockingbird's folder, else a `dockingbird-gui` on your PATH, and only the version this Dockingbird pins; `DOCKINGBIRD_GUI` names another file to run, for development.
