@@ -46,7 +46,7 @@ Run it again whenever you like; when nothing changed it says so. Done when the l
 Claude uses this computer's login now, and Dockingbird follows it.
 ```
 
-Message id `LOGIN_HERE_DONE`. The copy leaves out the refresh token, which never leaves your computer, so no agent can renew or sign out your login. Your own Claude Code or Codex keeps it fresh by being used. When Dockingbird is on, it copies a renewed login at once. A gateway in `settings.json` must be an `https://` address, or an address of this computer itself. Dockingbird refuses to send a token to any other plain `http://` gateway (`LOGIN_HERE_GATEWAY_NOT_HTTPS`). If macOS asks whether security may read the login, choose Always Allow.
+Message id `LOGIN_HERE_DONE`. The copy leaves out the refresh token, which never leaves your computer, so no agent can renew or sign out your login. Your own Claude Code or Codex keeps it fresh by being used. When Dockingbird is on, it copies a renewed login at once. A gateway in `settings.json` must be an `https://` address, or an address of this computer itself. Dockingbird refuses to send a token to any other plain `http://` gateway (`LOGIN_HERE_GATEWAY_NOT_HTTPS`). An agent in `models` or `allowlist` egress reaches such a gateway through its own proxy when the gateway has a host name; see [egress-and-network.md](egress-and-network.md). If macOS asks whether security may read the login, choose Always Allow.
 
 ## 3. Sign in again, or as someone else
 
@@ -132,6 +132,19 @@ Signed out of Claude. Dockingbird has no Claude sign-in or key now.
 ```
 
 Message id `SIGNED_OUT`. With neither there, the line is `Claude wasn't signed in. Nothing to do.` (`LOGOUT_NOT_SIGNED_IN`, exit 0). A sign-out revokes nothing at Anthropic or OpenAI. If an agent may have copied the sign-in, also sign out in your account. To follow your computer's login again, run `dockingbird login claude --here`.
+
+## 8. Give a pool host your Codex login
+
+A computer in your fleet pool that has no Codex login of its own, such as a cloud VM, runs no Codex agents. On the computer that holds your Codex login, name the host in the `hosts.toml` of the fleet worker's home, and add `login_push = ["codex"]` to its `[[host]]` table.
+
+```toml
+[[host]]
+name = "lab"
+ssh = "lab.example"
+login_push = ["codex"]
+```
+
+Restart the worker. Within 30 seconds of each change to `~/.codex/auth.json` on the worker's computer, the worker writes a copy to the same path on the host, mode 0600. The copy leaves out the refresh token, as `login codex --here` does, so it works until its access token expires. Codex on the worker's computer renews its token as you use it, and a new Codex sign-in there gives the host a new copy. `dockingbird status` shows when the pushed copy expires, and an expired copy is refused, never used. Claude needs no such copy, because a pool host reaches Claude through its gateway. [hosts-file.md](../reference/files/hosts-file.md) lists the rules, what happens to a host's own Codex login, and the three steps that stop the copy.
 
 ## Where the sign-in lives
 

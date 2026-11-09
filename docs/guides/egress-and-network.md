@@ -18,8 +18,8 @@ Egress is how far an agent's network reaches, and Dockingbird's own default is `
 
 | Mode | What the agent reaches | How |
 |---|---|---|
-| `allowlist` | its tool's own hosts (the model API and the sign-in), the hosts of its presets, and the hosts of the config's `allow` | through a proxy container of its own, and nothing else |
-| `models` | its tool's own hosts alone | through the same proxy |
+| `allowlist` | its tool's own hosts (the model API and the sign-in), the hosts of its presets, and the hosts of the config's `allow`; and Claude's login gateway, when the login has one | through a proxy container of its own, and nothing else |
+| `models` | its tool's own hosts alone, and Claude's login gateway when the login has one | through the same proxy |
 | `none` | nothing, not even the model's API | no network at all |
 | `full` | the whole internet | the agent's own network with NAT out, and no proxy |
 
@@ -93,6 +93,15 @@ Dockingbird checks no Engine version. Engine 27 refuses the agent's network with
    Agents already running keep theirs.
    ```
 
+## A Claude login that goes through a gateway
+
+Your Claude login may go through a gateway, such as a proxy on your Mac that Claude Code uses (the address is `ANTHROPIC_BASE_URL` in Claude Code's `settings.json`). Since v0.15.21 a Claude agent in `models` or `allowlist` egress starts and runs its turns on such a home. Its proxy admits the gateway's host on the gateway's port alone, at the addresses that host resolves to when the proxy starts. For a gateway on this Mac the host is `host.docker.internal`, the name agents use for the Mac. Every other address of this computer, every other port of the gateway's host and every private range stay refused with the `407`.
+
+- The gateway must be named by a host name. A gateway named by an IP address, such as `https://10.0.0.5:8443`, cannot be admitted. The start prints [`START_GATEWAY_UNREACHABLE`](../troubleshooting.md#start_gateway_unreachable) and makes nothing. Point Claude Code at the gateway's host name, or start with `--egress full`, which reaches the gateway directly.
+- A gateway whose host name resolves to a public address is admitted like any other allowed host, on every port.
+- The rule covers Claude's login gateway alone. A gateway for Codex is not covered.
+- An agent keeps the gateway and the proxy rules it started with. A changed gateway reaches it at its next start. [sign-in-and-api-keys.md](sign-in-and-api-keys.md) says how Dockingbird follows the login.
+
 ## What a blocked host sees
 
 A host outside the list gets the proxy's `407` and a message that names Dockingbird and the way out, so a tool fails with its own proxy-refused error and not a timeout.
@@ -110,7 +119,7 @@ In `allowlist` and `models`, a tool that ignores the proxy fails and does not ge
 - An entry names a host, not a port. An admitted host is open on every port, and a host you allow is a host the agent can post to. Allow only hosts you would let it send the repo to.
 - A `*.` entry admits every name under the domain, and the proxy's lookup of the name the agent picks reaches that domain's own nameservers.
 - An internationalized name, with an `xn--` label, is not admitted yet. An `allow` entry holding one is refused when the config is read.
-- The proxy refuses every address that is not public, whether or not the name is allowed. A connection to your Mac, your LAN, `host.docker.internal`, Docker's own ranges or another agent's address gets the same `407`. A name in the list that resolves to one of them is refused too. `--egress full` is the way to reach them.
+- The proxy refuses every address that is not public, whether or not the name is allowed. A connection to your Mac, your LAN, `host.docker.internal`, Docker's own ranges or another agent's address gets the same `407`. A name in the list that resolves to one of them is refused too. `--egress full` is the way to reach them. The one exception is the Claude login gateway of the next section, admitted on its own port alone.
 - Under `full` there is no proxy, so an agent's own browser reaches this Mac's loopback services through `host.docker.internal`. A browser agent that must not reach them uses `allowlist` or `models`.
 - Behind a proxy that every connection must use, only `--egress full` works.
 - A project config in a checkout you marked untrusted can only narrow egress, with `none`, `models` or a list the default already covers. Anything wider is refused, and the step is `dockingbird trust`.
@@ -124,6 +133,7 @@ The agents' own networks are separate. Each agent gets a network named `dockingb
 - A start that prints [`EGRESS_PROXY_FAILED`](../troubleshooting.md#egress_proxy_failed) found the proxy of a `models` or `allowlist` agent dead or silent. The start removed everything it made. Run it again.
 - Docker has no address range left when you see [`START_NETWORK_POOLS_FULL`](../troubleshooting.md#start_network_pools_full). List the networks with `docker network ls`, free them with `docker network prune`, or add pools through Docker's `default-address-pools` setting.
 - [`EGRESS_FILE_INVALID`](../troubleshooting.md#egress_file_invalid) blocks every new agent while `egress.toml` is unreadable. Repair the file, or delete it with `dockingbird egress --reset`.
+- [`START_GATEWAY_UNREACHABLE`](../troubleshooting.md#start_gateway_unreachable) refuses a Claude start in `models` or `allowlist` egress whose login goes through a gateway named by an IP address. Name the gateway by a host name, or start with `--egress full`.
 - An `--allow` entry that is no host, wildcard name or preset draws [`EGRESS_ENTRY_INVALID`](../troubleshooting.md#egress_entry_invalid).
 - An untrusted checkout whose config asks for more than the default allows stops with [`START_EGRESS_UNTRUSTED`](../troubleshooting.md#start_egress_untrusted). Narrow the entry, or run `dockingbird trust`.
 - [`START_CONFIG_FIXED`](../troubleshooting.md#start_config_fixed) says the `--egress` you typed disagrees with the `egress` in the config file. Drop the flag or edit the file.
