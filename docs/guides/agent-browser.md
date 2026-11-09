@@ -1,6 +1,6 @@
 ---
 title: An agent's own browser
-summary: Give an agent a full Google Chrome of its own in a container, turn it on in an added config, watch and take over its screen, and see how it ends with the agent.
+summary: Give an agent a full Google Chrome of its own in a container, turn it on in an added config, watch and take over its screen, hand its captcha pages to a solver of yours, and see how it ends with the agent.
 audience: daily
 commands:
   - config add
@@ -13,7 +13,7 @@ commands:
 
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
 
-An added config with `browser = "chrome"` gives each of its agents a headed Google Chrome of Dockingbird's own. Chrome runs on a virtual screen in a container beside the agent's, called the sidecar. Nothing runs on your Mac, and none of your logins is in it. This page turns it on, lists what a page sees and what the agent can do, and shows `watch`, extensions, the local network list and how the sidecar ends with its agent.
+An added config with `browser = "chrome"` gives each of its agents a headed Google Chrome of Dockingbird's own. Chrome runs on a virtual screen in a container beside the agent's, called the sidecar. Nothing runs on your Mac, and none of your logins is in it. This page turns it on, lists what a page sees and what the agent can do, and shows `watch`, extensions, the local network list, the route that hands a challenge page to a solver of yours, and how the sidecar ends with its agent.
 
 A browser of your Mac, lent through `connect --browser`, is another route, covered in [the MCP servers, services and browsers guide](mcp-and-services.md). [The connections guide](connections.md) compares the two.
 
@@ -91,6 +91,8 @@ The agent opens pages, reads a page's url, title, visible text and visible form 
 
 [The agent tools page](../reference/agent-tools.md) lists every tool with its arguments and its answer.
 
+With a solver of yours named, `browser_open` and `browser_read` also hand a challenge page to it, as [Challenge pages and a solver](#challenge-pages-and-a-solver) describes.
+
 ## Watch and take over
 
 `dockingbird watch NAME` shows the sidecar's screen in your VNC viewer, Screen Sharing on a Mac, and lets you take over. NAME is an agent whose config asks for a browser and that is running.
@@ -155,6 +157,92 @@ local_network_access = ["[*.]example.com"]
 - Dockingbird never writes the file. You do.
 - A file that cannot be read, is not TOML, holds a key other than `local_network_access`, or lists something that is not a Chrome URL pattern refuses every start of an agent with a browser with [`BROWSER_SETTINGS_INVALID`](../troubleshooting.md#browser_settings_invalid). Fix the file or remove it to give Chrome no list.
 - The temporary Chrome that `serve` starts on your Mac does not get the list, since macOS has no policy for one Chrome process.
+
+## Challenge pages and a solver
+
+Dockingbird ships no captcha solver and names none. When a page in the agent's tab shows a challenge, Dockingbird can hand the tab to a program of yours, wait for its one answer, and give that answer to the agent. The route is off until a file in your Dockingbird home names that program.
+
+### Name your solver
+
+Write `browser-solver.json` in your Dockingbird home, `~/.local/share/dockingbird` unless `DOCKINGBIRD_HOME` says otherwise. It holds one key, `command`: a list of words whose first word is an absolute path to your program.
+
+```json
+{"command": ["/usr/local/bin/my-solver", "--quiet"]}
+```
+
+- Dockingbird never writes the file. You do.
+- Dockingbird reads the file when an agent whose config asks for a browser starts. With no file, the browser starts with no solver and checks no page. Agents already running keep the setting they started with.
+- The file must be a regular file of at most 1,048,576 bytes: a JSON object with only the key `command`, whose value is a non-empty list of non-empty strings.
+- A file that breaks one of those rules refuses the start with [`BROWSER_SOLVER_FILE_MALFORMED`](../troubleshooting.md#browser_solver_file_malformed), which names the rule. Fix the file, or remove it to start browsers with no solver.
+- Each start with a solver also starts a watcher process on your Mac for that sidecar. It appends to `logs/browser-solve-NAME.log` in your home and ends when the sidecar goes.
+
+### When a challenge is handed over
+
+The agent makes no call for this and gets no instruction. Its browser tools check each page themselves.
+
+- `browser_open` checks the page after it loads, every time.
+- `browser_read` checks the page unless a solve already ran on that address in that tab. After the tab moves to another address, a read checks again.
+- Clicks and typing never check, so a challenge that appears after a click is caught at the next read.
+- A page counts as a challenge page when it has one of these that takes up space on the page: a reCAPTCHA frame (not its invisible badge), an hCaptcha frame, a Cloudflare challenge frame, Cloudflare's `#challenge-form`, a `form#captcha-form`, or an input named `captcha` or `captchaCode`.
+
+The agent's pending `browser_open` or `browser_read` waits for the solve. Its answer then holds the page as it stands after the solve, plus a `solve` object with the outcome word and the words of it.
+
+```json
+{"solve": {"outcome": "solved", "detail": "The challenge in the agent's browser tab was solved."}}
+```
+
+The `outcome` is one of `solved`, `not_solved`, `not_configured` or `failed`. The agent goes on with the page as it is, whatever the word.
+
+### What your program gets and returns
+
+Dockingbird runs exactly the words of `command`, with nothing added, in a session of its own. Your program runs on your Mac as you, with the environment of the command that started the agent, so it reads its own settings there. The agent's egress setting does not bound it.
+
+It gets one JSON line on its standard input.
+
+```json
+{"endpoint": "http://127.0.0.1:<port>", "input": "tcp://127.0.0.1:<port>", "target": "<tab id>"}
+```
+
+| Field | What it is |
+|---|---|
+| `endpoint` | an address on this Mac's loopback, at a port the system picks, that reaches Chrome's DevTools port in the sidecar |
+| `input` | a second loopback address, whose connections reach the browser's input path. The browser plays what arrives there as the agent's own mouse and keyboard input, along a human-like path |
+| `target` | the id of the tab that shows the challenge |
+
+Both addresses exist only while the solve runs, and they close when it ends. Any process on your Mac that connects to them in that time reaches the same browser, so give the program no more reach than you would give any program that controls a browser tab.
+
+Your program ends with status 0 after it prints exactly one JSON line on its standard output, at most 4,096 bytes.
+
+```json
+{"outcome": "not_solved", "detail": "gave up after 6 rounds"}
+```
+
+- `outcome` is `solved`, `not_solved`, `not_configured` (the program lacks settings of its own, which `detail` names) or `failed`. `detail` is optional words. Dockingbird cleans them and puts them in the agent's line for `not_solved`, `not_configured` and `failed`; the `solved` line has no place for them. Other keys are ignored.
+- The program's standard error is appended to `logs/browser-solve-NAME.log`.
+- A program that cannot start, ends with another status, prints something outside that shape, or gives no answer within 300 seconds is `failed`, with words that say which. At 300 seconds Dockingbird sends the program's group SIGTERM, then SIGKILL.
+
+### Limits
+
+| Limit | Value |
+|---|---|
+| solves at once in one browser | 1. A second request while one runs is answered `failed` with "another solve of this browser is still pending" |
+| time for your program | 300 seconds |
+| time the browser holds the agent's action | 330 seconds, after which the agent's answer is `failed` with the timeout line of [`BROWSER_SOLVE_OUTCOME`](../troubleshooting.md#browser_solve_outcome) |
+| your program's answer | one line, at most 4,096 bytes |
+| the input connection | one at a time. While you use the browser through `dockingbird watch`, its clicks and keys are refused with `viewer-active` |
+
+Dockingbird reads only the program's one answer line. Where your program sends a challenge's image to be read is up to the program.
+
+### What the agent reads when it fails
+
+| Message | What happened | What to do |
+|---|---|---|
+| [`BROWSER_SOLVE_OUTCOME`](../troubleshooting.md#browser_solve_outcome) | the agent's `solve` words: solved, not solved with the program's detail, no solver, the program could not run, or no answer in time | none for `solved`. For the others, read the detail and `logs/browser-solve-NAME.log` |
+| [`BROWSER_SOLVER_FILE_MALFORMED`](../troubleshooting.md#browser_solver_file_malformed) | `browser-solver.json` is there but is not a command; the agent was not started | fix or remove the file |
+| [`BROWSER_SOLVER_CHANNEL_FAILED`](../troubleshooting.md#browser_solver_channel_failed) | the watcher could not reach the browser's channel, bridge a connection of your program, or hand an outcome back | the watcher's log has the detail. Start the agent again for a new browser and watcher |
+| [`BROWSER_SOLVE_WATCH`](../troubleshooting.md#browser_solve_watch) | the watcher's own log lines: a solve begun, how it ended, the channel's end | nothing, unless a solve ended otherwise than you expected |
+| [`BROWSER_SOLVE_VARIABLE_MALFORMED`](../troubleshooting.md#browser_solve_variable_malformed) | the browser's container got a solve setting other than `on`, so it did not start | start the agent again; each start writes the setting itself |
+| [`BROWSER_SOLVE_INPUT_CUT`](../troubleshooting.md#browser_solve_input_cut) and [`BROWSER_SOLVE_INPUT_RELEASED`](../troubleshooting.md#browser_solve_input_released) | in `docker logs` of the browser: it refused or lost your program's click or key and let go of what was held | nothing; they inform |
 
 ## How it ends with its agent
 
