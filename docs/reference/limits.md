@@ -1,6 +1,6 @@
 ---
 title: Limits
-summary: The bounds on sessions, files, names, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
+summary: The bounds on sessions, agents per home, files, names, repositories, connections, licenses and fleet calls that the Dockingbird guide states, one row each with its figure.
 audience: daily
 commands: []
 ---
@@ -21,6 +21,9 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Turn deadline | none | a turn runs until it ends, unless a config sets `[limits] turn_minutes` (at least 1) | [app-config.md](files/app-config.md) |
 | Idle stop | 30 minutes | Dockingbird turns itself off after this long with no agent; the next command turns it back on | [daily-loop.md](../guides/daily-loop.md) |
 | Agent numbers | 9999 per tool or command | past it a start without `--as` starts nothing and exits 1 | [delegating-tasks.md](../guides/delegating-tasks.md) |
+| Agents per home | 24 | the running agents one home holds, the default home included; the next start refuses with `HOST_AGENT_CAP`, and more agents on one computer need a second home | [host-load-protection.md](../guides/host-load-protection.md) |
+| Host reading for the start guard | 180 seconds | on a host of the pool, a start is refused with the stale form of `HOST_OVERLOADED` while the worker's `guard.json` is older than this or does not parse; the worker writes it every 30 seconds | [host-load-protection.md](../guides/host-load-protection.md#3-read-the-hosts-load) |
+| `start --wait` | 1 second to one day | a whole number with `s`, `m` or `h`, such as `30m`; a start waits this long for room, and a value without a unit is refused with `START_WAIT_INVALID` | [host-load-protection.md](../guides/host-load-protection.md#2-wait-for-room) |
 | Container limits | none unless set | `--cpus`, `--memory` and `[limits] cpus` and `memory` set them | [commands.md](commands.md) |
 | Sign-in retries | 3 | a Claude turn that Anthropic refused for its sign-in is tried again after 30, 60 and 120 seconds | [sign-in-and-api-keys.md](../guides/sign-in-and-api-keys.md) |
 | Rule retries in a row | 3 by default, 1 to 100 | the retries of one delivery under a `[fallback]` rule; set with `retry_max` | [app-config.md](files/app-config.md#keys-of-fallback) |
@@ -48,6 +51,13 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Service program output | 64 MiB and 10,000 entries | what a program you connected as a service may write to its output folder | [connections.md](../guides/connections.md) |
 | First image build | about 1 GB, about 5 minutes | the download of the first `dockingbird claude`, once | [first-run.md](../getting-started/first-run.md) |
 | Ubuntu package pool | 441 MB | the folder the first build fills, once per snapshot | [first-run.md](../getting-started/first-run.md) |
+
+## Repositories and connections
+
+| Bound | Figure | What it limits | Explained in |
+|---|---|---|---|
+| Repositories per project | no limit | a project registers any number of repositories, one for each folder whose branch a start copies; the cap of 100 is gone, and `dockingbird repo release --repository R` drops one registration | [daily-loop.md](../guides/daily-loop.md#drop-a-repository-registration) |
+| Enabled connections | 500 | `dockingbird connect` of a new name at this many enabled is refused with `CONNECTION_TOO_MANY`; a name already enabled is not counted, and `dockingbird disconnect NAME` frees a place | [connections.md](../guides/connections.md) |
 
 ## Swarm definitions
 
@@ -84,6 +94,13 @@ Where a config or a flag changes a bound, the row says which one, and a bound wi
 | Messages waiting for one fleet agent | 200 | messages to a fleet agent whose home is asleep, held on the control plane's store | [team-fleet.md](../guides/team-fleet.md) |
 | Hub connections | 1024 | one for each member and one for the control plane | [team-fleet.md](../guides/team-fleet.md) |
 | Store connection | 5 seconds | how long each fleet scheduler command waits for the database; then it ends 69 | [exit-codes.md](integration/exit-codes.md) |
+| Agent cap of a pool host | 24 by default, at most 24 | `fleet hosts add` and `fleet hosts policy` take `--agent-cap N` up to the cap of a home | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Lease headroom | none unless set | `--lease-headroom CORES,SIZE` on `fleet hosts add` or `fleet hosts policy` is the part of the host's reservable share that swarms may not reserve into; a value above the share is refused | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Lease priority | P2 by default | `fleet run --priority P` records the lease with that priority, P0 to P3, the words of `fleet set` | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Pending lease read | every 5 seconds | how often `fleet run` reads its lease while it waits for a host, so a short check starts within seconds of its admission | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Forced stop | 10 minutes | an idle agent that the fleet asked to stop or retire and that has not stopped by then is stopped by name, once; an agent with a turn running is never stopped this way | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Fleet event record | 4096 bytes | a record over it leaves members out in a fixed order, and `fleet why` says how many hosts it left out | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
+| Host history | 30 days | the samples `fleet host-history` prints | [host-load-protection.md](../guides/host-load-protection.md#3-read-the-hosts-load) |
 | `fleet run` wait | 30 minutes by default | `--wait`; a lease not taken by then is given up and the command ends 1 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet run` bound | at most one day | `--bound`; at the bound the command is interrupted and `fleet run` ends 124 | [fleet-scheduler.md](../guides/fleet-scheduler.md) |
 | `fleet read-home` | 200 agents and rows, 30 seconds per home | the rest is counted | [hosts.md](../guides/hosts.md) |

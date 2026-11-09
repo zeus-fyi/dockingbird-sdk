@@ -12,6 +12,8 @@ commands:
   - sync --let-go
   - stop
   - clean NAME
+  - start --wait
+  - repo release
 ---
 
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
@@ -42,6 +44,18 @@ To leave it working, close this window.
 ```
 
 Message id `AGENT_LEAVE_HINT`. The agent keeps working when you close the window.
+
+### When a start is refused for room
+
+A home runs at most 24 agents, the default home included. The 25th start refuses and starts nothing.
+
+```text
+The home {home} runs {count:agent|agents}, its cap of {cap},
+so no agent starts there now; the host's lines were read from {path}.
+Stop one there you don't need, or wait for room: dockingbird start --wait TIME
+```
+
+Message id `HOST_AGENT_CAP`. Stop an agent you do not need with `dockingbird stop NAME`, or wait for room with `dockingbird start --wait 30m "TASK"`. On a computer in a fleet pool, a start is also refused with `HOST_OVERLOADED` while the host's load is past one of its lines. [The host load protection guide](host-load-protection.md) explains both refusals and the wait.
 
 ## 2. Read status
 
@@ -212,9 +226,26 @@ claude-1 left 2 commits not shared yet. Remove its copy anyway? [y/N]
 
 Message id `CLEAN_ASK_UNSHARED`. Answer y only when you have taken the work or do not want it. `dockingbird clean claude-1` deletes one stopped agent whole, with its copy, results and history, after the same question. See [clean and uninstall](clean-and-uninstall.md).
 
+## Drop a repository registration
+
+Dockingbird registers a repository the first time a start copies a folder's branch, and a project registers any number of them. To drop one registration, run this with the repository's ID, which `repos.toml` in `DOCKINGBIRD_HOME` records for each branch Dockingbird copied. [The home layout](../reference/files/home-layout.md) lists that file.
+
+```bash
+dockingbird repo release --repository R
+```
+
+Done when the command prints this text (`REPO_RELEASED`).
+
+```text
+Dockingbird released {repository}: it no longer lists that repository,
+and a start on its folder copies the branch again.
+```
+
+The release drops the registration and nothing else. A repository an agent still works in is refused, and so is one Dockingbird does not list. A second release of the same repository says it is not found. `--json` prints the reply as JSON.
+
 ## When it fails
 
-Sixteen messages can show up in a normal day. Most only inform, and each one names its own next command.
+Nineteen messages can show up in a normal day. Most only inform, and each one names its own next command.
 
 - A sync that took the agents' commits ends with [`SYNC_UPDATED`](../troubleshooting.md#sync_updated) and the `git log -p` line to review them.
 - When you committed on the branch too, [`SYNC_BOTH_MOVED`](../troubleshooting.md#sync_both_moved) asks whether to merge. Starting an agent on such a branch shows [`START_MERGE_OFFER`](../troubleshooting.md#start_merge_offer) with the same question.
@@ -229,3 +260,5 @@ Sixteen messages can show up in a normal day. Most only inform, and each one nam
 - `dockingbird clean` asks [`CLEAN_ASK_UNSHARED`](../troubleshooting.md#clean_ask_unshared) before it deletes a copy that holds commits. The default answer is no.
 - `dockingbird status NAME` can print [`STATUS_KEPT_WORKTREE`](../troubleshooting.md#status_kept_worktree) when the kept copy has a worktree with commits on no branch. A start under that name then gets a fresh copy.
 - A host that ssh cannot reach shows up as [`FLEET_HOST_NOT_READ`](../troubleshooting.md#fleet_host_not_read) in `dockingbird fleet agents`.
+- A start in a home that runs 24 agents ends with [`HOST_AGENT_CAP`](../troubleshooting.md#host_agent_cap), and one on a loaded pool host with [`HOST_OVERLOADED`](../troubleshooting.md#host_overloaded). Stop an agent or add `--wait` to `dockingbird start`.
+- `dockingbird repo release` ends with [`REPO_RELEASE_NO_ANSWER`](../troubleshooting.md#repo_release_no_answer) when Dockingbird gave no answer. Run `dockingbird status`, then try again.

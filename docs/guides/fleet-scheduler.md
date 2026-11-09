@@ -4,7 +4,7 @@ summary: Enrol hosts in the pool, read the queue, see why a workload waits, cont
 audience: team-admin
 commands:
   - fleet hosts add --os --cores --memory --line --rank --agent-cap --power
-  - fleet hosts policy
+  - fleet hosts policy --lease-headroom
   - fleet hosts drain
   - fleet hosts undrain
   - fleet hosts remove
@@ -18,15 +18,16 @@ commands:
   - fleet cancel
   - fleet done
   - fleet set --priority
-  - fleet run --cores --memory --bound
+  - fleet run --cores --memory --bound --priority
   - fleet update --release --host
+  - fleet admitter --metrics-port
 ---
 
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
 
 # Run work on the fleet pool
 
-This guide for teams runs the pool once [the team fleet guide](team-fleet.md) is done. You enrol hosts, read the queue and control each workload. You also run a check under a lease and move the pool to a new release. Submitting a swarm is on [the swarms guide](swarms.md), and the model behind it is on [the fleet scheduler concept page](../concepts/fleet-scheduler.md).
+This guide for teams runs the pool once [the team fleet guide](team-fleet.md) is done. You enrol hosts, read the queue and control each workload. You also run a check under a lease and move the pool to a new release. Submitting a swarm is on [the swarms guide](swarms.md), and the model behind it is on [the fleet scheduler concept page](../concepts/fleet-scheduler.md). The gate lines you set here also decide whether a direct start on a pool host is refused, which [the host load protection guide](host-load-protection.md) explains.
 
 ## Before you start
 
@@ -34,6 +35,7 @@ This guide for teams runs the pool once [the team fleet guide](team-fleet.md) is
 - Each host runs a worker, and one host runs the admitter. `dockingbird fleet hosts` lists both.
 - The pool commands need the `fleet_admin` role. A project's role queues and controls its own workloads only.
 - The top help screen does not list `fleet`. `dockingbird fleet -h` shows every action.
+- The admitter serves the pool's metrics at the org pointer's database host on port 9107. `dockingbird fleet admitter --metrics-port N` picks another port, and 0 asks for a free one. When the address is in use or not yet this computer's, the admitter says `FLEET_METRICS_UNSERVED` once and keeps admitting, tries the address again before each pass, and says `FLEET_METRICS_SERVING` once it serves.
 
 ## 1. Enrol a host
 
@@ -44,7 +46,7 @@ dockingbird fleet hosts add cloud --os linux --cores 60 --memory 230g --line idl
 dockingbird fleet queue --host cloud
 ```
 
-A line is `FIGURE=BOUND,CLEAR`. `--lease-headroom CORES,SIZE` keeps room for leases, `--no-swarms` keeps swarms off the host, and `--rank N` sets its place in the order, 1 first. The host's line appears once its worker has published a sample, and says `no sample yet` before that.
+A line is `FIGURE=BOUND,CLEAR`. `--agent-cap N` is the most agents one home on the host runs, 24 at most, which is also the default. `--lease-headroom CORES,SIZE` keeps room for leases, `--no-swarms` keeps swarms off the host, and `--rank N` sets its place in the order, 1 first. The host's line appears once its worker has published a sample, and says `no sample yet` before that. The same lines guard every agent start on the host, yours included: a start is refused while one reads red, as [the host load protection guide](host-load-protection.md) says.
 
 ```text
 cloud: {liveness}, {policy}, sample {age} old
@@ -55,11 +57,12 @@ cloud: {liveness}, {policy}, sample {age} old
 
 ## 2. Change, drain and remove a host
 
-`policy` changes whether a host takes swarms, its rank, its agent cap and its lines. A free-disk line is given once the host's sample shows the figure, because a line on a figure the sample lacks is red. Drain keeps new work off a host, undrain lets it back, and remove takes it out of the pool. Remove is refused while a workload is reserved on the host or pinned to it.
+`policy` changes whether a host takes swarms, its rank, its agent cap, its lines and its lease headroom. `--lease-headroom CORES,SIZE` is the part of the host's share that swarms may not reserve into, so a check run finds room. A headroom above the share is refused, as `hosts add` refuses it. A free-disk line is given once the host's sample shows the figure, because a line on a figure the sample lacks is red. Drain keeps new work off a host, undrain lets it back, and remove takes it out of the pool. Remove is refused while a workload is reserved on the host or pinned to it.
 
 ```bash
 dockingbird fleet hosts policy cloud --takes-swarms no
 dockingbird fleet hosts policy cloud --rank 1 --line free_disk_mib=45056,90112
+dockingbird fleet hosts policy cloud --lease-headroom 4,16g
 dockingbird fleet hosts drain cloud
 dockingbird fleet hosts undrain cloud
 dockingbird fleet hosts remove cloud
@@ -88,7 +91,7 @@ The pool has no host and the queue no workload.
 
 ## 4. See why a workload waits
 
-`fleet why ID` names, for each host, the first thing that keeps a waiting workload off it, with the figures. For a running swarm it names the agents still waiting to start and what holds them. `fleet ledger ID` lists a swarm's commits, newest first, with who approved each and the test result.
+`fleet why ID` names, for each host, the first thing that keeps a waiting workload off it, with the figures. For a running swarm it names the agents still waiting to start and what holds them. `fleet ledger ID` lists a swarm's commits, newest first, with who approved each and the test result. When a hold on many hosts is too long for the store's 4096-byte record, `fleet why` says how many hosts the record left out.
 
 ```bash
 dockingbird fleet why ID
@@ -125,7 +128,7 @@ Each control prints the state it entered and the agents still working. `set` pri
 {id} priority P0
 ```
 
-A lease takes `cancel` only. `done` ends a running team after each agent's turn. It is refused for a swarm that was admitted or interrupted before any agent started, and `cancel` applies there.
+A lease takes `cancel` only. An agent that is idle after it was asked to stop or retire, and has not stopped 10 minutes later, is stopped by name once, and the worker logs one warning line. An agent with a turn running, or whose status is unread, is never stopped this way. `done` ends a running team after each agent's turn. It is refused for a swarm that was admitted or interrupted before any agent started, and `cancel` applies there.
 
 ## 6. Run a check under a lease
 
@@ -134,9 +137,10 @@ A lease reserves cores and memory for one command. `fleet run` records the lease
 ```bash
 dockingbird fleet run --cores 4 --memory 8g --bound 30m -- make test
 dockingbird fleet run --cores 2 --memory 4g --bound 20m --hosts cloud --wait 10m --kind picker --exclusive -- make lint
+dockingbird fleet run --cores 4 --memory 8g --bound 30m --priority P1 -- make test
 ```
 
-The command's own exit status is the result. At the bound the command is interrupted, stopped 15 seconds later, and `fleet run` ends 124. `fleet cancel ID` of a running lease interrupts it the same way. A lease not taken within `--wait`, 30 minutes by default, is given up and ends 1. Durations name their unit, such as `90s`, `20m` or `2h`, up to a day.
+The command's own exit status is the result. At the bound the command is interrupted, stopped 15 seconds later, and `fleet run` ends 124. `fleet cancel ID` of a running lease interrupts it the same way. A lease not taken within `--wait`, 30 minutes by default, is given up and ends 1. `--priority P` records the lease with that priority, P0 to P3, the words of `fleet set`, and a lease without it is P2. While it waits, `fleet run` reads its lease every 5 seconds, so a one-minute check starts within seconds of its admission. An agent start inside a lease the host runs is counted by the start guard and never refused by it. Durations name their unit, such as `90s`, `20m` or `2h`, up to a day.
 
 On Linux the command runs inside a transient scope of your own systemd user manager, so its cores and memory are the lease's. On a Mac nothing bounds the command, and a lease there counts cores only. When the store does not answer, `fleet run` runs the command without a lease and says so on one line. When the store turns the login down, it ends 78 and runs nothing. The owner's role has no project of its own, so its leases count against the `--project` of its `org login`.
 
@@ -182,10 +186,11 @@ These ids come from the queue, the controls and host changes. Each line says wha
 
 ### Leases and updates
 
-The rest come from leases, `fleet run` and `fleet update`. Each line says what the id means and what to do.
+The rest come from leases, `fleet run`, the admitter's metrics and `fleet update`. Each line says what the id means and what to do.
 
 - [`FLEET_LEASE_CANCEL_ONLY`](../troubleshooting.md#fleet_lease_cancel_only) says a lease takes `cancel` and no other control.
 - [`FLEET_DONE_NEVER_STARTED`](../troubleshooting.md#fleet_done_never_started) says no agent of the swarm ever started, so `cancel` applies in place of `done`.
+- [`FLEET_METRICS_UNSERVED`](../troubleshooting.md#fleet_metrics_unserved) says the admitter could not open its metrics address. Admission goes on. Free the port or wait for the address, and nothing needs a restart. [`FLEET_METRICS_SERVING`](../troubleshooting.md#fleet_metrics_serving) says it opened it.
 - [`FLEET_RUN_NOT_ADMITTED`](../troubleshooting.md#fleet_run_not_admitted) means no host took the lease within `--wait`. The line names what held each host off.
 - [`FLEET_RUN_NO_LEASE`](../troubleshooting.md#fleet_run_no_lease) means the store did not answer, so the command ran with no lease at all.
 - [`FLEET_LEASE_NO_PROJECT`](../troubleshooting.md#fleet_lease_no_project) means the owner's login names no project. Log in again with `--project`.
