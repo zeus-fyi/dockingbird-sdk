@@ -25,6 +25,7 @@ The folder itself has mode 0700.
 | `.dockingbird-home` | the marker: a small JSON file Dockingbird writes first into a new home; never a link | 0600 |
 | `config.toml` | the image tag, the last build's duration (`last_build_seconds`, the next build's estimate) and, yours, a `trust =` line | |
 | `egress.toml` | optional; what new agents may reach, written by `dockingbird egress` | 0600 |
+| `browser.toml` | optional, yours, in the default home's folder and read for every home of the computer; its one key is `local_network_access`, a list of up to 32 Chrome URL patterns of at most 512 characters, such as `["[*.]example.com"]`, whose pages may reach the local network without Chrome's question; every agent with a browser started afterwards gets them as Chrome's managed policy `LocalNetworkAccessAllowedForUrls`; Dockingbird never writes it, and a file it cannot read or that holds anything else refuses every start of an agent with a browser (`BROWSER_SETTINGS_INVALID`) | |
 | `versions.toml` | optional; which version each tool runs, written by `dockingbird pin` or by you | |
 | `instructions/claude.md`, `instructions/codex.md` | optional, yours; rules for every agent of that tool in this home | |
 | `repos.toml` | each checkout: its display name, path, repo name, branches and their root commits | |
@@ -35,6 +36,9 @@ The folder itself has mode 0700.
 | `clones/` | a fleet worker's clones of the repositories its swarms work on | |
 | `installs/RELEASE/` | a release installed for a home's program file to name | |
 | `installs/current` | a link to the release this computer's fleet worker and admitter run; `dockingbird fleet update` moves it | |
+| `programs/VERSION/` | one release of your `dockingbird` command in a folder of its own, never changed once installed; an install that follows `main` names it by its commit's first 12 characters; `dockingbird update` installs each release here, and `dockingbird clean` removes the folders that no home names and no running Dockingbird uses | |
+| `programs/VERSION.lock` | the lock file beside each program folder | |
+| `programs/current` | a link to the release your `dockingbird` command runs, which the `dockingbird` that uv put on your `PATH` links to; `dockingbird update` moves it with one rename | |
 | `cache/`, `org-db/` | reserved; `clean --all` of this home keeps these folders and says so | |
 | `state.json` | a cache no container can write; its absence means "not set up" | |
 | `program` | one line: the path of the `dockingbird` script a start or update ran; `fleet scrape` and `fleet read-home` run it for this home | 0600 |
@@ -46,10 +50,10 @@ The folder itself has mode 0700.
 | `configs/index.json` | the list of the configs you added | 0600 |
 | `vaults/` | the password stores a vault connection reads | 0700 |
 | `logs/coordinator.log` | the log of the coordinator, the background process that Dockingbird turns off after 30 idle minutes | |
-| `logs/agents/NAME-STAMP.log` | each agent's log, copied when it ends, with control characters escaped | |
-| `logs/dockingbird.log` | an unexpected error's details, redacted; rotated to `.1` | |
+| `logs/agents/NAME-STAMP.log` | each agent's log, copied when it ends, with control characters escaped; an agent's `supervisor.log` moves to `supervisor.log.1` at half its bound, and this copy keeps the last part of both, so the lines that say how the agent ended survive; the supervisor log also holds `SETTLE_INHERITED` and `SETTLED` for each delivery a successor settles after an update, and `TASK_PACKET` for each task packet written | |
+| `logs/dockingbird.log` | an unexpected error's details, redacted, and one line for each start of the home's coordinator: the command that started it, the start's form (run or start), the container, and the process and its parent, so the wake of an idle home traces to a command; rotated to `.1` | |
 | `tmp/` | sync bundles in flight; empty between commands | |
-| `bin/dockingbird-gui` | the GUI that `dockingbird ui` runs; not yet available, so the file is not there | |
+| `bin/dockingbird-gui` | the GUI that `dockingbird ui` runs, version 0.1.20 in this release; `dockingbird ui --install` and, on a Mac, `dockingbird update` put it here and link it beside `dockingbird` on your `PATH`; the file is missing until one of them has run, and `dockingbird ui` then prints `GUI_MISSING`; see [the GUI](../../guides/gui.md) | |
 | `bin/zeusfyi-license`, `bin/zeusfyi-license.fetch-failed` | the license client, downloaded once, and the time of its last failed download | 0700 |
 | `license.json` | the license client's file: the license, this computer's id and label, the last check-in, the terms accepted; `clean --all` gives the seat back, then removes it | 0600 |
 | `completion/dockingbird.SHELL` | the tab completion script `completion --install` wrote; `dockingbird update` keeps it current | 0700, files 0600 |

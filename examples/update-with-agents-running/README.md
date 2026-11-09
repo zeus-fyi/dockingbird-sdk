@@ -46,7 +46,7 @@ Dockingbird 0.15.3 is installed and takes over now.
 claude-1 and codex-1 take it at their next stopping point.
 ```
 
-Message id `UPDATE_ROLLING`. A command you run meanwhile waits for the coordinator's switch with `Switching Dockingbird to 0.15.3 ...`, minutes at most, and never waits for the agents. On a Mac, `update` last tries to install the GUI, which is not yet available to customers. If that fails, Dockingbird is already updated, and `update` ends with the GUI message and exit 1.
+Message id `UPDATE_ROLLING`. A command you run meanwhile waits for the coordinator's switch with `Switching Dockingbird to 0.15.3 ...`, minutes at most, and never waits for the agents. `update` installs the release into its own folder under `~/.local/share/dockingbird/programs/VERSION/` and moves your `dockingbird` command with one rename, so a command you start during the update runs whole. On a Mac, `update` last installs the GUI this release pins. If that fails, Dockingbird is already updated, and `update` ends with the GUI message and exit 1. A `dockingbird serve` you run keeps serving: it prints `Dockingbird is updating, so notes-1 waits for it to finish.` while the coordinator is replaced, for up to 600 seconds. A home whose Dockingbird was stopped is stopped again once the update is done.
 
 ## 3. Watch the switch
 
@@ -63,7 +63,7 @@ codex-1 was asked to take 0.15.3 2 min ago and hasn't answered yet.
 claude-2 on 0.15.2 keeps its own until its terminal closes.
 ```
 
-Message ids `STATUS_UPDATE_ROLLING` and `STATUS_UPDATE_STRAGGLERS`. An agent switches only between two turns, never inside a turn or a tool call, and no turn is ended for it. A Claude agent whose background work still runs waits up to 30 minutes for it. An idle agent that has not answered its ask in 10 minutes is left on its old code. When an agent switches, its tool is told before its next prompt.
+Message ids `STATUS_UPDATE_ROLLING` and `STATUS_UPDATE_STRAGGLERS`. An agent switches only between two turns, never inside a turn or a tool call, and no turn is ended for it. A Claude agent whose background work still runs waits up to 30 minutes for it. A screen agent with text you typed and left unsent waits behind it, and `status` says `notes-1's update waits until you finish typing in its screen.` An idle agent that has not answered its ask in 10 minutes is left on its old code. When an agent switches, its tool is told before its next prompt.
 
 ```text
 Dockingbird updated from 0.15.2 to 0.15.3 and resumed your conversation. Continue where you were.
@@ -110,5 +110,6 @@ Message id `UPDATE_NO_ROLL_FLOOR`. `status` says `Dockingbird 0.15.3 is installe
 - A second `dockingbird update` while the first installs gives [`UPDATE_IN_PROGRESS`](../../docs/troubleshooting.md#update_in_progress). Run it again when the first ends.
 - A coordinator that does not come up gives [`UPDATE_SWITCH_FAILED`](../../docs/troubleshooting.md#update_switch_failed). The old version still runs, and `dockingbird update` shows why.
 - A Dockingbird from before rolling updates prints [`UPDATE_NO_ROLL_FLOOR`](../../docs/troubleshooting.md#update_no_roll_floor) and waits for the agents to end.
-- A release that changes the records prints [`UPDATE_MIGRATES`](../../docs/troubleshooting.md#update_migrates) first. After it takes over, the old version cannot run on them.
+- A release that changes the records prints [`UPDATE_MIGRATES`](../../docs/troubleshooting.md#update_migrates) first. After it takes over, the old version cannot run on them. [The updates guide](../../docs/guides/updates.md) lists the releases from 0.15.0 that did.
+- A coordinator whose version cannot be read ends every Docker command but `stop` and `clean --all` with [`VERSION_UNREADABLE`](../../docs/troubleshooting.md#version_unreadable). Run `dockingbird stop`, then `dockingbird update`.
 - Agents still on old code show in `status` as [`STATUS_UPDATE_STRAGGLERS`](../../docs/troubleshooting.md#status_update_stragglers), each named with its version.

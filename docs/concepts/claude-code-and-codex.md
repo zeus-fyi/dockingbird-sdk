@@ -67,6 +67,17 @@ A swarm role's model and effort come from the project, never from Dockingbird: `
 
 The Codex column maps the same kinds onto Codex's models by Codex's own descriptions, so measure it on your work before you rely on it. An account sees the models its plan or API organisation offers, so check Codex's `/model` before a submit. A `[roles.NAME]` table answers a role only when its `harness` is the role's, and the project file holds one table per name. A project that runs both tools keeps the second tool's rows in the store, one row per name and tool.
 
+## What Dockingbird sets in each tool's screen
+
+An agent on the bus can run its tool's own screen while its messages keep arriving. Dockingbird types each message into the prompt itself. The two tools get different settings there.
+
+- Claude Code starts with agent view off. Every Claude agent gets `CLAUDE_CODE_DISABLE_AGENT_VIEW=1` and `disableAgentView` in the settings Dockingbird writes, so agent view, `--bg` and `/background` are not in its screen and a message is never typed into a background session. A repo's or an agent's own settings cannot turn them back on.
+- Codex gets a managed configuration with `[notice] hide_rate_limit_model_nudge = true`. It hides the dialog Codex shows near a rate limit to suggest a smaller model, so a message pasted into a screen session no longer answers that dialog instead of reaching the agent.
+- Claude tells Dockingbird when a turn begins. Codex does not, so your Enter on text you typed begins the turn until Codex says it is done or its screen stays still for 2 seconds (`TUI_STILL_MS`).
+- A Claude turn that took its prompt and then drew nothing for 10 seconds (`TUI_PROMPT_ACCEPT_MS`) with no end signal and no open question gets one Esc. If an end signal follows within `AGENT_STOP_GRACE_S` (8 seconds), the turn ends `interrupted`. Otherwise it ends `failed` with the fault `STALLED` and the words of what Dockingbird saw. The fleet's row then reads `failed`, and `fleet replace` recovers the agent. Codex reports no prompt, so a Codex delivery with no completion signal ends after the same window when nothing was drawn after its paste or the drawing has stayed still.
+
+[The operator guide](../operator-guide.md) has the whole rules under "Its screen" and "Turns and errors".
+
 ## What it never does
 
 - It never lends a refresh token to an agent. The copy of a Keychain or login-file sign-in leaves the refresh token out.
