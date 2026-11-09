@@ -67,6 +67,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Draw the metrics in Grafana](docs/guides/grafana.md): Import the default Dockingbird dashboard into your own Grafana, read its five rows, add a host, and set three alerts.
 - [Harbor benchmark tasks](docs/guides/harbor.md): Run a Harbor benchmark task's two baselines and one real trial with your own login, then list, read and clean its jobs.
 - [The GUI](docs/guides/gui.md): What the Dockingbird GUI is, that its install is not yet available to customers, and what dockingbird ui prints today.
+- [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
 
 ## Cookbooks and examples
 

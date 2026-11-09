@@ -9,7 +9,7 @@ commands: []
 
 # Swarm definition file
 
-A swarm definition is a TOML file, `swarm.toml`, at `schema = 1`. Keep it at `.dockingbird/swarms/NAME/swarm.toml` and submit it by name with `dockingbird fleet submit NAME`, or give a folder or a file path. [The swarms guide](../../guides/swarms.md) writes and submits one. `fleet describe NAME` prints every parameter and settable field as JSON.
+A swarm definition is a TOML file, `swarm.toml`, at `schema = 1`. Keep it at `.dockingbird/swarms/NAME/swarm.toml` and submit it by name with `dockingbird fleet submit NAME`, or give a folder or a file path. [The swarms guide](../../guides/swarms.md) writes and submits one. `fleet describe NAME` prints every parameter and settable field as JSON. [The swarm parameters guide](../../guides/swarm-parameters.md) declares parameters and submits one definition many times with its values changed.
 
 ## Top-level keys
 
@@ -56,7 +56,7 @@ A parameter's name is at most 32 characters of letters, digits and `-`, and its 
 | `key`, `priority`, and `[source]` `repository` and `branch` | when the definition declares `[params]`, a declared parameter alone; a built-in there is refused (`undeclared`), since these values give the swarm's key, repository and branch |
 | `project`, `[placement]`, an attachment, a `harness_config` file | never |
 
-A string that is one placeholder of an `int` parameter and nothing else becomes that number, so `count = "{{N}}"` is `count = 4` for `--set N=4`. A placeholder in a key is refused (`placeholder-key`). A placeholder that names no declared parameter and no built-in is refused (`undeclared`).
+A string that is one placeholder of an `int` parameter and nothing else becomes that number, so `count = "{{N}}"` is `count = 4` for `--set N=4`. A placeholder in a key is refused (`placeholder-key`). A placeholder that names no declared parameter and no built-in is refused (`undeclared`). Expansion runs in one pass at submit, and a value it puts in is never scanned again.
 
 ### Built-in parameters
 
@@ -94,7 +94,7 @@ Each `[[role]]` is one kind of agent.
 | `[role.subagents.<name>]` | table | none | one helper kind, at most one table per role: `instructions` (required), `model`, `effort`, `max` and `tools`, as [the subagent block](roles-and-connections.md#subagent-block) gives them |
 | `send_to` | list of role names | any agent of the project | the roles the agents may message beside their parent; `[]` allows the parent alone |
 | `workspace`, `egress`, `allow`, `env` | as in a config | as in a config | session settings, as [`app.toml`](app-config.md) takes them |
-| `context` | `kept` or `fresh` | `kept` | as a config's `context`: one conversation for every delivery, or a new one for each task delivery |
+| `context` | `kept` or `fresh` | `kept` | `fresh` starts each task delivery of every agent of the role in a new conversation, under the same rules and settings; the entry's key wins over its library role's, and another word is refused at `role[N].context` |
 | `tools` | `bus`, `full` or a list | as in a config | A config takes `bus` (messages and files, the default), `default` (claims and commits) or `full` (both); a swarm role takes `bus`, `full` or a list that keeps every bus tool; a list that drops a bus tool gives `refused: role[N].tools: drops a tool of the bus set` |
 | `harness_config` | a path, or a table by harness | none | the harness's own settings file, the base under Dockingbird's own keys, read under the definition's folder or the library role's; never expanded |
 | `compact_at` | `500000`, `500k` or `auto` | the library role's: `300k` for `coordinator` and `hands`, `500k` for the other four; else `500000` for a fleet-started agent | the point at which the agent's context compacts; `--set ROLE.compact_at=POINT` overrides it at submit |
@@ -179,3 +179,5 @@ A value's field is `set.<key>` for a `--set` and `values.<path>` for the documen
 | `not-json` | not a JSON document |
 | `range` | outside the parameter's own bounds or words |
 | `missing` | missing, for a parameter with no default and no value |
+
+[The swarm parameters guide](../../guides/swarm-parameters.md) shows each form with a worked definition.

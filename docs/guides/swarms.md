@@ -167,7 +167,7 @@ brief = "briefs/reviewer.md"
 reviews = ["builder"]
 ```
 
-A role may take its settings from a role library with `use = "NAME"`, as [the cookbook on role libraries](../../examples/swarm-from-a-role-library/README.md) shows. A definition may leave `[placement]` out. Its swarm then goes to every pool host that takes swarms, in pool rank order.
+A role may take its settings from a role library with `use = "NAME"`, as [the cookbook on role libraries](../../examples/swarm-from-a-role-library/README.md) shows. A definition may leave `[placement]` out. Its swarm then goes to every pool host that takes swarms, in pool rank order. A definition may also declare `[params]` and write `{{name}}` where a value goes, so one file serves many swarms. [The swarm parameters guide](swarm-parameters.md) shows how.
 
 ### Choose each role's model and effort
 
@@ -223,7 +223,7 @@ dockingbird fleet submit NAME --set grader.count=6 --set grader.helper.max=4
 dockingbird fleet submit NAME --values values.json
 ```
 
-`--set KEY=VALUE` is repeatable. A key is a parameter the definition declares, a role's setting, a subagent's or a key of a role's fallback. `--values FILE` is a JSON document of the shape `{"params": {...}, "roles": {"ROLE": {...}}}`. A `--set` beats the file for the same key. A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, a subagent's `model`, `effort` and `max`, and a role's fallback `harness`, `model`, `effort` and `placement`, as in `--set builder.fallback.harness=codex`. `fleet queue` and `fleet why` show the values a swarm was given. [The definition reference](../reference/files/swarm-definition.md#parameters) has the parameters' types, the built-ins such as `{{branch}}`, and the rule each refusal names.
+`--set KEY=VALUE` is repeatable. A key is a parameter the definition declares, a role's setting, a subagent's or a key of a role's fallback. `--values FILE` is a JSON document of the shape `{"params": {...}, "roles": {"ROLE": {...}}}`. A `--set` beats the file for the same key. A submit may set a role's `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`, a subagent's `model`, `effort` and `max`, and a role's fallback `harness`, `model`, `effort` and `placement`, as in `--set builder.fallback.harness=codex`. `fleet queue` and `fleet why` show the values a swarm was given. [The definition reference](../reference/files/swarm-definition.md#parameters) has the parameters' types, the built-ins such as `{{branch}}`, and the rule each refusal names. [The swarm parameters guide](swarm-parameters.md) walks through three submits of one definition and the rules for each value.
 
 The step is done when the swarm is queued.
 
