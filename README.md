@@ -73,7 +73,7 @@ Zeusfyi makes it, and it runs on an Apple silicon Mac or on arm64 Linux.
 
 Dockingbird needs four tools and a license key. [Prerequisites](docs/getting-started/prerequisites.md) gives the check for each.
 
-- An Apple silicon Mac or arm64 Linux. Intel Macs, x86 Linux and Windows are not supported.
+- An Apple silicon Mac or arm64 Linux. Intel Macs, and Windows are not guaranteed to work.
 - Docker Desktop, which includes the buildx plugin. Docker Engine on Linux needs Docker's `docker-buildx-plugin` package.
 - [uv](https://docs.astral.sh/uv/). On a Mac, `brew install uv` installs it.
 - git at `/usr/bin/git`.
