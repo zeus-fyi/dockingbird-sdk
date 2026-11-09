@@ -163,6 +163,20 @@ See it: dockingbird status claude-1
 
 Message id `SET_DONE`. A change lasts only while the agent runs.
 
+### Give it more skills
+
+```bash
+dockingbird set claude-1 --skills .agents/skills/a
+```
+
+`--skills` names skill folders, comma-separated, or a skills folder, as a start does, and goes alone, beside no other change. A skill of a name the agent has is replaced, and none is removed. Done when the line names the skills added.
+
+```text
+claude-1: skills added: a; its tool lists them from its next turn.
+```
+
+Message id `SET_SKILLS_DONE`. The skills do not outlive a stop. [Give agents skills](skills.md) has the rules and the other two endings of the line.
+
 ## 9. Stop it
 
 ```bash

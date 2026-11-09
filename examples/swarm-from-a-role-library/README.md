@@ -99,12 +99,14 @@ The first submit gives values per role and per subagent as `--set` lines.
 
 ```bash
 dockingbird fleet submit graders \
-  --set coord.model=opus --set coord.effort=max \
-  --set grader.count=4 --set grader.model=opus --set grader.effort=xhigh \
-  --set grader.helper.model=sonnet --set grader.helper.effort=xhigh --set grader.helper.max=4
+  --set coord.model=MODEL --set coord.effort=xhigh \
+  --set grader.count=4 --set grader.model=MODEL --set grader.effort=xhigh \
+  --set grader.helper.model=MODEL --set grader.helper.effort=xhigh --set grader.helper.max=4
 ```
 
-The second reads the same values from a file.
+Write a model word of the role's tool in place of each `MODEL`. [Claude Code and Codex](../../docs/concepts/claude-code-and-codex.md#model-and-effort-per-role) names a model for each kind of role, and `xhigh` is the coordinator's recommended effort.
+
+The second reads the counts, the efforts and the helpers' cap from a file. It names no model, so each role takes its model from `[roles.NAME]` of the project file, else from your organisation's store: `coord` by its name, then `coordinator`, the shipped role it uses.
 
 ```bash
 dockingbird fleet submit graders --values graders.json
@@ -116,7 +118,7 @@ The third takes the definition's defaults through its own parameters, `N` grader
 dockingbird fleet submit graders
 ```
 
-`--set N=4 --set y=4 --set effort=xhigh --set model=opus` sets the parameters in place of the roles' fields. A `--set` beats the file's value for the same key. The definition has no `key`, so each submit queues a new swarm named `graders-` and the UTC time. `--key K` names one, and a repeated `--key K` answers the swarm it queued first. Each submit is done when it prints this line.
+`--set N=4 --set y=4 --set effort=xhigh --set model=MODEL` sets the parameters in place of the roles' fields. A `--set` beats the file's value for the same key. The definition has no `key`, so each submit queues a new swarm named `graders-` and the UTC time. `--key K` names one, and a repeated `--key K` answers the swarm it queued first. Each submit is done when it prints this line.
 
 ```text
 {id} pending, position {position}

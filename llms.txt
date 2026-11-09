@@ -22,8 +22,8 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Glossary](docs/concepts/glossary.md): One short entry for each word the Dockingbird docs use for a part of the product, with a link to the page that explains it.
 - [Agents and the bus](docs/concepts/agents-and-the-bus.md): How a task reaches an agent, how its answers come back, what each bus command moves, and what an agent's life looks like from start to stop.
 - [The sync model](docs/concepts/sync-model.md): How the agents' commits reach your branch and yours reach them, what sync does when one or both sides moved, and what it refuses.
-- [Claude Code and Codex](docs/concepts/claude-code-and-codex.md): Where the two tools an agent runs differ in Dockingbird, covering sign-in, naming, one-shot forms, API keys, config keys, rules files and versions.
-- [Swarms and roles](docs/concepts/swarms-and-roles.md): What a swarm definition holds, how roles, counts and send_to shape a team, how values are given at submit, and what a workload is.
+- [Claude Code and Codex](docs/concepts/claude-code-and-codex.md): Where the two tools an agent runs differ in Dockingbird, covering sign-in, naming, one-shot forms, API keys, config keys, rules files, versions, and the model and effort recommended for each swarm role on each tool.
+- [Swarms and roles](docs/concepts/swarms-and-roles.md): What a swarm definition holds, how roles, counts and send_to shape a team, where a role's model and effort come from, how values are given at submit, and what a workload is.
 - [Fleet and hosts](docs/concepts/fleet-and-hosts.md): How the hosts file differs from the scheduler's pool, why a host keeps one name, how placement orders hosts, and what a worker and an admitter do.
 - [The fleet scheduler](docs/concepts/fleet-scheduler.md): The fleet scheduler is a pool of hosts on your organisation's PostgreSQL store that queues swarms and check runs and admits each where it fits.
 - [The control plane](docs/concepts/control-plane.md): The control plane is a home of its own that other computers join, so an agent on one computer can message an agent on another.
@@ -37,7 +37,8 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [The daily loop](docs/guides/daily-loop.md): Start an agent at your terminal, read status, take its commits with sync, stop, and recover when a laptop sleeps, a terminal closes or an agent ends with work not shared.
 - [Delegating tasks](docs/guides/delegating-tasks.md): Hand an agent a task on the bus, wait for it, read its messages, answer its questions, send more work and save its files.
 - [Connections](docs/guides/connections.md): A connection lets agents use a GitHub repo, a folder, a database, a program, an MCP server or a browser while the secret stays with Dockingbird.
-- [Your own commands](docs/guides/your-own-commands.md): Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo.
+- [Your own commands](docs/guides/your-own-commands.md): Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo, with a fallback tool for its failed turns.
+- [Give agents skills](docs/guides/skills.md): Give an agent skills its tool lists as its own, at one start, from a config, on a running agent or for a swarm role.
 - [Toolchains and dependencies](docs/guides/toolchains.md): See, install, lock and change the language versions agents get from your repo's mise.toml or .tool-versions.
 - [Trust and repo settings](docs/guides/trust-and-repo-settings.md): Decide which checkouts load their own settings, hooks, MCP servers, rules and dependency installs inside an agent, and add rules of your own for every agent.
 - [Sign-in and API keys](docs/guides/sign-in-and-api-keys.md): Reuse the Claude and Codex logins already on your computer, sign in again or as someone else, use an API key, and sign out.
@@ -57,8 +58,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [MCP servers, services and browsers for agents](docs/guides/mcp-and-services.md): Give agents an MCP server by URL, a program of yours with typed arguments, or a browser, and serve them as yourself.
 - [Give agents a database](docs/guides/databases.md): Connect a PostgreSQL database so agents query it, and write to it through a broker, without ever seeing its address or password.
 - [Sign agents in with a password vault](docs/guides/secrets-vault.md): Connect a gopass store so Dockingbird types a login's password and one-time code into an agent's browser, and the agent sees neither.
-- [Swarms](docs/guides/swarms.md): Write a swarm definition, check it, submit it with values, follow it in the queue and change it while it runs.
-- [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
+- [Swarms](docs/guides/swarms.md): Write a swarm definition, choose each role's model and effort, check it, submit it with values, follow it in the queue and change it while it runs.
 - [The work queue](docs/guides/work-queue.md): Keep one board of items, agents and requests in the organisation's store that people, scripts and agents read and write from any computer.
 - [Install a team fleet](docs/guides/team-fleet.md): Install the PostgreSQL store, the roles, the worker and admitter services and the control plane that let a team share hosts and message across computers.
 - [Run work on the fleet pool](docs/guides/fleet-scheduler.md): Enrol hosts in the pool, read the queue, see why a workload waits, control it, run a check under a lease and move the pool to a release.
@@ -67,6 +67,7 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Draw the metrics in Grafana](docs/guides/grafana.md): Import the default Dockingbird dashboard into your own Grafana, read its five rows, add a host, and set three alerts.
 - [Harbor benchmark tasks](docs/guides/harbor.md): Run a Harbor benchmark task's two baselines and one real trial with your own login, then list, read and clean its jobs.
 - [The GUI](docs/guides/gui.md): What the Dockingbird GUI is, that its install is not yet available to customers, and what dockingbird ui prints today.
+- [Swarm parameters](docs/guides/swarm-parameters.md): Declare parameters in one swarm definition, write placeholders, then submit it many times with only the values changed.
 
 ## Cookbooks and examples
 
@@ -101,14 +102,14 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [License refused](docs/troubleshooting/licence-refused.md): Each way a license command or a license check can stop you, in the order you meet it, with what the screen shows and the fix.
 - [First start stops](docs/troubleshooting/first-start-stops.md): Each place the first dockingbird claude can stop, in the order you meet it, with what the screen shows and the fix.
 - [Troubleshooting index: install, Docker, licensing and the command line](docs/troubleshooting/install.md): The 63 message ids about installing, Docker, the license and typing a command, each with when it appears.
-- [Troubleshooting index: homes, checkouts and toolchains](docs/troubleshooting/homes.md): The 110 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears.
-- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 300 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
-- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 70 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
-- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 197 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
-- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 210 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
+- [Troubleshooting index: homes, checkouts and toolchains](docs/troubleshooting/homes.md): The 113 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears.
+- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 326 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
+- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 74 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
+- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 206 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
+- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 224 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
 - [Troubleshooting index: benchmark jobs](docs/troubleshooting/benchmarks.md): The 51 message ids about Harbor benchmark jobs, each with when it appears.
 - [Troubleshooting index: sign-ins and the org store](docs/troubleshooting/sign-ins.md): The 91 message ids about signing in, API keys, signing out and the org login, each with when it appears.
-- [Troubleshooting index: updates](docs/troubleshooting/updates.md): The 43 message ids about checking for and installing updates, pins and the switch to a new version, each with when it appears.
+- [Troubleshooting index: updates](docs/troubleshooting/updates.md): The 49 message ids about checking for and installing updates, pins and the switch to a new version, each with when it appears.
 - [Troubleshooting index: the GUI, the MCP server and shell completion](docs/troubleshooting/gui-and-mcp.md): The 27 message ids about the GUI, the MCP server and shell completion, each with when it appears.
 - [Troubleshooting](docs/troubleshooting.md): Every message Dockingbird prints, by id: when it appears, its text, the next step it gives and its exit status.
 
@@ -121,9 +122,9 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [Compatibility, what you can build on](docs/reference/integration/compatibility.md): The surfaces a script may rely on and the promise about how they change between releases.
 - [hosts.toml](docs/reference/files/hosts-file.md): Every key of hosts.toml, the file that names the other computers you reach, and the commands that write it.
 - [org.toml and the password file](docs/reference/files/org-file.md): The keys of org.toml, the file that names your organisation's store, and the ~/.pgpass line that holds each role's password.
-- [Swarm definition file](docs/reference/files/swarm-definition.md): Every top-level key and every role key of a swarm definition at schema 1, with its type, default and meaning.
-- [app.toml, the keys of a config](docs/reference/files/app-config.md): Every key of a config file such as .dockingbird/app.toml, with its values, its default and what it fixes.
-- [Role and connection files](docs/reference/files/roles-and-connections.md): The keys of a library role file, a service connection file with its argument keys, and a subagent block.
+- [Swarm definition file](docs/reference/files/swarm-definition.md): Every top-level key and every role key of a swarm definition at schema 1, its parameters and placeholders, where a role's model and effort come from, its fallback table and the values a submit takes.
+- [app.toml, the keys of a config](docs/reference/files/app-config.md): Every key of a config file such as .dockingbird/app.toml, its [fallback] table and error classes among them, with its values, its default and what it fixes.
+- [Role and connection files](docs/reference/files/roles-and-connections.md): The keys of a library role file and the library's index.toml, a service connection file with its argument keys, and a subagent block.
 - [What dockingbird init writes](docs/reference/files/project-file.md): The files dockingbird init writes into a repo, and every key of .dockingbird/project.toml.
 - [The home folder layout](docs/reference/files/home-layout.md): What lives where under a Dockingbird home, which files you may edit, and how a second home by name works.
 - [The fleet store](docs/reference/files/fleet-store.md): The three schemas of the organisation's PostgreSQL 18 store, its role groups, the order of a migration and which migrations need older workers restarted first.

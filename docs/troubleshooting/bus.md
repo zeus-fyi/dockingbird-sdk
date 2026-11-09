@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: the bus"
-summary: "The 70 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
+summary: "The 74 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: the bus
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 70 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 74 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
 
 | Id | When it appears |
 |---|---|
@@ -31,6 +31,8 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`INBOX_ROW_RESOLVED`](../troubleshooting.md#inbox_row_resolved) | You gave a row number of your inbox instead of an id. |
 | [`DELIVERY_EXCEEDS_LINE`](../troubleshooting.md#delivery_exceeds_line) | An agent asked to read a message, and not even the shortest page of it fits in one answer of the agent's tools (they are given a most characters an answer may have). |
 | [`SEND_AMBIGUOUS`](../troubleshooting.md#send_ambiguous) | You sent an agent a plain message while two or more of its questions to you are still unanswered, so Dockingbird can't tell which one it answers. |
+| [`SEND_GROUP_CONFLICT`](../troubleshooting.md#send_group_conflict) | You ran `dockingbird send --all` with `--role` or `--swarm` too: `--all` already sends to every live agent, so Dockingbird can't tell which group you meant. |
+| [`SEND_GROUP_NO_REPLY`](../troubleshooting.md#send_group_no_reply) | You sent to a group (`--all`, `--role` or `--swarm`) with `--reply-to` or `--kind answer`: an answer goes to the one agent that asked, never to a group. |
 | [`SEND_REPLY_ANOTHER_AGENT`](../troubleshooting.md#send_reply_another_agent) | You replied with `--reply-to` to a message in your inbox that is another agent's question, not one of the agent you sent to: the words would have answered the other agent. |
 | [`SEND_NOT_ON_BUS`](../troubleshooting.md#send_not_on_bus) | You sent a message to an agent that runs in a terminal without the bus's read tool: Dockingbird's default environment, or a config whose tool set lacks it. |
 | [`SEND_PAYLOAD_INVALID`](../troubleshooting.md#send_payload_invalid) | `dockingbird send --kind KIND --payload JSON` with a payload larger than the bound: nothing was sent; give the kind's fields as one JSON object. |
@@ -48,6 +50,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`INBOX_PAGE_MORE`](../troubleshooting.md#inbox_page_more) | You ran `dockingbird inbox --page N` and later pages hold more messages: how many, and the command that shows the next page, with the same `--priority` or `--questions` you gave. |
 | [`INBOX_PAGE_EMPTY`](../troubleshooting.md#inbox_page_empty) | You ran `dockingbird inbox --page N` for a page past the last one: nothing is on it, and the message says how many pages your inbox (or the messages that match your `--priority` or `--questions`) fills. |
 | [`INBOX_PAGE_ZERO`](../troubleshooting.md#inbox_page_zero) | You ran `dockingbird inbox --page 0`. |
+| [`INBOX_SINCE_INVALID`](../troubleshooting.md#inbox_since_invalid) | You ran `dockingbird inbox --all --since TIME` with a TIME that isn't a date and time with its offset from UTC, such as `2026-11-07T00:00:00+00:00`. |
 | [`INBOX_NAME_OPTION`](../troubleshooting.md#inbox_name_option) | You ran `dockingbird inbox NAME` with an option that only works on your own inbox: `--priority`, `--questions`, `--page` or `--clear`. |
 | [`INBOX_SWARM_INVALID`](../troubleshooting.md#inbox_swarm_invalid) | You gave `dockingbird inbox` or `dockingbird read` a `--swarm` value with an item that isn't a swarm's name (lowercase letters, digits and `-`, up to 63 characters), or an empty one, as two commas in a row or one at the end make. |
 | [`INBOX_ENGINE_INVALID`](../troubleshooting.md#inbox_engine_invalid) | You gave `dockingbird inbox` or `dockingbird read` an `--engine` value with an item that isn't a workload's id: a UUID in lower case, as `dockingbird swarm list --json` shows it. |
@@ -79,6 +82,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`WITHDRAWN`](../troubleshooting.md#withdrawn) | You ran `dockingbird send --withdraw`: the message's deliveries that no agent had taken yet are withdrawn. |
 | [`WAIT_DELIVERY`](../troubleshooting.md#wait_delivery) | You ran `dockingbird wait` and a message you hadn't seen yet was waiting, or arrived while it waited, wherever it sorts in your inbox. |
 | [`WAIT_TIMED_OUT`](../troubleshooting.md#wait_timed_out) | You ran `dockingbird wait` and no message you hadn't seen arrived before its time ran out. |
+| [`WAIT_ENDED`](../troubleshooting.md#wait_ended) | You ran `dockingbird wait NAME` for an agent that has stopped, or it stopped while you waited, and its work is kept, so nothing new comes from it until it is continued with the command the line names. |
 | [`RESULTS_WRITTEN`](../troubleshooting.md#results_written) | You ran `dockingbird results`: each line is one file it saved from the agent's task thread, with the file's type. |
 | [`RESULTS_NONE`](../troubleshooting.md#results_none) | You ran `dockingbird results` and the agent's task thread has no attached files yet. |
 | [`RESULTS_NO_THREAD`](../troubleshooting.md#results_no_thread) | You ran `dockingbird results` for an agent this Mac started without a task, or did not start, so no task thread is recorded for it. |

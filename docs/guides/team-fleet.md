@@ -96,6 +96,8 @@ dockingbird org projects add example --name Example --url https://github.com/exa
 dockingbird org people add alice --account alice@example.net
 dockingbird org members add alice --project example
 dockingbird org roles set implementer --harness claude --model MODEL --effort EFFORT
+dockingbird org roles set reviewer --harness claude --model MODEL --effort EFFORT
+dockingbird org roles set tester --harness claude --model MODEL --effort EFFORT
 ```
 
 ```text
@@ -103,7 +105,11 @@ Added the project example to the org store.
 Added alice, account alice@example.net, to the org store.
 alice is now a member of example.
 implementer with claude now runs MODEL at effort EFFORT.
+reviewer with claude now runs MODEL at effort EFFORT.
+tester with claude now runs MODEL at effort EFFORT.
 ```
+
+A role that names no model or effort looks them up by its kind, `implementer`, `reviewer` or `tester`, first in the project file's `[roles.NAME]`, then in these rows. [The swarms guide](swarms.md#choose-each-roles-model-and-effort) recommends a kind of model and an effort for each role.
 
 ## 4. Log in on each computer as its kind
 

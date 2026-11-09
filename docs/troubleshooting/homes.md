@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: homes, checkouts and toolchains"
-summary: "The 110 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears."
+summary: "The 113 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: homes, checkouts and toolchains
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 110 ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 113 ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust.
 
 | Id | When it appears |
 |---|---|
@@ -48,6 +48,9 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`NOTHING_LINKED`](../troubleshooting.md#nothing_linked) | You said no (or pressed Ctrl-C) when Dockingbird asked whether a branch with a deleted branch's name should carry on from that branch's agents' commits, or there was no terminal to ask on. |
 | [`BRANCH_NAME_UNSUPPORTED`](../troubleshooting.md#branch_name_unsupported) | The branch's name has characters the agents' copy can't hold. |
 | [`REPO_HISTORY_REFUSED`](../troubleshooting.md#repo_history_refused) | The branch's history has an object git's strict checks refuse, often from an old tool. |
+| [`REPO_LINK_REFUSED`](../troubleshooting.md#repo_link_refused) | Dockingbird refused to copy the branch for the agents, for a reason no other message covers: the message names the reason and, when there is one, the field it refused. |
+| [`REPO_RELEASED`](../troubleshooting.md#repo_released) | You ran `dockingbird repo release --repository R` and Dockingbird released that repository: it no longer lists it, and the next start in its folder copies the branch again. |
+| [`REPO_RELEASE_NO_ANSWER`](../troubleshooting.md#repo_release_no_answer) | You ran `dockingbird repo release`, and its call inside Dockingbird could not start, ran out of time, or gave a reply Dockingbird could not read; the message names which. |
 | [`LINK_NO_ANSWER`](../troubleshooting.md#link_no_answer) | Dockingbird didn't answer while it linked the branch. |
 | [`REPOS_FILE_UNREADABLE`](../troubleshooting.md#repos_file_unreadable) | Dockingbird's list of linked repos can't be read: it is a link, not yours, too large, or not in its format. |
 | [`LINK_INVALID`](../troubleshooting.md#link_invalid) | The branch's Dockingbird link in `.git/config` has something that isn't a link Dockingbird made. |

@@ -46,7 +46,7 @@ DOMAINS = (
      "WORKTREE INIT TOOL TOOLCHAIN DEPS ENV RULES TRUST TRUSTED NOTHING PROJECT")),
     ("agents", "agents, status, sync and clean", "daily", "starting agents, their status, sync, stop and clean",
      ("START AGENT AGENTS NAME NAMES CODEX COPY BOTH ENDED SESSION STOP STOPPED STEP STATUS DETAIL NEEDS EGRESS "
-      "ACCEPT SYNC CLEAN CHANGE COMMIT SHARE ALSO OTHERS AS MORE SET")),
+      "ACCEPT SYNC CLEAN CHANGE COMMIT SHARE ALSO OTHERS AS MORE SET FALLBACK HOST")),
     ("bus", "the bus", "daily", "tasks on the bus: send, wait, the inbox, read, questions and results",
      ("SEND SENT INBOX READ RESULTS QUESTION QUESTIONS ANSWER ANSWERED SEARCH RELAY WITHDRAWN WAIT WAITING "
       "INSTRUCTION INSTRUCTIONS DELIVERY TURN BODY")),
@@ -81,7 +81,7 @@ PAGE_GROUPS = (
      "sync-model.md claude-code-and-codex.md swarms-and-roles.md fleet-and-hosts.md fleet-scheduler.md "
      "control-plane.md licensing-model.md hosting-paradigms.md security-model.md observability.md")),
     ("Guides", ("docs/guides/",), paths("docs/guides/", "daily-loop.md delegating-tasks.md connections.md "
-     "your-own-commands.md toolchains.md trust-and-repo-settings.md sign-in-and-api-keys.md egress-and-network.md "
+     "your-own-commands.md skills.md toolchains.md trust-and-repo-settings.md sign-in-and-api-keys.md egress-and-network.md "
      "hosts.md licensing.md updates.md mcp-server.md clean-and-uninstall.md backup-and-restore.md "
      "data-and-privacy.md networking.md tailscale.md other-networks.md cloud-vms.md github.md mcp-and-services.md "
      "databases.md secrets-vault.md swarms.md work-queue.md team-fleet.md fleet-scheduler.md metrics.md "

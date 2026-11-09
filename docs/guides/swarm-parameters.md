@@ -230,7 +230,7 @@ A key takes one of three forms. The value is text, and the field it lands in rea
 | `<role>.<setting>` | `grader.count=6` | one role's setting |
 | `<role>.<subagent>.<setting>` | `grader.helper.max=4` | one subagent's setting |
 
-`KEY=VALUE` splits at the first `=`. A `--set` with no `=` is refused at `set.<text>`. A submit may set these role settings: `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`. It may set these subagent settings: `model`, `effort` and `max`. The files own a role's `connections`, `tools`, `egress`, `env`, `workspace`, `send_to` and texts. A `--set` on one prints `not a setting an invocation may set`.
+`KEY=VALUE` splits at the first `=`. A `--set` with no `=` is refused at `set.<text>`. A submit may set these role settings: `count`, `min`, `max`, `model`, `effort`, `compact_at` and `session_hours`. It may set these subagent settings: `model`, `effort` and `max`. It may set a role's fallback `harness`, `model`, `effort` and `placement`, as in `--set grader.fallback.harness=codex`. The files own a role's `connections`, `tools`, `egress`, `env`, `workspace`, `send_to` and texts. A `--set` on one prints `not a setting an invocation may set`.
 
 ## 6. Submit with a values file
 

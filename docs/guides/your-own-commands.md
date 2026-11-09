@@ -1,6 +1,6 @@
 ---
 title: Your own commands
-summary: Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo.
+summary: Add a command of your own, such as dockingbird review, from a TOML config in your repo or one shared by every repo, with a fallback tool for its failed turns.
 audience: daily
 commands:
   - config add
@@ -84,13 +84,14 @@ or add one: dockingbird config add PATH
 | `mode` | `bus` (default), `terminal` | `bus` runs the agent in the background through messages. `terminal` runs it at your terminal. A `mode` you write is fixed, and `--terminal` or `--bus` that disagrees is refused. |
 | `context` | `kept` (default), `fresh` | `kept` is one conversation for every task delivery. `fresh` starts a new conversation for each, under the same rules. Bus only. |
 
-The file can also pin three start flags. Write harness, mode or a limit in it, and a start that asks for something else is refused before anything starts. A key left out stays open to its flag.
+The file can also pin start flags. Write harness, mode, a limit or a fallback key in it, and a start that asks for something else is refused before anything starts. A key left out stays open to its flag.
 
 | File key | Flag it fixes |
 |---|---|
 | `harness` | `--harness` |
 | `mode` | `--terminal` and `--bus` |
 | `[limits]` `cpus`, `memory`, `session_hours` | `--cpus`, `--memory`, `--session-hours` |
+| `[fallback]` `harness`, `model`, `effort`, `placement` | `--fallback TOOL`, `--fallback-model`, `--fallback-effort`, `--fallback-placement` |
 
 ```text
 review runs with mode = bus: .dockingbird/review.toml says so.
@@ -136,9 +137,74 @@ Agents already running keep the config they started with. Cleaning everything re
 
 One file can hold several commands, each in a `[commands.NAME]` table, in place of the top-level `command`, `default` and `skill`. A table sets its own summary, default, skill and instructions, and may override any other key. The top instructions come before each command's own, and a top summary reaches no command.
 
+## Skills
+
+A config's `[skills]` table gives each agent of its commands skills its tool lists as its own. The `skill` key, singular, is another key: the first turn's text.
+
+```toml
+# Skills its tool lists (Claude Code's Skill tool and / menu, Codex's $ mention): one skills folder, or skill folders, each a path from this checkout's top. Default: none.
+[skills]
+path = ".agents/skills"
+# Where they go in the agent's home: both (~/.claude/skills and ~/.agents/skills), claude or agents. Default: both.
+into = "both"
+```
+
+A repo's own config's skills apply only in a checkout you have not marked untrusted. An added config's paths are relative to its file's folder, and `config add` copies them with it, so its skills are the ones it had when you added it, until you add it again. `--skills PATHS` on a start does the same for that start, and a skill it names replaces the config's skill of the same name. [Give agents skills](skills.md) has every rule, the bounds and how each tool lists the skills.
+
+## A fallback tool
+
+A config's `[fallback]` table sets what a failed turn of its agents does: try it again, report it, or move the agent to the other tool with its conversation. Without the table every failure is reported.
+
+1. Add the table. This one moves a Claude agent to Codex when a safety system refuses a turn, and retries every other failure that can pass, such as a rate limit or a provider outage.
+
+   ```toml
+   # .dockingbird/review.toml
+   command = "review"
+   harness = "claude"
+
+   [fallback]
+   harness = "codex"
+
+   [fallback.on]
+   refusal = "fallback"
+   server = "retry"
+   ```
+
+   Those two rules are the defaults with a `harness`, written out. Keep transient classes on `retry`: a move changes the model in the middle of a task. [The app.toml reference](../reference/files/app-config.md#keys-of-fallback) lists every key, every error class and each default.
+
+2. Start the command on the bus. The step is done when it prints its start lines.
+
+   ```text
+   review-1 started on myapp (main).
+   Thread <id>. Watch: dockingbird wait review-1
+   ```
+
+   When this computer has no Codex sign-in, the agent starts with its move off and says so once. Its rules then only retry and report.
+
+   ```text
+   review-1 starts with its fallback off: no Codex sign-in here.
+   ```
+
+3. Read the inbox after a failed turn. A retry shows under "Needs your attention" in `dockingbird status` while it waits. A move stops the agent after its turn, keeps its copy, and sends you one message at `P1`.
+
+   ```text
+   review-1 is retrying after rate_limit (1 of 3), next in 5 min.
+   review-1 stopped after refusal: moving to Codex
+   ```
+
+4. Pick the agent up on the fallback tool when Dockingbird does not. On this computer its fallback watcher runs the pick-up itself, at most three times for one agent, and `dockingbird status` names the command when nothing picks the agent up.
+
+   ```bash
+   dockingbird review --as review-1 --fallback
+   ```
+
+   The step is done when the start lines print. The agent goes on with its conversation and the messages that waited for it, under the fallback's model and effort. Afterwards the agent keeps the tool it ran last, so a later pick-up by its name runs it on Codex. By default an agent moves once at most.
+
+`dockingbird start` fills the table's keys a config leaves unset: `--fallback TOOL`, `--fallback-model MODEL`, `--fallback-effort LEVEL` and `--fallback-placement any` or `require-login`. A flag that differs from a value the file sets is refused. So are a model or an effort with no tool to move to, and any of the four flags for an agent at a terminal, which runs no rules.
+
 ## Trust, tool arguments and secrets
 
-A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, three keys are off: `harness_args`, `[env]` and `repo_settings = true`. An added config's `harness_args` and `[env]` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
+A repo's own config comes with the repo, so whoever can push to it decides what it says. In a checkout you marked untrusted with `dockingbird trust --off`, five keys are off: `harness_args`, `[env]`, `[skills]`, `harness_config` and `repo_settings = true`. An added config's `harness_args`, `[env]`, `[skills]` and `harness_config` apply everywhere, since you chose to add it. The page [trust-and-repo-settings.md](trust-and-repo-settings.md) has the whole trust model.
 
 `harness_args` take only Claude Code's `--model`, `--fallback-model`, `--max-turns` and `--effort`, with `low`, `medium`, `high`, `xhigh` or `max` as the effort. For Codex they take `--model`, `-m` and `-c model_reasoning_effort=LEVEL`. Anything else is refused, and the refusal names the allowed flags.
 
@@ -154,3 +220,11 @@ Your own Claude Code or Codex can start these commands too, through `dockingbird
 - [`CONFIG_NOT_REGISTERED`](../troubleshooting.md#config_not_registered) means `config remove` found no added config of that name. `config list` shows the names.
 - [`START_COMMAND_UNKNOWN`](../troubleshooting.md#start_command_unknown) means no config here gives that command. The message lists the ones that do.
 - [`START_CONFIG_FIXED`](../troubleshooting.md#start_config_fixed) means a flag such as `--harness` or `--terminal` disagrees with a key the file fixes. Drop the flag or change the file.
+- [`START_SKILLS_REFUSED`](../troubleshooting.md#start_skills_refused) means a start's `--skills` names what Dockingbird cannot use, such as a path with no skill or a link. Nothing was started. Fix that skill folder, or leave it out of `--skills`.
+- [`START_FALLBACK_NO_HARNESS`](../troubleshooting.md#start_fallback_no_harness) means `--fallback-model` or `--fallback-effort` came with no fallback tool, from the flag or the file. Nothing was started. Add `--fallback TOOL`, or a `harness` to the `[fallback]` table.
+- [`START_FALLBACK_TERMINAL`](../troubleshooting.md#start_fallback_terminal) means a fallback flag came with an agent at a terminal, which runs no rules. Nothing was started. Drop the flag, or start the agent on the bus.
+- [`FALLBACK_OFF_HERE`](../troubleshooting.md#fallback_off_here) says the agent started with its move off, because this computer has no sign-in for the fallback tool. Sign that tool in with `dockingbird login`, then pick the agent up.
+- [`FALLBACK_NO_LOGIN`](../troubleshooting.md#fallback_no_login) means the pick-up, or a start under `placement = "require-login"`, needs the fallback tool signed in here. Nothing was started. Run the `dockingbird login` the line names.
+- [`FALLBACK_NONE`](../troubleshooting.md#fallback_none) means the agent recorded no tool to move to. Name one, as in `--fallback codex`.
+- [`FALLBACK_MAX`](../troubleshooting.md#fallback_max) means the agent has moved as often as one agent may. Pick it up on the tool it runs now, without `--fallback`.
+- [`STATUS_FALLBACK_FAILED`](../troubleshooting.md#status_fallback_failed) says every pick-up the fallback watcher tried was refused, and names the last refusal. Mend its cause, then run the `--fallback` pick-up the note names.
