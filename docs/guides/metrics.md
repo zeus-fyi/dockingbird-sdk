@@ -78,7 +78,25 @@ Each family's `# HELP` and `# TYPE` lines appear once, then one sample line per 
 dockingbird --json fleet scrape
 ```
 
-With `--json` the envelope's `id` is `FLEET_SCRAPE`. Its `fields` hold `read_at`, the home's folder and profile, every agent with its session, tool, state and labels (up to 200, the rest counted), and the text as `exposition`, one string per line. The lines read `Home: NAME` and `Agents: N, M with metrics.`.
+With `--json` the envelope's `id` is `FLEET_SCRAPE`. Its `fields` hold `read_at`, the home's folder and profile, every agent with its session, tool, state and labels (up to 200, the rest counted), the text as `exposition`, one string per line, and `relay`, described below. The lines read `Home: NAME` and `Agents: N, M with metrics.`.
+
+## Read the control-plane relay
+
+On the control plane's home, `fleet scrape` prints eight more families after the agents' families and before `# EOF`. Their names start with `dockingbird_relay_`. They count what the control plane's relay does: the requests it answered, the requests it refused by reason and by stage, the replies it dropped, the exchanges in flight now, and the seconds from a request's arrival to its reply, per node.
+
+```bash
+dockingbird --home CONTROL_PLANE_HOME fleet scrape
+```
+
+`CONTROL_PLANE_HOME` is the home you made with `cp init`. The relay writes its figures every 10 seconds, and `fleet scrape` reads that file with one `docker exec`, so the figures run up to 10 seconds behind. Counters start at zero each time the relay restarts, and `dockingbird_relay_start_timestamp_seconds` says when. A sample line looks like this.
+
+```text
+# HELP dockingbird_relay_answered_total Requests answered with the daemon's response since the relay started, per node.
+# TYPE dockingbird_relay_answered_total counter
+dockingbird_relay_answered_total{profile="PROFILE",node="NODE"} 1520
+```
+
+On any other home the eight families are absent, and no `docker` command runs. With `--json`, the field `relay` says what happened. `read` comes with the number of `nodes`. Anything else names the reason: `no-relay` for a home that is no control plane or a relay that is not running, `docker-missing`, `exec-failed`, `no-snapshot` before the relay's first write, `too-large`, or `unexpected-shape`. When the relay cannot be read, the agents' text still prints whole and the command ends as it would have. [The metrics reference](../reference/metrics.md) lists the eight families with their labels.
 
 ## Read the fleet scheduler
 
@@ -86,7 +104,7 @@ With `--json` the envelope's `id` is `FLEET_SCRAPE`. Its `fields` hold `read_at`
 dockingbird fleet queue --metrics
 ```
 
-This prints the admitter's families in the Prometheus text format, for the workloads your role can see. It takes neither `--json` nor `--host`. The queue's depth by priority, each host's reservations and headroom, red gate lines, stale hosts, interrupted workloads and holds by reason come first. Counters of admissions, starts, queue wait and agent seconds follow. The admitter serves the same text on its own port, at the fleet database's host.
+This prints the admitter's families in the Prometheus text format, for the workloads your role can see. It takes neither `--json` nor `--host`. The queue's depth by priority, each host's reservations and headroom, red gate lines, stale hosts, interrupted workloads, holds by reason and each host's agents against its agent cap come first. Counters of admissions, starts, queue wait and agent seconds follow. The admitter serves the same text on its own port, at the fleet database's host.
 
 ## Read the status rows
 
@@ -100,11 +118,12 @@ Each row of `status --json` is an envelope of its own. A running agent's row car
 
 | Label | What it names | Where it appears |
 |---|---|---|
-| `profile` | The home | Every agent line |
+| `profile` | The home | Every agent line and every relay line |
 | `agent` | The agent's name | Every agent line |
 | `session` | The agent's session | Every agent line |
 | `tool` | `claude` or `codex` | Every agent line |
 | `team`, `role` | The swarm and the role of a fleet agent | An agent of a swarm |
+| `node` | The node that sent the request | The relay's per-node lines |
 
 ## The JSON forms for a script
 
@@ -112,7 +131,7 @@ Each row of `status --json` is an envelope of its own. A running agent's row car
 |---|---|---|
 | `fleet probe --json` | `FLEET_PROBE` | Each figure by name, the kinds of process, `unread` |
 | `fleet read-home --json` | `FLEET_HOME` | The home's agents, state counts, inbox rows, `unread` |
-| `fleet scrape --json` | `FLEET_SCRAPE` | `read_at`, the agents, `exposition` |
+| `fleet scrape --json` | `FLEET_SCRAPE` | `read_at`, the agents, `exposition`, `relay` |
 | `fleet queue --metrics` | none | Prints text only, with no `--json` form |
 
 [The example exporter](../../examples/observability/exporter.py) reads these envelopes with the standard library alone. [The metrics reference](../reference/metrics.md) lists every family. To collect the figures on a schedule, go on to [the Prometheus guide](prometheus.md).

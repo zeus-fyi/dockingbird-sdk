@@ -1,17 +1,18 @@
 ---
 title: Metrics reference
-summary: Every metric family Dockingbird serves, with its type, labels and unit, the agent families first, the fleet families second and the exporter's own gauges last.
+summary: Every metric family Dockingbird serves, with its type, labels and unit, the agent families first, the fleet scheduler's second, the control-plane relay's third and the exporter's own gauges last.
 audience: integrator
 commands:
   - fleet scrape
   - fleet queue --metrics
+  - fleet admitter
 ---
 
 > Part of the Dockingbird customer docs. The index for agents is [llms.txt](../../llms.txt).
 
 # Metrics reference
 
-This page is generated from the release's own `fleet scrape` and `fleet queue --metrics` output, and the names and types printed there are the authority. [The observability page](../concepts/observability.md) explains the sources. The Help column of each row is the release's own `# HELP` line. The Meaning column is a short gloss. In the exporter's table, the Help column names the probe field each series is read from.
+This page is generated from the release's own `fleet scrape` and `fleet queue --metrics` output, and the names and types printed there are the authority. `fleet scrape` prints the agent families and, on a control-plane home, the relay families. `fleet queue --metrics` prints the fleet families. [The observability page](../concepts/observability.md) explains the sources. The Meaning column is a short gloss. Where a table has a Help column, it holds the release's own `# HELP` line, and in the exporter's table it names the probe field each series is read from.
 
 ## Agent families
 
@@ -51,25 +52,55 @@ Model tokens and costs count from the start of an agent's process (Claude) or th
 
 ## Fleet families
 
-The admitter serves these on its own port, and `dockingbird fleet queue --metrics` prints them. A family may carry more labels than listed. Use `rate()` or `increase()` on the counters only.
+The admitter serves these on its own port, and `dockingbird fleet queue --metrics` prints them. The page leaves out a family with no sample. Every family is a gauge except the five that end in `_total`, which are counters: they only grow and survive every admitter restart, so use `rate()` or `increase()` on them only.
+
+| Family | Type | Labels | Unit | Meaning |
+|---|---|---|---|---|
+| `fleet_queue_depth` | gauge | `priority` | workloads | Pending workloads, swarms and leases, at each priority |
+| `fleet_reserved_millicores` | gauge | `host` | millicores | CPU reserved on the host by workloads that have not ended |
+| `fleet_reserved_mib` | gauge | `host` | MiB | Memory reserved on the host by workloads that have not ended |
+| `fleet_headroom_millicores` | gauge | `host` | millicores | The host's reservable CPU less the reserved CPU, below zero when a policy change lowered the share under the reservations |
+| `fleet_headroom_mib` | gauge | `host` | MiB | The host's reservable memory less the reserved memory |
+| `fleet_gate_red` | gauge | `host`, `figure` | 0 or 1 | 1 while the last admission pass left the host's gate line on that figure red |
+| `fleet_host_stale` | gauge | `host` | 0 or 1 | 1 when the host's latest sample is older than `HOST_STALE_S`, or it has none |
+| `fleet_host_probe` | gauge | `host`, `probe` | 1 | 1 for each stale host, labelled with the class of the check the admitter gave it when it went stale; absent for a host that is not stale |
+| `fleet_interrupted` | gauge | `host` | workloads | Workloads interrupted on the host now |
+| `fleet_placed_agents` | gauge | `host` | agents | Agents of workloads that have not ended placed on the host, every step but retired |
+| `fleet_holds` | gauge | `reason` | workloads | Pending workloads the last pass held off at least one host for that reason |
+| `fleet_home_agents` | gauge | `host` | agents | Agents of the host's fullest home, counted against the agent cap as the last pass judged them; absent for a host no pass has judged |
+| `fleet_agent_cap` | gauge | `host` | agents | The host's agent cap: the most agents one of its homes runs |
+| `fleet_host_agents` | gauge | `host` | agents | Agent containers the host's latest sample saw running, in every home, listed in `hosts.toml` or not; absent for a host with no sample |
+| `fleet_admissions_total` | counter | `host` | count | First admissions on the host: every lease's and a swarm's first, never a re-admission's |
+| `fleet_starts_total` | counter | `host` | count | Swarm starts on the host |
+| `fleet_queue_wait_seconds_total` | counter | `host` | seconds | Seconds the host's first admissions waited from their submit |
+| `fleet_agent_seconds_total` | counter | `role`, `host` | seconds | Seconds of the role's running agents on the host, one tick's interval per agent |
+| `fleet_agent_idle_seconds_total` | counter | `role`, `host` | seconds | Seconds of the role's idle agents on the host, idle meaning no open request |
+
+The `probe` label of `fleet_host_probe` is one of `ssh_timeout`, `ssh_refused`, `host_up_worker_silent`, `route_error` and `no_route`, or `unread` when the admitter recorded none. The `reason` label of `fleet_holds` is a hold word, or `unread`. No label holds a path, a token or an agent's text.
+
+## Control-plane relay families
+
+`dockingbird fleet scrape` prints these after the agent families, on the control plane's home only. On any other home it prints none and runs no `docker` command. Every counter and the histogram start at zero when the relay restarts. Each line carries the label `profile` first, the home's profile id, then the labels below. Prometheus gets them through the example exporter, which adds `home` to every sample line it passes on. The page leaves out a family with no sample: `dockingbird_relay_refused_total` has no line until the first refusal, and `dockingbird_relay_dropped_total` has none until the first drop.
 
 | Family | Type | Labels | Unit | Help | Meaning |
 |---|---|---|---|---|---|
-| `fleet_queue_depth` | gauge | `priority` | workloads | from the release's output | workloads in the queue, by priority |
-| `fleet_reserved_millicores` | gauge | `host` | millicores | from the release's output | CPU reserved on the host |
-| `fleet_reserved_mib` | gauge | `host` | MiB | from the release's output | memory reserved on the host |
-| `fleet_headroom_millicores` | gauge | `host` | millicores | from the release's output | CPU left to reserve on the host |
-| `fleet_headroom_mib` | gauge | `host` | MiB | from the release's output | memory left to reserve on the host |
-| `fleet_gate_red` | gauge | `host` | count | from the release's output | red gate lines of the host |
-| `fleet_host_stale` | gauge | `host` | 0 or 1 | from the release's output | the host's sample is stale |
-| `fleet_interrupted` | gauge | `host` | workloads | from the release's output | interrupted workloads on the host |
-| `fleet_holds` | gauge | `reason` | workloads | from the release's output | held workloads, by reason |
-| `fleet_agent_cap` | gauge | `host` | agents | from the release's output | the host's agent cap against its fullest home |
-| `fleet_admissions_total` | counter | `host` | count | from the release's output | workloads the host admitted |
-| `fleet_starts_total` | counter | `host` | count | from the release's output | agent starts on the host |
-| `fleet_queue_wait_seconds_total` | counter | `host` | seconds | from the release's output | seconds workloads waited before the host admitted them |
-| `fleet_agent_seconds_total` | counter | `role`, `host` | seconds | from the release's output | agent seconds of the role on the host |
-| `fleet_agent_idle_seconds_total` | counter | `role`, `host` | seconds | from the release's output | idle agent seconds of the role on the host |
+| `dockingbird_relay_info` | gauge | `version`, `workers`, `per_node` | 1 | The relay's fleet version and its bounds on exchanges in flight, as the relay records them. | the relay's fleet version, the requests it serves at once (`workers`) and the most one node may hold (`per_node`) |
+| `dockingbird_relay_start_timestamp_seconds` | gauge | none | seconds | When the relay started, in Unix seconds; its counters start at zero there. | Unix time of the relay's start |
+| `dockingbird_relay_written_timestamp_seconds` | gauge | none | seconds | When the relay last wrote these figures, in Unix seconds. | Unix time of the snapshot you read |
+| `dockingbird_relay_in_flight` | gauge | `node` | exchanges | Exchanges on the daemon's socket in flight now, per node. | requests being served for the node now |
+| `dockingbird_relay_answered_total` | counter | `node` | requests | Requests answered with the daemon's response since the relay started, per node. | requests answered |
+| `dockingbird_relay_refused_total` | counter | `node`, `reason`, `stage` | requests | Requests refused since the relay started, per node, by reason and by stage: check, before the socket; exchange, the socket's own refusal. | requests refused |
+| `dockingbird_relay_dropped_total` | counter | `node`, `reason` | replies | Replies not published and library errors since the relay started, by node (empty for an error of no node) and reason. | replies not published, and library errors |
+| `dockingbird_relay_request_seconds` | histogram | `node`, and `le` on the `_bucket` lines | seconds | Seconds from a request's arrival to its reply's publish, answered requests only, per node. | seconds per answered request |
+
+- `node` is the id of the node that sent the request. On `dockingbird_relay_dropped_total` it is empty for a library error that names no node, and an empty label and an absent one are the same series.
+- `stage` is `check` for a request the relay's own checks refused before the daemon's socket, and `exchange` for a refusal the socket's exchange raised.
+- `reason` on `dockingbird_relay_refused_total` is the error's reason word, such as `RPC_SERVER_UNAVAILABLE`, or `unknown` when the error names none. On `dockingbird_relay_dropped_total` it is `no_reply` for a request that named no reply subject, or the class name of the error that dropped the reply.
+- Each map keeps at most 64 distinct reason words besides `other` (`NATS_RELAY_REASONS_MAX`). A new word past that counts as `other`.
+- The histogram has one bucket per bound of 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10 and 30 seconds, then `+Inf`. The 30 is the fleet request timeout (`NATS_REQUEST_TIMEOUT_S`). It counts answered requests only, from the request's arrival to the publish of its reply, so a refused request adds nothing. `_sum` and `_count` follow the buckets of each node.
+- Every node has its `in_flight`, `answered_total` and `request_seconds` lines from the first snapshot, at zero.
+- The relay writes its figures every 10 seconds (`NATS_RELAY_METRICS_WRITE_S`), so a scrape runs up to 10 seconds behind. The text holds at most 1,048,576 bytes (`NATS_RELAY_METRICS_MAX_BYTES`, about 300 nodes).
+- With `--json`, the `relay` field of `fleet scrape` says `read`, with how many `nodes`, or names why not: `no-relay`, `docker-missing`, `exec-failed`, `no-snapshot`, `too-large` or `unexpected-shape`. A relay that cannot be read leaves the agent families whole.
 
 ## The exporter's gauges
 
