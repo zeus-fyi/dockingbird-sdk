@@ -217,7 +217,7 @@ After the control plane's computer restarts, the first `dockingbird cp status` o
 
 ## 10. Update in order
 
-Update the admin's store first with `org create`, then the control plane's home, then each member and each worker with `dockingbird update`. Until a member matches the control plane, its fleet frames are refused with `NODE_VERSION_MISMATCH` and its agents keep working without the fleet. `fleet update` moves the pool's hosts in rank order and is the admin's alone, as [the fleet scheduler guide](fleet-scheduler.md#update-the-pool) shows.
+Update the admin's store first with `org create`, then the control plane's home, then each member and each worker with `dockingbird update`. `0012_agent_placement` sets a restart order: after `org create`, restart the admitter at the new release first, then move the workers and the submitters, with no `fleet submit` between `org create` and the admitter's restart. An admitter of the release before admits nothing against that store until it restarts. [The fleet store reference](../reference/files/fleet-store.md#older-workers) says for every migration whether earlier workers keep running. Until a member matches the control plane, its fleet frames are refused with `NODE_VERSION_MISMATCH` and its agents keep working without the fleet. `fleet update` moves the pool's hosts in rank order and is the admin's alone, as [the fleet scheduler guide](fleet-scheduler.md#update-the-pool) shows.
 
 ## Services
 
@@ -260,6 +260,7 @@ A compromised member can send instructions to any agent of the fleet, including 
 - [`FLEET_DB_UNREACHABLE`](../troubleshooting.md#fleet_db_unreachable) means the database did not answer. The command ends 69, so run it again when the server is up.
 - [`FLEET_DB_REFUSED`](../troubleshooting.md#fleet_db_refused) means the database turned the login down. The command ends 78, so check the role and its password.
 - [`FLEET_STORE_BEHIND`](../troubleshooting.md#fleet_store_behind) means the store lacks a migration this build needs. Run `org create`, then start the worker again.
+- [`FLEET_QUEUE_HELD`](../troubleshooting.md#fleet_queue_held) prints `  held: NAME: REASON` under a swarm of `fleet queue` for an agent whose start was refused, and [`FLEET_WHY_HELD`](../troubleshooting.md#fleet_why_held) says that `fleet replace` or `fleet retire` frees its slot. [The swarms guide](swarms.md#4-change-a-running-swarm) says what to run.
 - [`FLEET_CONFIG_PASSWORD_REFUSED`](../troubleshooting.md#fleet_config_password_refused) means an older `fleet.toml` still holds a password. Run `org login --from-fleet-toml --as KIND`.
 - [`FLEET_UPDATE_NO_REPOINT`](../troubleshooting.md#fleet_update_no_repoint) means a host has no `repoint` line. Add one to its `[[host]]` table.
 - [`MODE_CHANGE_AGENTS_RUNNING`](../troubleshooting.md#mode_change_agents_running) blocks `cp init`, `cp off`, `node join` and `node leave` while agents run in the home. Stop them first.

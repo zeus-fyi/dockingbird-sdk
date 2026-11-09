@@ -46,8 +46,12 @@ Every key is optional, and a key you leave out takes the default in the tables b
 | `harness_args` | list of words | none | fixed arguments for the tool: Claude takes `--model`, `--fallback-model`, `--max-turns` and `--effort` (`low`, `medium`, `high`, `xhigh` or `max`); Codex takes `--model`, `-m` and `-c model_reasoning_effort=LEVEL`; anything else is refused |
 | `harness_config` | a path, or a table by tool such as `{ claude = "claude-settings.json" }` | none | the tool's own settings file, a path beside this file, which the agent's tool takes as its base under Dockingbird's own keys |
 | `mise_env` | text | none | mise's environments for the agent's toolchain, comma separated; `ci` makes mise read `mise.ci.toml` over `mise.toml` |
+| `[folders]` | table of connection name to `read` or `write` | `read` for every name left out | the access a folder connection gives the agent, for the connections an added config names in `connections`: `read` mounts the folder read-only and `write` mounts it read-write, at `/dockingbird/folders/NAME`; [connections.md](../../guides/connections.md) gives the steps |
+| `[subagents.NAME]` | one table | none | one helper the agent's tool may run, with its own `instructions` (required), `model`, `effort`, `max` and `tools`; a config holds one such table at most; [the subagent block](roles-and-connections.md#subagent-block) lists the keys |
 | `[env]` | table of text | none | variables the agent's tool sees; settings, never secrets, because the agent can read and send them |
 | `[fallback]` | table | none, so every failed turn is reported | what a failed turn on the bus does: a retry, a report or a move to the other tool; [its keys](#keys-of-fallback) are below |
+
+A config has no file option on `start`, `claude` or `codex`. An agent takes a config by `dockingbird start --command NAME`, by the command's own name as in `dockingbird NAME`, or, with `start` alone, as the config marked `default = true`.
 
 ## Keys of `[skills]`
 

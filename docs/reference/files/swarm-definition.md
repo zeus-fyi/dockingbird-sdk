@@ -87,6 +87,7 @@ Each `[[role]]` is one kind of agent.
 | `max` | integer | the role's `count` | the most agents an add reaches |
 | `brief` | path | required, or from the library role | the Markdown file of the first task, read under the definition's folder |
 | `reviews`, `tests` | list of role names | none | whose commits this role reviews or tests |
+| `branch` | string, a suffix | none | the task branch the role's agents work on, `<source branch>-<suffix>`, in a clone of their own; a role without it works on the source branch; [Task branches](#task-branches) has the rules |
 | `kind` | slug | `reviewer` or `tester` by `reviews` or `tests`, else `implementer`, as the role library's `index.toml` names them | a name the model and effort are looked up by |
 | `use` | string | none | `"NAME"` names `.dockingbird/roles/NAME.toml`; `"dockingbird/NAME"` names a shipped role |
 | `instructions` | path | none | text the agents get after Dockingbird's rules and the project's |
@@ -104,6 +105,37 @@ Each `[[role]]` is one kind of agent.
 | `hosts` | list of host names | the placement's hosts | the hosts of `[placement]` its agents may take, in order; the roles that publish commits (each role that reviews, and each role another reviews or tests) share one host, and in a swarm without `spread = true` every role does, else `hosts-apart` |
 | `skills` | table of `path` and `into` | none | skills its agents' tool lists as its own, as a config's `[skills]` takes them: `path`, one skill or skills folder or a list of them, each a path from the top of the swarm's source; `into`, `both`, `claude` or `agents`; every start reads them from the swarm's clone, and a path the clone lacks holds the swarm (`skills_refused`) until you push the fix and run `fleet release ID`; `--set` cannot set it; see [skills.md](../../guides/skills.md) |
 | `[role.fallback]`, `[role.fallback.on]` | tables | none | the tool its agents move to after a failed turn, and each error class's rule; see [A role's fallback](#a-roles-fallback) |
+
+## Task branches
+
+A role with `branch = "t1"` in a swarm whose `[source]` `branch` is `feature` has its agents work on the task branch `feature-t1`. The agents of a role without the key work on `feature`. The key is optional, and a definition without it runs as before.
+
+```toml
+[source]
+repository = "example-org/example-app"
+branch = "feature"
+
+[[role]]
+name = "build-1"
+harness = "claude"
+count = 1
+brief = "briefs/build.md"
+branch = "t1"
+
+[[role]]
+name = "review-1"
+harness = "claude"
+count = 1
+brief = "briefs/review.md"
+reviews = ["build-1"]
+branch = "t1"
+```
+
+At the swarm's start the fleet pushes the task branch to `origin` when it is not there, then clones it. It also pushes each task branch to `origin` in a whole placement, as it does in a spread one. Each agent works in the clone of its role's branch.
+
+A reviewer or tester serves one branch. A role whose `reviews` or `tests` name a role on another branch is refused at `fleet submit`, with `branch-mismatch` at `role[N].reviews[i]` or `role[N].tests[i]`. A role with no `branch` counts as equal to another with none. A swarm with task branches therefore names one reviewer and one tester per task branch. A suffix that makes `<source branch>-<suffix>` an invalid branch name is refused with `branch` at `role[N].branch`.
+
+An earlier release's `fleet submit` refuses the key as an unknown key. `dockingbird init` installs a worked example, `.agents/skills/dockingbird-swarm/library/task-branches/`, with a build, a review and a test role for each of three tasks. Its comments give the submit command.
 
 ## Library roles
 
