@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: agents, status, sync and clean"
-summary: "The 326 message ids about starting agents, their status, sync, stop and clean, each with when it appears."
+summary: "The 330 message ids about starting agents, their status, sync, stop and clean, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,10 +9,11 @@ commands: []
 
 # Troubleshooting index: agents, status, sync and clean
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 326 ids about starting agents, their status, sync, stop and clean.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 330 ids about starting agents, their status, sync, stop and clean.
 
 | Id | When it appears |
 |---|---|
+| [`START_REPOSITORY_PAST_CUT`](../troubleshooting.md#start_repository_past_cut) | You started an agent on a home with more repositories than `native state` lists, running a Dockingbird older than this command: this command reads a repository past that list by id, and the older Dockingbird can't. |
 | [`STEP_TOOK_TOO_LONG`](../troubleshooting.md#step_took_too_long) | One of the steps Dockingbird asks Docker for while it sets itself up or starts, or starts an agent, took longer than Dockingbird waits, usually because the computer was busy. |
 | [`SESSION_RESUMED_AFTER_UPDATE`](../troubleshooting.md#session_resumed_after_update) | Dockingbird moved an agent to a new version, or to new code of the same version, at a stopping point and resumed its conversation; the agent's tool reads this line as it starts again. |
 | [`AGENTS_RUNNING_UPDATE_REFUSED`](../troubleshooting.md#agents_running_update_refused) | Agents started while an update was finishing, so Dockingbird left the rest of the update until they end: run `dockingbird update` again when they finish, or stop them first. |
@@ -57,6 +58,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`EGRESS_ENTRY_INVALID`](../troubleshooting.md#egress_entry_invalid) | You gave `dockingbird egress` an `--allow` entry that isn't a host such as `docs.python.org`, or `*.corp.example` for every name under it, or a preset (`registries`, `github`), or more entries than an allow list takes. |
 | [`AGENT_RUNNING_ARGS`](../troubleshooting.md#agent_running_args) | You gave `--as` with arguments for the tool, with `--egress`, or with `--new`, for an agent that is already running. |
 | [`AGENT_UNKNOWN`](../troubleshooting.md#agent_unknown) | You named an agent, with `stop`, `status`, `send`, `read`, `results`, `wait` or `inspect config --agent`, that isn't running and has no work kept. |
+| [`AGENT_SESSIONS_PAST_CUT`](../troubleshooting.md#agent_sessions_past_cut) | You named an agent, with `start --as`, `stop`, `set` or `send`, while Dockingbird lists more agents than one listing shows, and the listing of that agent's own history was cut too, so whether it runs could not be read. |
 | [`START_MERGE_OFFER`](../troubleshooting.md#start_merge_offer) | You started an agent on a branch where you and the agents both have new commits. |
 | [`BOTH_MOVED_ROW`](../troubleshooting.md#both_moved_row) | One commit in a list of new commits on both sides, yours or the agents'. |
 | [`AGENT_RECONNECTING`](../troubleshooting.md#agent_reconnecting) | You started the tool with no arguments, or with `--as` and the name of one of its agents, while that agent was still working without a terminal, so this terminal reconnects to it. |
@@ -212,6 +214,8 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`STATUS_UPDATE_STAGED`](../troubleshooting.md#status_update_staged) | `status` after `dockingbird update` installed a new version while agents are working: it names the version and the agents it waits for, and says when it is taking over now. |
 | [`STATUS_UPDATE_ROLLING`](../troubleshooting.md#status_update_rolling) | `dockingbird status` while a new version takes over and the agents take it one by one, each at its next stopping point. |
 | [`STATUS_UPDATE_STRAGGLERS`](../troubleshooting.md#status_update_stragglers) | `dockingbird status` after a new version took over while some agents kept another one, each named with the version it runs. |
+| [`STATUS_SIDECAR_BEHIND`](../troubleshooting.md#status_sidecar_behind) | `dockingbird status` when an agent's browser or proxy still runs an older Dockingbird version than the agent itself, because the agent was updated in place. |
+| [`STATUS_HOST_PROCESS_BEHIND`](../troubleshooting.md#status_host_process_behind) | `dockingbird status` when a program of this home on your computer still runs an older Dockingbird version than the home: a `dockingbird serve`, or an agent's login courier or solve watcher, named with its process id. |
 | [`STATUS_STRAGGLER_RUNS`](../troubleshooting.md#status_straggler_runs) | One agent inside a line of `dockingbird status` about an update, with the Dockingbird version it runs, such as `claude-1 on 0.10.3`. |
 | [`STATUS_NO_AGENTS`](../troubleshooting.md#status_no_agents) | `status` while no agent is working. |
 | [`STATUS_START_FAILED`](../troubleshooting.md#status_start_failed) | Under "Needs your attention": the last start of an agent on this branch stopped because Dockingbird couldn't make the agents' copy of the branch. |
@@ -285,7 +289,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`START_NO_SIGNIN_BUS`](../troubleshooting.md#start_no_signin_bus) | You started an agent without a terminal for a tool that isn't signed in and has no API key saved: nobody would see its sign-in, so nothing was started. |
 | [`START_LOGIN_HERE_EXPIRED`](../troubleshooting.md#start_login_here_expired) | You started an agent of a tool whose login on this computer Dockingbird follows, and that login has expired here. |
 | [`START_LOGIN_HERE_GONE`](../troubleshooting.md#start_login_here_gone) | You started an agent of a tool whose login on this computer Dockingbird follows, and you are no longer signed in to that tool here. |
-| [`START_GATEWAY_UNREACHABLE`](../troubleshooting.md#start_gateway_unreachable) | You started a Claude agent in the `models` or `allowlist` egress mode while Claude's login on this computer goes through a gateway on this Mac itself (`http://127.0.0.1:59471`, say, a proxy of yours). |
+| [`START_GATEWAY_UNREACHABLE`](../troubleshooting.md#start_gateway_unreachable) | You started a Claude agent in the `models` or `allowlist` egress mode while Claude's login on this computer goes through a gateway whose host is an IP address, or another text that is not a plain host name (`https://10.0.0.5:<port>`, say). |
 | [`START_ARGS_NOT_KEPT`](../troubleshooting.md#start_args_not_kept) | You started an agent with arguments after `--`, and keeping them for its next pick-up would take Dockingbird's `state.json` past the size it reads, so they were left out of it. |
 | [`START_PROJECT_CONNECTIONS`](../troubleshooting.md#start_project_connections) | You started a config from a repo's own `.dockingbird/` folder that names connections: only a config you add may name them, so a repo you cloned can't reach your credentials. |
 | [`START_PROJECT_VERSION`](../troubleshooting.md#start_project_version) | You started a config from a repo's own `.dockingbird/` folder that sets `version`, at its top level or in one of its commands: only a config you add may pin the tool's version, so a repo you cloned can't choose what runs. |

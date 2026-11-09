@@ -49,7 +49,7 @@ DOMAINS = (
       "ACCEPT SYNC CLEAN CHANGE COMMIT SHARE ALSO OTHERS AS MORE SET FALLBACK HOST")),
     ("bus", "the bus", "daily", "tasks on the bus: send, wait, the inbox, read, questions and results",
      ("SEND SENT INBOX READ RESULTS QUESTION QUESTIONS ANSWER ANSWERED SEARCH RELAY WITHDRAWN WAIT WAITING "
-      "INSTRUCTION INSTRUCTIONS DELIVERY TURN BODY")),
+      "INSTRUCTION INSTRUCTIONS DELIVERY TURN BODY EXPECTED EXPECTATION EXPECTATIONS")),
     ("connections", "configs, connections and host resources", "daily", ("your own commands, connections, served "
      "resources, browsers and watch"), ("CONFIG CONNECT CONNECTION CONNECTED REVOKE SERVE BROWSER WATCH MANUAL FILE "
      "LOCAL PLAN HARNESS")),

@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting index: the bus"
-summary: "The 74 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
+summary: "The 78 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears."
 audience: daily
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Troubleshooting index: the bus
 
-Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 74 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
+Find a message id below to see when Dockingbird prints that message. Add `--verbose` to a command and every message also shows its id. With `--json`, each envelope carries the id as its `id` key. Each id links to its entry in the [catalogue](../troubleshooting.md): the message text, the next step and the exit status. This page holds the 78 ids about tasks on the bus: send, wait, the inbox, read, questions and results.
 
 | Id | When it appears |
 |---|---|
@@ -28,6 +28,7 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`INSTRUCTION_FILE_FIXED`](../troubleshooting.md#instruction_file_fixed) | You picked up or reconnected to an agent with `--as` and gave `--agent-md` or `--claude-md` another file than the one it started with, or a file it started without. |
 | [`INSTRUCTION_FILE_SAVED`](../troubleshooting.md#instruction_file_saved) | A new agent's start found that an earlier agent had changed the AGENTS.md or CLAUDE.md that `--agent-md` or `--claude-md` gave it. |
 | [`INBOX_ROW_UNKNOWN`](../troubleshooting.md#inbox_row_unknown) | You gave a row number no message in your inbox has now, or your inbox is empty. |
+| [`INBOX_ROW_CONSUMED`](../troubleshooting.md#inbox_row_consumed) | You gave a row number of a message another reader of this home (a swarm's reader, the fleet engine or a plain `dockingbird read`) read since your inbox showed it, which took it out of the inbox. |
 | [`INBOX_ROW_RESOLVED`](../troubleshooting.md#inbox_row_resolved) | You gave a row number of your inbox instead of an id. |
 | [`DELIVERY_EXCEEDS_LINE`](../troubleshooting.md#delivery_exceeds_line) | An agent asked to read a message, and not even the shortest page of it fits in one answer of the agent's tools (they are given a most characters an answer may have). |
 | [`SEND_AMBIGUOUS`](../troubleshooting.md#send_ambiguous) | You sent an agent a plain message while two or more of its questions to you are still unanswered, so Dockingbird can't tell which one it answers. |
@@ -80,6 +81,9 @@ Find a message id below to see when Dockingbird prints that message. Add `--verb
 | [`SENT`](../troubleshooting.md#sent) | You ran `dockingbird send` and the message went; the line shows its id. |
 | [`SENT_QUESTION_OPEN`](../troubleshooting.md#sent_question_open) | You ran `dockingbird send` and the agent has bus questions to you that are still open. |
 | [`WITHDRAWN`](../troubleshooting.md#withdrawn) | You ran `dockingbird send --withdraw`: the message's deliveries that no agent had taken yet are withdrawn. |
+| [`EXPECTED`](../troubleshooting.md#expected) | You ran `dockingbird expect KIND --from NAME --within SECONDS`: Dockingbird now watches for the message you expect. |
+| [`EXPECTATIONS`](../troubleshooting.md#expectations) | You ran `dockingbird expect --list`: one line per expectation of yours, open ones, or every state with `--closed`, newest first. |
+| [`EXPECTATION_WITHDRAWN`](../troubleshooting.md#expectation_withdrawn) | You ran `dockingbird expect --withdraw ID`: the open expectation is withdrawn and sends no alert. |
 | [`WAIT_DELIVERY`](../troubleshooting.md#wait_delivery) | You ran `dockingbird wait` and a message you hadn't seen yet was waiting, or arrived while it waited, wherever it sorts in your inbox. |
 | [`WAIT_TIMED_OUT`](../troubleshooting.md#wait_timed_out) | You ran `dockingbird wait` and no message you hadn't seen arrived before its time ran out. |
 | [`WAIT_ENDED`](../troubleshooting.md#wait_ended) | You ran `dockingbird wait NAME` for an agent that has stopped, or it stopped while you waited, and its work is kept, so nothing new comes from it until it is continued with the command the line names. |
