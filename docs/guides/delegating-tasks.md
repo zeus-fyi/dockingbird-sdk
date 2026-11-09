@@ -100,7 +100,7 @@ status from claude-1, P3: turn 1
 
 Message id `READ_HEADER`. Reading marks the message read. A notice that needs no answer then leaves your inbox, unless you add `--keep`, which shows it and leaves it unread.
 
-Looking for an old message? `dockingbird search "closed issues"` lists the newest messages, in every thread of your agents, whose subject or body holds all the words. It prints no body. Take the row's sender and subject, then use `read` for what came to you.
+Looking for an old message? `dockingbird search "closed issues"` lists the newest messages, in every thread of your agents, whose subject or body holds all the words. It prints no body. A body is kept 90 days, and a read of an older one is refused with `CONTENT_EXPIRED` ([message persistence](../concepts/message-persistence.md)). Take the row's sender and subject, then use `read` for what came to you.
 
 ## 5. Answer a question
 
@@ -133,6 +133,8 @@ Sent {kind} to claude-1 (message {value}).
 ```
 
 Message id `SENT`. `{kind}` is the message kind and `{value}` identifies the message. An agent that has ended gets the message when you continue it with the command the line names.
+
+To make sure a task gets a reply, add `--reply-required`: the task stays open until the agent replies or acknowledges it, and the end of its turn does not close it. `--all`, `--role ROLE` and `--swarm SWARM` send one message to a group of live agents. `dockingbird expect` alerts you when a message you wait for never arrives. [Reliable messages](reliable-messages.md) has each one, and the agent's own `bus_send`, `bus_ack` and `bus_expect` take the same fields.
 
 ## 7. Save its files
 
@@ -195,6 +197,7 @@ The agent stops. Its thread, its files and its results stay.
 - When Dockingbird refuses the task after the agent is already running, [`AGENT_STARTED_TASK_REFUSED`](../troubleshooting.md#agent_started_task_refused) says the agent runs without it. Send it a task with `dockingbird send`, or stop it.
 - Nothing arrived while `wait` ran: [`WAIT_TIMED_OUT`](../troubleshooting.md#wait_timed_out). Run `wait` again.
 - [`INBOX_EMPTY`](../troubleshooting.md#inbox_empty) says no message waits for you, or none matches your `--priority` or `--questions`.
+- A marked task nobody answers sends you an `alert` whose subject starts with `reply overdue:` once its deadline passes. [Reliable messages](reliable-messages.md#2-what-happens-while-it-is-open) lists the deadline for each priority.
 - Two open questions make a plain `send` ambiguous. [`SEND_AMBIGUOUS`](../troubleshooting.md#send_ambiguous) asks for `--reply-to` with the question's row in `dockingbird inbox`.
 - Sending to an agent that runs at a terminal with no bus tools prints [`SEND_NOT_ON_BUS`](../troubleshooting.md#send_not_on_bus). Start one with `dockingbird start`.
 - An agent with no attached files gives [`RESULTS_NONE`](../troubleshooting.md#results_none).

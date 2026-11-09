@@ -40,6 +40,21 @@ The harness shows each tool's arguments with the tool.
 | no answer at the start | the agent starts and works on its home, with `FLEET_SESSION_NOT_OPENED`, and gets its fleet inbox once the control plane answers |
 | status line | `fleet: <label>-<name>, heartbeat <age>, asks <n>`, `fleet: not open` or `fleet: none` under each running agent in `dockingbird status` |
 
+## Bus tools for reliable messages
+
+The `bus` tool set, the default for an agent, holds the tools that mark a message and watch for one. The harness shows each tool's arguments with the tool. [Reliable messages](../guides/reliable-messages.md) explains what each field does.
+
+| Tool | Field | What it does |
+|---|---|---|
+| `bus_send` | `requires_ack` | a boolean; the message stays open until its target replies or acknowledges it; it takes the kinds `status`, `decision`, `review_result`, `alert`, `answer` and `question` |
+| `bus_send` | `reply_required` | a boolean; demands a reply to a `task_request`, `handoff` or `review_request`, so the end of the target's turn does not settle it |
+| `bus_send` | `reply_to` | the 36-character id of the message this one answers; a reply to a marked message settles the sender's delivery of it |
+| `bus_send` | `all`, `swarm`, `role` | sends to a group instead of `to`: every live agent, a swarm, a role, or a role within a swarm |
+| `bus_ack` | `delivery_id`, `expected_version`, `outcome` | records the agent's disposition of a delivery; `outcome` is `accepted`, `responded`, `done`, `declined` or `needs_info`, and `note` takes at most 120 characters |
+| `bus_expect` | `kind`, `sender`, `within_s`, `subject_prefix`, `since` | registers a message the agent expects; `within_s` is 1 to 604,800 seconds; one alert arrives if none comes in time |
+| `bus_expectations` | `closed` | lists the agent's open expectations, or every state with `closed` |
+| `bus_expect_withdraw` | `expectation_id` | withdraws an open expectation |
+
 ## Limits
 
 | Limit | Value |
