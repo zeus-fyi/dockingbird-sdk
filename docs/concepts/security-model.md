@@ -1,6 +1,6 @@
 ---
 title: Security model
-summary: What an agent can reach, what it cannot, where secrets live, how the four egress modes limit its network, and what clean --all removes.
+summary: What an agent can reach, what it cannot, where secrets live and how a connection brokers them, how the four egress modes limit its network, and what clean --all removes.
 audience: first-day
 commands: []
 ---
@@ -30,11 +30,15 @@ No agent has a bind mount except the folders you connected. Your home folder, yo
 
 A connection holds the secret and the agent holds only the name. A GitHub key, a database password and a vault passphrase stay inside Dockingbird. The coordinator is the only container that holds them, and it has no network except ssh to the hosts of your connections. An agent asks it for a fetch, a push or one SQL statement, and never gets the key or the password.
 
+Each request is checked again against the agent's live grant when the coordinator runs it. `dockingbird revoke NAME --to AGENT`, `dockingbird disconnect NAME` and a role's denial therefore take effect on the agent's next request, with no restart. A grant ends with its session. The page [connections.md](../guides/connections.md#how-a-secret-is-brokered) lists what each kind keeps, what the agent receives, what it cannot read and how access ends.
+
+A vault sign-in works the same way. Dockingbird reads the password and the one-time code from the gopass store and types them into the page itself, in a browser it lends, so the agent is told success or a refusal in words. The value reaches the coordinator, the program that types it and the browser, and never the agent's container, its transcripts, a receipt, a log, an argument or an environment variable. The sign-in runs through a Chrome you serve on your Mac, or through the agent's own Chrome in a container with nothing to lend. The page [secrets-vault.md](../guides/secrets-vault.md) sets it up.
+
 Each tool's sign-in and saved API key live in a Docker volume that no agent mounts. An agent asks the coordinator for its own tool's credential at its start. A key you save goes through a container's standard input and never appears in an argument, a container environment, `docker inspect`, a log or a file on your Mac.
 
 ## What stays open
 
-The default mode `full` lets a hijacked agent send out the repo it works on and its own Docker sign-in or key to any host. `dockingbird egress allowlist` closes that for agents you start from then on. An `allowlist` entry names a host and not a port, so an allowed host is open on every port. Prompt injection through repo content is not addressed. Every container runs as your uid, and an agent can fill its copy or Docker's disk until `clean` frees it. A browser you lend with `serve` loads pages through your computer's network, and in your own browser the agent acts as you on every site you are signed in to.
+The default mode `full` lets a hijacked agent send out the repo it works on and its own Docker sign-in or key to any host. `dockingbird egress allowlist` closes that for agents you start from then on. An `allowlist` entry names a host and not a port, so an allowed host is open on every port. Prompt injection through repo content is not addressed. Every container runs as your uid, and an agent can fill its copy or Docker's disk until `clean` frees it. A browser you lend with `serve` loads pages through your computer's network, and in your own browser the agent acts as you on every site you are signed in to. A service's program runs as you on your Mac, so with `uses` it sees the database credential of its run. Anything you type into a browser you `watch` is visible to the agent. A GitHub key copy can reach every repo your account reaches, while a job stays bound to the repo and branch you connected.
 
 ## What clean removes
 
@@ -75,7 +79,9 @@ Text alternative. The agent container holds the agent, its copy of the repo and 
 | Guide | What it adds |
 |---|---|
 | [Egress and network](../guides/egress-and-network.md) | Sets a mode, an allowlist and a proxy. |
-| [Connections](../guides/connections.md) | Gives agents a repo, folder, database or browser without the secret. |
+| [Connections](../guides/connections.md) | Gives agents a repo, folder, database, program, MCP server or browser without the secret, and lists every `connect` option. |
+| [Services, MCP servers and browsers](../guides/mcp-and-services.md) | Runs a program of yours or lends a browser through `serve`. |
+| [Password vault](../guides/secrets-vault.md) | Types a stored login into an agent's browser without showing it. |
 | [Sign-in and API keys](../guides/sign-in-and-api-keys.md) | Signs in and saves a key. |
 | [Trust and repo settings](../guides/trust-and-repo-settings.md) | Decides what a repo's own settings load. |
 | [Clean and uninstall](../guides/clean-and-uninstall.md) | Removes agents, volumes and the home. |
