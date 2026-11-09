@@ -148,7 +148,7 @@ dockingbird fleet probe
 
 It starts, stops and changes nothing, gives each read at most 20 seconds and the whole run 60, and ends 0 with whatever it read. A part it could not read says `unread`, and the screen ends `Not read: ...` (`FLEET_PROBE_UNREAD`). It runs on a Mac only. On Linux it ends 1 with `The fleet probe reads macOS only` (`FLEET_PROBE_NOT_MACOS`), and it reads this computer, never a host. To read a Mac host, run it on that Mac.
 
-The GUI that lists every host in one window is not yet available.
+The GUI lists the hosts in its sidebar and adds, renames and forgets one with the same commands. See [the GUI](gui.md#3-what-the-window-shows).
 
 ## When it fails
 

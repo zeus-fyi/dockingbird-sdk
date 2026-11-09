@@ -1,6 +1,6 @@
 ---
 title: Frequently asked questions
-summary: Thirteen first-week questions, each answered in three lines with one link to the page that holds the detail.
+summary: Fourteen first-week questions, each answered in three lines with one link to the page that holds the detail.
 audience: first-day
 commands: []
 ---
@@ -9,7 +9,7 @@ commands: []
 
 # Frequently asked questions
 
-Thirteen questions, three lines each. The questions cover the prerequisites and the key, what the agent sees, sync, two agents on one branch, a shared key, the slow first start, a closed lid, Claude Code against Codex, support, a new laptop, a trial and offline use. The last line of each answer is a link.
+Fourteen questions, three lines each. The questions cover the prerequisites and the key, what the agent sees, sync, two agents on one branch, a shared key, the slow first start, a closed lid, Claude Code against Codex, support, a new laptop, a trial, offline use and the GUI. The last line of each answer is a link.
 
 ## What do I need: Mac or Linux, Docker, uv, git, disk?
 You need an Apple silicon Mac or arm64 Linux, Docker Desktop (Docker Engine with buildx on Linux), uv, and git at `/usr/bin/git`.
@@ -75,3 +75,8 @@ See [start a trial](guides/licensing.md#start-a-trial).
 `dockingbird license status` reads a file on the computer and needs no network, and without a check-in the license keeps working for its lease.
 After a term ends the installed version keeps working, and new releases need a renewed license.
 See [offline behavior](guides/licensing.md#offline-behavior-and-day-counts).
+
+## Is there a GUI?
+Yes. `dockingbird ui --install` installs it, and `dockingbird ui` opens one window with a tab for each agent and your inbox beside them.
+It runs on Apple silicon Macs and arm64 Linux, and the install needs your git to read the GUI's private repository over SSH.
+See [the GUI](guides/gui.md).
