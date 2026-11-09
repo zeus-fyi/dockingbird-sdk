@@ -142,4 +142,5 @@ These are the customer docs, one line per page in reading order. Search them fro
 
 - [Operator guide](docs/operator-guide.md): The long form of the Dockingbird docs, one section per topic, from install and sync to the fleet, configs, files and egress.
 - [Next release, draft](docs/release-notes/next.md): The draft notes of the next Dockingbird release, written as its changes land.
+- [Dockingbird changes from v0.7.0 to v0.15.28](docs/release-notes/changes-v0.7.0-to-v0.15.28.md): One page of the changes a customer sees in each release from v0.7.0 to v0.15.28, newest first, with the upgrade step of each release that needs one.
 - [Dockingbird v0.6.5](docs/release-notes/v0.6.5.md): The notes of release v0.6.5, which adds fleet hosts set, rename and forget and places a swarm in the pool's host order.
