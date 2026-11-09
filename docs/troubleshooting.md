@@ -388,6 +388,21 @@ Next step: none; it only informs.
 
 Exit status: 1 (a problem Dockingbird printed).
 
+### START_REPOSITORY_PAST_CUT
+
+When: You started an agent on a home with more repositories than `native state` lists, running a Dockingbird older than this command: this command reads a repository past that list by id, and the older Dockingbird can't. `dockingbird update` finishes the home's update; then start again.
+
+```text
+dockingbird {command}: native state lists {count} repositories and not this branch's,
+and the Dockingbird this home runs is older than this command,
+so it can't read one by id.
+Finish this home's update, then try again: dockingbird update
+```
+
+Next step: dockingbird update
+
+Exit status: 1 (a problem Dockingbird printed).
+
 ### INTERNAL_ERROR
 
 When: Something went wrong that Dockingbird has no words for. It printed no traceback; when it could, it wrote the details to its log, which the message names, so you can report it. When the log could not be written either (a full disk, for one), the first line names the kind of error in parentheses, for example `docker failed` or `OSError ENOSPC`.
@@ -2641,7 +2656,7 @@ Exit status: 1 (a problem Dockingbird printed).
 
 ### UPDATE_SWITCH_FAILED
 
-When: The switch to the version `dockingbird update` installed didn't work, so the older version still runs, and your commands with it. Dockingbird doesn't try again by itself; `dockingbird update` shows why and tries again. `status` shows it under "Needs your attention". When the new version, or new code of the same version, changed the records Dockingbird keeps and then didn't come up, the code that ran before can't run on them: fix the cause and run `dockingbird update` again. While agents were taking a new version: when Dockingbird or the code installed here couldn't be read for a long time, the roll stopped, and once the cause is fixed the next command here resumes it; when the new version's code is gone from this home, the roll stopped, and `dockingbird update` installs it again; when the Dockingbird running here was put on other code by hand twice during one update, the roll stopped, and `dockingbird update` rolls it again.
+When: The switch to the version `dockingbird update` installed didn't work, so the older version still runs, and your commands with it. Dockingbird doesn't try again by itself; `dockingbird update` shows why and tries again. `status` shows it under "Needs your attention". When the new version, or new code of the same version, changed the records Dockingbird keeps and then didn't come up, the code that ran before can't run on them: fix the cause and run `dockingbird update` again. While agents were taking a new version: when Dockingbird or the code installed here couldn't be read for a long time, the roll stopped, and once the cause is fixed the next command here resumes it; when the new version's code is gone from this home, the roll stopped, and `dockingbird update` installs it again; when the Dockingbird running here was put on other code by hand twice during one update, the roll stopped, and `dockingbird update` rolls it again. When the line ends with a cause, that is the code of what the switch met: look that code up here, fix it and run `dockingbird update` again.
 
 ```text
 Dockingbird didn't switch to {version}, so {old} still runs.
@@ -2684,6 +2699,13 @@ Or:
 Dockingbird {new} is installed, but the Dockingbird running here
 was put on other code by hand twice during this update, so the roll stopped.
 Run it again: dockingbird update
+```
+
+Or:
+
+```text
+Dockingbird didn't switch to {version}, so {old} still runs: {cause}.
+See why and try again: dockingbird update
 ```
 
 Next step, as the message gives it:
@@ -4364,6 +4386,19 @@ Next step: dockingbird status
 
 Exit status: 1 (a problem Dockingbird printed).
 
+### AGENT_SESSIONS_PAST_CUT
+
+When: You named an agent, with `start --as`, `stop`, `set` or `send`, while Dockingbird lists more agents than one listing shows, and the listing of that agent's own history was cut too, so whether it runs could not be read. Nothing was changed.
+
+```text
+{name}'s history has more than the {count} entries a listing shows,
+so whether it runs can't be read. Nothing was changed.
+```
+
+Next step: none; it only informs.
+
+Exit status: 1 (a problem Dockingbird printed).
+
 ### START_MERGE_OFFER
 
 When: You started an agent on a branch where you and the agents both have new commits. Dockingbird offers to merge theirs into yours first, so the agent starts from both.
@@ -4678,6 +4713,13 @@ Or:
 
 ```text
 No end signal; the prompt was taken, then the drawing stayed still for {elapsed} since its last change. One Esc was typed.
+```
+
+Or:
+
+```text
+No prompt named the paste within {elapsed}; Enter was typed again,
+and the box emptied unless a person typed in it.
 ```
 
 Next step: none; it only informs.
@@ -10405,6 +10447,44 @@ Next step, as the message gives it:
 
 Exit status: 0 (done).
 
+### STATUS_SIDECAR_BEHIND
+
+When: `dockingbird status` when an agent's browser or proxy still runs an older Dockingbird version than the agent itself, because the agent was updated in place. They take the agent's version when the agent starts again; stop it and start it again to take it now.
+
+```text
+{name}'s {sidecars:and} run Dockingbird {old} since {name} started; they take {new} at {name}'s next start.
+To take {new} now:
+dockingbird stop {name}, then start the agent again
+```
+
+Next step: dockingbird stop {name}, then start the agent again
+
+Exit status: 0 (done).
+
+### STATUS_HOST_PROCESS_BEHIND
+
+When: `dockingbird status` when a program of this home on your computer still runs an older Dockingbird version than the home: a `dockingbird serve`, or an agent's login courier or solve watcher, named with its process id. A serve moves to the new version by itself between two requests; restart one that stays behind. A courier or watcher takes the new version when its agent starts again.
+
+```text
+dockingbird serve (process {pid}) runs Dockingbird {old}; this home runs {new}.
+If it stays on {old}, restart it.
+```
+
+Or:
+
+```text
+{name}'s {process} (process {pid}) runs Dockingbird {old}; this home runs {new}.
+It takes {new} when {name} starts again:
+dockingbird stop {name}, then start the agent again
+```
+
+Next step, as the message gives it:
+
+- If it stays on {old}, restart it.
+- dockingbird stop {name}, then start the agent again
+
+Exit status: 0 (done).
+
 ### STATUS_STRAGGLER_RUNS
 
 When: One agent inside a line of `dockingbird status` about an update, with the Dockingbird version it runs, such as `claude-1 on 0.10.3`.
@@ -13781,6 +13861,67 @@ Next step, as the message gives it:
 
 Exit status: 0 (done) or 1 (a problem Dockingbird printed), as "When:" says.
 
+### BROWSER_SETTINGS_INVALID
+
+When: You started an agent with a browser, and the computer's `browser.toml` in Dockingbird's data root can't be read, isn't TOML, has a key other than its one key for Chrome's local network list, or lists something there that isn't a Chrome URL pattern.
+
+```text
+{path}: local_network_access must be a list
+of Chrome URL patterns, such as ["[*.]example.com"].
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Or:
+
+```text
+{path} has a key Dockingbird doesn't read;
+local_network_access is its one key.
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Or:
+
+```text
+{path} isn't TOML, so Dockingbird can't read
+its local_network_access line.
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Or:
+
+```text
+{path} isn't a regular file of yours, or is too large or not
+UTF-8, so Dockingbird can't read its local_network_access line.
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Or:
+
+```text
+{path} lists more than {count} patterns
+in local_network_access.
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Or:
+
+```text
+{path}: a pattern in local_network_access is empty,
+longer than {chars} characters, or has a space or a letter
+outside ASCII.
+No agent with a browser starts until it's fixed.
+Fix the file, or remove it to give Chrome no local network list.
+```
+
+Next step: Fix the file, or remove it to give Chrome no local network list.
+
+Exit status: 1 (a problem Dockingbird printed).
+
 ### START_USING_DEFAULT
 
 When: You ran `dockingbird start` without a command, in a repo whose `.dockingbird/` folder marks one command as its default: that command runs, and the line names it and its file.
@@ -13885,17 +14026,17 @@ Exit status: 1 (a problem Dockingbird printed).
 
 ### START_GATEWAY_UNREACHABLE
 
-When: You started a Claude agent in the `models` or `allowlist` egress mode while Claude's login on this computer goes through a gateway on this Mac itself (`http://127.0.0.1:59471`, say, a proxy of yours). In those modes an agent reaches only its own proxy, which admits no address of this computer, so the start stopped before making anything rather than fail its first turn. Start with `--egress full` (the agent then reaches the gateway as `host.docker.internal`), or point Claude Code here at an `https://` address agents can reach.
+When: You started a Claude agent in the `models` or `allowlist` egress mode while Claude's login on this computer goes through a gateway whose host is an IP address, or another text that is not a plain host name (`https://10.0.0.5:<port>`, say). An agent's proxy admits the login's gateway by its host name on its port alone, so the start stopped before making anything rather than fail its first turn. Point Claude Code here at the gateway's host name, or start with `--egress full`, which reaches the gateway directly.
 
 ```text
-Claude's login on this computer goes through {gateway},
-this computer's own address, which an agent in the {mode} egress mode can't
-reach (its proxy admits no address of this computer), so nothing was started.
-Point Claude Code here at an https:// address agents can reach, or start
+Claude's login on this computer goes through {gateway}, whose host an
+agent's proxy can't admit (a proxy admits a gateway by a plain host name,
+never by an IP address), so nothing was started in the {mode} egress mode.
+Point Claude Code here at a gateway with a host name, or start
 with --egress full.
 ```
 
-Next step: Point Claude Code here at an https:// address agents can reach, or start with --egress full.
+Next step: Point Claude Code here at a gateway with a host name, or start with --egress full.
 
 Exit status: 1 (a problem Dockingbird printed).
 
@@ -14628,6 +14769,18 @@ Row {index} names no message in your inbox now; use the id shown by dockingbird 
 ```
 
 Next step: dockingbird inbox
+
+Exit status: 1 (a problem Dockingbird printed).
+
+### INBOX_ROW_CONSUMED
+
+When: You gave a row number of a message another reader of this home (a swarm's reader, the fleet engine or a plain `dockingbird read`) read since your inbox showed it, which took it out of the inbox. The line names that reader and when it read it; `dockingbird inbox` lists what is still waiting.
+
+```text
+Row {index} names no message in your inbox now: {by} read it at {at}.
+```
+
+Next step: none; it only informs.
 
 Exit status: 1 (a problem Dockingbird printed).
 
@@ -15952,6 +16105,66 @@ Or:
 
 ```text
 Withdrew message {value}. An agent had accepted it, so its work is asked to stop.
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### EXPECTED
+
+When: You ran `dockingbird expect KIND --from NAME --within SECONDS`: Dockingbird now watches for the message you expect. When one of that kind from that agent, its subject starting with the prefix, reaches you in time, the expectation closes by itself; when none has by its due time, you get one alert. The any-subject form: no prefix was given.
+
+```text
+Expecting a {kind} from {name} whose subject starts with "{prefix}", by {due} (expectation {value}).
+```
+
+Or:
+
+```text
+Expecting a {kind} from {name}, by {due} (expectation {value}).
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### EXPECTATIONS
+
+When: You ran `dockingbird expect --list`: one line per expectation of yours, open ones, or every state with `--closed`, newest first. The empty form: you have none to list.
+
+```text
+{state}: a {kind} from {name} whose subject starts with "{prefix}", due {due} (expectation {value})
+```
+
+Or:
+
+```text
+{state}: a {kind} from {name}, due {due} (expectation {value})
+```
+
+Or:
+
+```text
+No expectation to list.
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### EXPECTATION_WITHDRAWN
+
+When: You ran `dockingbird expect --withdraw ID`: the open expectation is withdrawn and sends no alert. The same form: it was already matched, alerted or withdrawn, and nothing changed.
+
+```text
+Withdrew expectation {value}.
+```
+
+Or:
+
+```text
+Expectation {value} was already {state}; nothing changed.
 ```
 
 Next step: none; it only informs.
@@ -17936,7 +18149,7 @@ Exit status: 0 (done).
 
 ### CONNECT_VAULT_INVALID
 
-When: You ran `dockingbird connect NAME --vault`, and one of its words was refused before the passphrase was asked for; nothing was saved. The line names which: a manager other than `gopass`; a store that isn't a real folder under Dockingbird's `vaults` folder (a missing folder, a link, or a file in its place is refused), and the line adds that the folder must hold the whole home that `gopass setup --crypto age --storage fs` filled; a login name that isn't lowercase letters, digits and hyphens (the line numbers the `--login` words from 1 in the order given and names the refused one by its number, never the name typed); a site that isn't an origin such as `https://example.com` or `https://example.com:8443`, with no path or anything else after it (the line names its login, never the site's text); a username that is empty or has a control character (the line names its login, never the username); two `--login` words with the same name (the line names it); a `--totp` that names none of the `--login` names; or no `--login` at all.
+When: You ran `dockingbird connect NAME --vault`, and one of its words was refused before the passphrase was asked for; nothing was saved. The line names which: a manager other than `gopass`; a store that isn't a real folder under Dockingbird's `vaults` folder (a missing folder, a link, or a file in its place is refused), and the line adds that the folder must hold the whole home that `gopass setup --crypto age --storage fs` filled; a login name that isn't lowercase letters, digits and hyphens (the line numbers the `--login` words from 1 in the order given and names the refused one by its number, never the name typed); a site that isn't an origin such as `https://example.com` or `https://example.com:8443`, with no path or anything else after it (the line names its login, never the site's text); a username that is empty or has a control character (the line names its login, never the username); two `--login` words with the same name (the line names it); a `--totp` that names none of the `--login` names; or no `--login` at all. Then the two options that describe a `--totp` login's code page: a `--code-origin` or `--reveal` that names a login `--totp` doesn't mark (the line names the option); a second `--code-origin` for one login; a code origin that isn't an origin, by the same rule as a site (the line names its login); or `--reveal` steps that are too many for one login, or one that is empty, too long, has a control character or starts or ends with a space (the line names its login and the bounds).
 
 ```text
 {word} isn't a password manager Dockingbird uses. Use --vault gopass.
@@ -17987,12 +18200,39 @@ Or:
 Give each --login its own alias; {alias} is given more than once.
 ```
 
+Or:
+
+```text
+{option} names a login that --totp doesn't mark.
+```
+
+Or:
+
+```text
+Give --code-origin once for each login; {alias} is given more than once.
+```
+
+Or:
+
+```text
+The code origin for {alias} isn't an origin: use https://host or https://host:port,
+nothing after it.
+```
+
+Or:
+
+```text
+The --reveal steps for {alias} are more than {steps}, or one is empty,
+longer than {count} characters, or has a control character or edge spaces.
+```
+
 Next step, as the message gives it:
 
 - Use --vault gopass.
 - none, where the message only informs
 - Give at least one --login ALIAS ORIGIN USERNAME.
 - Give each --login its own alias; {alias} is given more than once.
+- Give --code-origin once for each login; {alias} is given more than once.
 
 Exit status: 2 (usage).
 
@@ -19817,6 +20057,31 @@ When: `dockingbird serve` waited for an update as long as it waits for one, the 
 
 ```text
 Dockingbird's update has run longer than {bound}, so serving {name} stopped.
+Run this again.
+```
+
+Next step: Run this again.
+
+Exit status: 1 (a problem Dockingbird printed).
+
+### SERVE_FOLLOWING
+
+When: An update put a new version of Dockingbird in place while `dockingbird serve` ran. Between two requests, with no job running, `serve` started the new version in its own place, with the same words, so it goes on serving with nothing to do.
+
+```text
+Dockingbird {version} runs this home now, so serving {name} moves to it.
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### SERVE_FOLLOW_FAILED
+
+When: `dockingbird serve` tried to start the new version of Dockingbird an update put in place and the system refused it, for the reason in brackets, so `serve` stopped. Run `serve` again; under its unit, `dockingbird serve --all` is started again by itself.
+
+```text
+Serving {name} couldn't move to Dockingbird {version} ({reason}), so it stopped.
 Run this again.
 ```
 
@@ -22149,6 +22414,20 @@ Next step: none; it only informs.
 
 Exit status: 0 (done).
 
+### FLEET_WHY_PRUNE
+
+When: `dockingbird fleet why` of a finished swarm: what its last `dockingbird fleet prune` on a host did, how many agents it cleaned, the bytes they freed, the agents it left running and the engine's copies of the repository it removed, and whether it ended done or failed.
+
+One row of a table; its cells line up with the rows around it.
+
+```text
+prune job {job} on {host} ended {outcome} at {at}: {cleaned} agents cleaned, {freed_bytes} bytes freed, {running} left running, {clones} clones removed
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
 ### FLEET_ROWS_SKIPPED
 
 When: `dockingbird fleet agents`, or `dockingbird fleet hosts set` as it adds a host, found rows in the host's Docker listing that it couldn't read, such as a container of another shape or an agent that stopped while it read, and says how many; the host is `local` for this computer. The rest of what it printed is what it could read.
@@ -23092,27 +23371,30 @@ Exit status: 0 (done).
 
 ### FLEET_RETIRE_DONE
 
-When: `dockingbird fleet retire` asked an agent of a running swarm to retire: it retires at the first tick that finds it idle with no question or request open; a tick that finds it working or with one open refuses the ask, and the next `fleet retire` says so. Its share goes back to the pool; one that never started retires at once, and a `fleet retire` of an agent already asked changes nothing and says so.
+When: `dockingbird fleet retire` asked an agent of a running swarm to retire: it retires at the first tick that finds it idle with no question open and no request it has not taken yet (a review or task request from another agent that no turn of it has carried); a tick that finds it working or with either refuses the ask, and the next `fleet retire` says so. A request it took and left open blocks nothing: retiring the agent ends that work. Its share goes back to the pool; one that never started retires at once, and a `fleet retire` of an agent already asked changes nothing and says so.
 
 ```text
 {id} running: {name} retires at the first tick that finds it idle
-with no question or request open; a tick that finds it working or with
-one open refuses the ask, and the next fleet retire says so
+with no question open and no request it has not taken yet; a tick
+that finds it working or with either refuses the ask, and the
+next fleet retire says so
 ```
 
 Or:
 
 ```text
 {id} running: {name} retires at the first tick that finds it idle
-with no question or request open; a tick that finds it working or with
-one open refuses the ask, and the next fleet retire says so; still working: {names}
+with no question open and no request it has not taken yet; a tick
+that finds it working or with either refuses the ask, and the
+next fleet retire says so; still working: {names}
 ```
 
 Or:
 
 ```text
-{id} running: {name} was already asked to retire; it retires at the first tick
-that finds it idle with no question or request open
+{id} running: {name} was already asked to retire; it retires at
+the first tick that finds it idle with no question open and no
+request it has not taken yet
 ```
 
 Next step: none; it only informs.
@@ -23121,7 +23403,7 @@ Exit status: 0 (done).
 
 ### FLEET_RETIRE_REFUSED_BEFORE
 
-When: Your earlier `fleet retire` of this agent reached its host's worker while the agent was working or held a question or a request, so the worker refused it and cleared it. This ask is written again and applies at the first tick that finds the agent idle with nothing open.
+When: Your earlier `fleet retire` of this agent reached its host's worker while the agent was working or held a question or a request it had not taken yet, so the worker refused it and cleared it. This ask is written again and applies at the first tick that finds the agent idle with neither.
 
 ```text
 {id} running: the worker refused the earlier ask of {name} at {at}: {word};
@@ -23158,23 +23440,27 @@ Exit status: 0 (done).
 
 ### FLEET_REPLACE_DONE
 
-When: `dockingbird fleet replace` asked an agent to start again by its name, its conversation kept, at the worker's next pass if it runs no turn then and has no question or request open (a failed or crashed one starts again whatever is open); with `--fresh`, a new agent of its role takes its place under the next name. A running turn or an open question or request makes the worker refuse this ask and drop it: run this command again once it is idle with none open.
+When: `dockingbird fleet replace` asked an agent to start again by its name, its conversation kept, at the worker's next pass if it runs no turn then and has no question open and no request it has not taken yet (a failed or crashed one starts again whatever is open); with `--fresh`, a new agent of its role takes its place under the next name. A running turn, an open question or a request it has not taken yet makes the worker refuse this ask and drop it: run this command again once it is idle with neither.
 
 ```text
-{id} running: {name} starts again at the worker's next pass if it runs no turn
-then and has no question or request open (a failed or crashed one starts again
-whatever is open).
-A running turn or an open question or request makes the worker refuse this
-ask and drop it: run this command again once it is idle with none open.
+{id} running: {name} starts again at the worker's next pass if
+it runs no turn then and has no question open and no request it
+has not taken yet (a failed or crashed one starts again whatever
+is open).
+A running turn, an open question or a request it has not taken
+yet makes the worker refuse this ask and drop it: run this
+command again once it is idle with neither.
 ```
 
 Or:
 
 ```text
-{id} running: {name} retires at the worker's next pass if it runs no turn then
-and has no question or request open, and {new} starts in its place.
-A running turn or an open question or request makes the worker refuse this
-ask and drop it: run this command again once it is idle with none open.
+{id} running: {name} retires at the worker's next pass if it runs
+no turn then and has no question open and no request it has not
+taken yet, and {new} starts in its place.
+A running turn, an open question or a request it has not taken
+yet makes the worker refuse this ask and drop it: run this
+command again once it is idle with neither.
 ```
 
 Next step: none; it only informs.
@@ -23387,6 +23673,18 @@ Next step: none; it only informs.
 
 Exit status: 0 (done).
 
+### FLEET_WHY_HELD
+
+When: `dockingbird fleet why` of a swarm: an agent held after its start was refused, with the refusal. It stays held, its slot taken, until `dockingbird fleet replace` starts it again or `dockingbird fleet retire` frees the slot.
+
+```text
+{name} is held after {reason}; fleet replace or fleet retire frees its slot.
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
 ### FLEET_WHY_DENIED
 
 When: `dockingbird fleet why` of a swarm: an agent started without a connection its role lists, because `dockingbird connect NAME --revoke --role ROLE` denied it to that role. `--to-role` grants it again.
@@ -23549,6 +23847,18 @@ Or:
 
 ```text
   starting: {names}
+```
+
+Next step: none; it only informs.
+
+Exit status: 0 (done).
+
+### FLEET_QUEUE_HELD
+
+When: Under a swarm of `dockingbird fleet queue`: each agent held after its start was refused, with the refusal; `dockingbird fleet why` says how to free its slot.
+
+```text
+  held: {name}: {reason}
 ```
 
 Next step: none; it only informs.

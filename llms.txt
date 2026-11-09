@@ -103,10 +103,10 @@ These are the customer docs, one line per page in reading order. Search them fro
 - [First start stops](docs/troubleshooting/first-start-stops.md): Each place the first dockingbird claude can stop, in the order you meet it, with what the screen shows and the fix.
 - [Troubleshooting index: install, Docker, licensing and the command line](docs/troubleshooting/install.md): The 63 message ids about installing, Docker, the license and typing a command, each with when it appears.
 - [Troubleshooting index: homes, checkouts and toolchains](docs/troubleshooting/homes.md): The 113 message ids about Dockingbird homes, your checkout and its branches, init, toolchains, project rules and trust, each with when it appears.
-- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 326 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
-- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 74 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
-- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 206 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
-- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 224 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
+- [Troubleshooting index: agents, status, sync and clean](docs/troubleshooting/agents.md): The 330 message ids about starting agents, their status, sync, stop and clean, each with when it appears.
+- [Troubleshooting index: the bus](docs/troubleshooting/bus.md): The 78 message ids about tasks on the bus: send, wait, the inbox, read, questions and results, each with when it appears.
+- [Troubleshooting index: configs, connections and host resources](docs/troubleshooting/connections.md): The 209 message ids about your own commands, connections, served resources, browsers and watch, each with when it appears.
+- [Troubleshooting index: the fleet, swarms and the work queue](docs/troubleshooting/fleet.md): The 227 message ids about hosts, the fleet scheduler, the control plane, swarms and the work queue, each with when it appears.
 - [Troubleshooting index: benchmark jobs](docs/troubleshooting/benchmarks.md): The 51 message ids about Harbor benchmark jobs, each with when it appears.
 - [Troubleshooting index: sign-ins and the org store](docs/troubleshooting/sign-ins.md): The 91 message ids about signing in, API keys, signing out and the org login, each with when it appears.
 - [Troubleshooting index: updates](docs/troubleshooting/updates.md): The 49 message ids about checking for and installing updates, pins and the switch to a new version, each with when it appears.
