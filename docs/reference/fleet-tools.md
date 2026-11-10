@@ -72,3 +72,4 @@ The `bus` tool set, the default for an agent, holds the tools that mark a messag
 | a home's work, runs, claims and publication | stay on the home |
 | a fleet thread and a home thread | two threads; a message sent on one store is never seen on the other |
 | the home's own `questions` list | shows none of the fleet's questions |
+| an agent of another home that has not joined | no bus route; see [an agent that manages other agents](../concepts/agents-and-the-bus.md#an-agent-that-manages-other-agents) |
