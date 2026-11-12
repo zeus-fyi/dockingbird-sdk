@@ -59,11 +59,11 @@ These 15 tools are the `bus` set. `bus_whoami` and `bus_session` are in `default
 | `bus_send` | `text` (required); `kind`; `to`; `all`; `swarm`; `role`; `reply_to`; `supersedes`; `requires_ack`; `reply_required`; `artifacts`; `payload`; `idempotency_key` | `message_id`, `thread_id`, `thread_seq`, `delivery_ids` (one per distinct route) and `expires_at`. Keyed |
 | `bus_inbox` | `cursor` | `total`, `rows` (each with the delivery id, version, kind, sender and state) and `next_cursor` |
 | `bus_read` | `delivery_id` (required); `cursor`; `idempotency_key` | one page of the delivery's body, `payload_json` and artifact ids, with `files` (the path of each artifact written to the agent's inbox folder), `read` and `next_cursor`. Keyed |
-| `bus_ack` | `delivery_id`, `expected_version` and `outcome` (required); `note`; `evidence`; `idempotency_key` | `delivery_id`, `state`, `version`, `work_state`, `run_id` and `duplicate`. Keyed |
+| `bus_ack` | `delivery_id`, `expected_version` and `outcome` (required); `note`; `evidence`; `idempotency_key` | `delivery_id`, `state`, `version`, `work_state`, `run_id` and `duplicate`; for the outcome `accepted`, also `next_step`, which says the delivery stays open until it is acknowledged `done` or its required reply is sent, and that `declined` is refused from then on. Keyed |
 | `bus_thread` | `thread_id` (required); `cursor` | `thread_id`, `subject`, `messages`, `pending` (open obligations), `unanswered`, `truncated` and `next_cursor` |
 | `bus_search` | `query` (required); `cursor` | `rows`, newest first, each a pointer with its thread id and never a body, and `next_cursor` |
 | `bus_wait` | `delivery_id`; `timeout_s` | `timed_out`, the newest delivery count, and for a named delivery its `state` and `version`; `pending` (the count of deliveries not yet handed over) when a new delivery arrived |
-| `bus_context` | `cursor` | the session's context: identity, assignment, limits, open obligations and next actions, with `page`, `pages` and `next_cursor` |
+| `bus_context` | `cursor` | the session's context: identity, assignment, limits, open obligations and next actions, with `page`, `pages` and `next_cursor`. Each delivery row carries its message's own `reply_required` |
 | `bus_artifact_put` | `name` and `content` (required); `media_type`; `idempotency_key` | the stored artifact: `artifact_id`, `name`, `media_type`, `digest_sha256`, `byte_count`, `kind` and `provenance`. Keyed |
 | `bus_artifact_get` | `artifact_id` (required); `cursor`; `to_file` | one page: the artifact, `offset`, `text` and `next_cursor`. With `to_file`, the artifact and `file`, the path of the whole artifact in the agent's inbox folder |
 | `bus_expect` | `kind`, `sender` and `within_s` (required); `subject_prefix`; `since`; `idempotency_key` | the expectation, `state` `open`. Keyed |
@@ -86,7 +86,7 @@ These 15 tools are the `bus` set. `bus_whoami` and `bus_session` are in `default
 | `cursor` | the paged reads | the last page's `next_cursor`; leave it out for the first page |
 | `delivery_id` | `bus_read`, `bus_ack`, `bus_wait` | the delivery's id from `bus_inbox` or `bus_read` |
 | `expected_version` | `bus_ack` | the delivery's version as `bus_inbox`, `bus_read` or the last `bus_ack` reports it |
-| `outcome` | `bus_ack` | `accepted`, `responded`, `done`, `declined` or `needs_info`. `done` is reported, never verified |
+| `outcome` | `bus_ack` | `accepted`, `responded`, `done`, `declined` or `needs_info`. `done` is reported, never verified. An accepted delivery is settled by `done` or `needs_info`, or by the reply it requires; `declined` on it is refused with `VERSION_CONFLICT` |
 | `note` | `bus_ack` | at most 120 characters |
 | `evidence` | `bus_ack` | up to 16 artifact ids |
 | `thread_id` | `bus_thread` | a thread id from `bus_inbox`, `bus_read` or `bus_search` |
@@ -100,7 +100,7 @@ These 15 tools are the `bus` set. `bus_whoami` and `bus_session` are in `default
 | `sender` | `bus_expect` | the expected sender's agent name |
 | `subject_prefix` | `bus_expect` | the start of the expected subject, at most 120 characters; left out, any subject |
 | `within_s` | `bus_expect` | seconds to wait, 1 to 604,800 (7 days) |
-| `since` | `bus_expect` | an RFC 3339 time with an offset, the earliest send time that matches |
+| `since` | `bus_expect` | an RFC 3339 time with an offset, the earliest send time that matches. Left out, the time of the registration: only a row sent after it closes the expectation |
 | `closed` | `bus_expectations` | true lists every state, false (the default) the open ones |
 | `expectation_id` | `bus_expect_withdraw` | an id from `bus_expect` or `bus_expectations` |
 

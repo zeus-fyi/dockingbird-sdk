@@ -51,7 +51,7 @@ Message id `SENT`. To mark a `status`, `decision` or another kind, give the kind
 ### What settles a marked message
 
 - The target replies. A reply is a message of any kind whose reply-to is the marked message, sent by the target. An agent replies with `bus_send` and `reply_to`.
-- The target acknowledges it with `bus_ack`.
+- The target acknowledges it with `bus_ack`. An acknowledgment `accepted` does not settle it: an accepted delivery stays open until the agent acknowledges it `done` (or `needs_info`) or sends the reply it requires, and `declined` is refused (`VERSION_CONFLICT`) once it is accepted. The result of `bus_ack` with `accepted` says so in its `next_step` member.
 
 A read never settles a marked message. A task sent with `--reply-required` is not settled when the agent's turn ends: the agent's own turn summary settles nothing. A reply from a third agent, a reply to an unmarked message and a status in the thread with another parent settle nothing.
 
@@ -61,12 +61,14 @@ A `question` keeps its own rule: an `answer` from the target, or a reply from yo
 
 The target sees the message again on a schedule, on every path an agent reads from. Each reminder feeds the delivery again with the note `Reminder: this delivery is still unanswered.`
 
+The first time a marked `status`, `decision`, `review_result` or `alert` reaches its target, its turn opens with a note. A read settles an unmarked message of these kinds, so without the note the first turn would look like any other. The note is: `This message requires an acknowledgment: reply to it with bus_send reply_to=<its message id> (any kind), or bus_ack it responded once you have acted on it; your read does not settle it.`
+
 | Item | Value |
 |---|---|
 | Time between reminders of one message | 300 seconds (`SURFACE_REMINDER_INTERVAL_S`, 60 to 3,600) |
 | Reminders per message | at most 2 (`STOP_REMINDERS_MAX`, 0 to 5) |
 
-A reminder never accepts, settles or expires the message. The agent's stop hook holds the agent at the end of a turn while a P0 or marked message has been shown fewer than 2 times, so a reminder cannot trap it in a loop.
+A reminder never accepts, settles or expires the message. The agent's stop hook holds the agent at the end of a turn while a P0 or marked message has been shown fewer than 2 times, so a reminder cannot trap it in a loop. Only a session that reads its own inbox, an agent in a terminal, is held; the hook of an agent on the bus holds nothing. For a marked message the hold names the read, then what settles it: `Dockingbird: delivery <id> (<kind>, <priority>) is unanswered: before stopping, read it with bus_read, then reply to it with bus_send reply_to=<message id> or bus_ack it.` For a marked `answer` the hold says `awaits your acknowledgment: before stopping, read it with bus_read, then bus_ack it.` in place of the part after the priority.
 
 At the deadline, the sender gets one `alert` in the message's thread. Its subject starts with `reply overdue:`. The alert is sent once, because the alert in the thread is the guard against a second one.
 
@@ -79,7 +81,11 @@ At the deadline, the sender gets one `alert` in the message's thread. Its subjec
 
 P0 must stay below P1, and P1 below P2. A value that breaks the order stops the command before it runs. [Environment variables](../reference/environment-variables.md) says how a setting reaches Dockingbird.
 
+An agent's `bus_send` goes at priority P2, so the `reply overdue:` alert for a marked message of an agent comes after 14,400 seconds by default (`DOCKINGBIRD_P2_ACCEPTANCE_DEADLINE_S`). An agent that must be told sooner registers the message it waits for with `bus_expect` (section 3).
+
 When the sender is you, the alert reaches every client session of the project that has not ended, so it reaches `dockingbird inbox` as an `alert` row.
+
+An agent whose message no one is left to answer gets a second alert. It applies to a message that no read settles and that is not withdrawn. When every open delivery of the message is bound to an agent session that ended at least 300 seconds ago (`TARGET_ENDED_GRACE_S`, fixed), the check that sends overdue alerts sends the sender one `alert` in the message's thread. Its subject starts with `target ended:`, followed by the message's subject. The alert names each ended agent and its delivery's state, `pending` or `accepted`, and tells the sender to send the work again with `supersedes` set to the message's id, or to tell its parent. It is the message's one alert: a message gets this one or `reply overdue:`, never both. The 300 seconds leave out a restart, whose continuation takes the delivery over, and a teardown, which ends the sender too. A message of yours gets no `target ended:` alert.
 
 ### When the check runs
 
@@ -112,7 +118,7 @@ dockingbird expect status --from test-1 --prefix tested --within 1800
 Expecting a status from test-1 whose subject starts with "tested", by <time> (expectation <id>).
 ```
 
-Message id `EXPECTED`. A message that already arrived since `--since` closes the expectation at once. `--within` must be above 0 and at most the message expiry, 7 days by default (604,800 seconds).
+Message id `EXPECTED`. A message that already arrived since `--since` closes the expectation at once. Without `--since`, only a message sent after you register closes it. `--within` must be above 0 and at most the message expiry, 7 days by default (604,800 seconds).
 
 The alert is an `alert` row in your inbox. Its subject is `expected row missing: KIND from NAME`, with `: PREFIX` added when you gave one.
 

@@ -80,7 +80,7 @@ commands:
 | `agent_start` | none | `command`, `task`, `name`, `harness` (`claude` or `codex`), `idempotency_key` | starts an agent, or continues one that ended when `name` names it; `task` is its first message |
 | `agent_list` | none | `cursor` | one page of your agents with name, state, mode, model, effort and inbox counts |
 | `agent_status` | `agent` | none | one agent: its last turn, model and effort, pending obligations and kept results |
-| `agent_send` | `agent`, `text` | `kind`, `reply_to`, `artifacts`, `payload`, `idempotency_key` | sends a new task (`task_request`, the default) or answers a question with `reply_to`; the first line of `text` is the subject |
+| `agent_send` | `agent`, `text` | `kind`, `reply_to`, `artifacts`, `payload`, `reply_required`, `requires_ack`, `idempotency_key` | sends a new task (`task_request`, the default) or answers a question with `reply_to`; the first line of `text` is the subject; `reply_required` marks a `task_request`, `handoff` or `review_request` and `requires_ack` a `status`, `decision`, `review_result`, `alert`, `answer` or `question`, as `dockingbird send --reply-required` and `--requires-ack` do. `reply_required` on another kind is refused before anything is sent: `VALIDATION_FAILED`, with the details `{"field": "reply_required", "reason": "INCONSISTENT"}` |
 | `agent_inbox` | none | `agent`, `cursor` | one page of the deliveries your agents sent you, or with `agent` the deliveries to that agent |
 | `agent_read` | `delivery_id` | `cursor`, `idempotency_key` | one page of a delivery's body and its artifact ids, and records your read |
 | `agent_wait` | none | `agent`, `timeout_s` (1 to 45) | waits for the next delivery from `agent` or from any agent; a timeout cancels nothing |
