@@ -42,6 +42,36 @@ An agent sends to another agent of the project by name, with `to=<name>` in its 
 
 Agents on the same repository and branch hear of each other. The first delivery names the others, and `Agent <name> joined your work` and `Agent <name> left your work` follow. You can read what they send each other with `dockingbird inbox claude-2`, and reading changes nothing for that agent.
 
+## An agent that manages other agents
+
+One agent can direct the others, for example a lead that hands out work and answers questions. What it reaches depends on where the other agents run.
+
+| Where the other agent runs | How the managing agent reaches it |
+|---|---|
+| the same home | `bus_send` with `to=<name>`, for every live agent of the home, on any repository or in a scratch folder |
+| another home on the same computer | no bus route; `bus_send` answers `AGENT_UNKNOWN` |
+| another computer | no bus route; `bus_send` answers `AGENT_UNKNOWN` |
+| a home that joined the same control plane | `fleet_send` with the agent's fleet name, such as `lab-agent-b` |
+
+Nothing extra is granted for the first row. An agent reaches every agent of its home unless its swarm role names `send_to`, which narrows it to its parent and the roles listed.
+
+### What it reads
+
+- `bus_status` with `section: "sessions"` lists every session of the home: each agent's activity, turn, open questions and last heartbeat. Pass `offset` for the next page. An agent has `bus_status` when its config's `tools` is `"default"` or `"full"`. With `tools = "bus"` it has none.
+- `bus_inbox` and `bus_read` read the agent's own inbox only. Another agent's inbox is read by you, the operator: `dockingbird inbox agent-b` and `dockingbird read ID`, or `agent_inbox` from your harness.
+- A message of kind `status` needs a payload with `phase`, such as `{"phase": "check"}`. Without it, the send is refused with `VALIDATION_FAILED` and the reason `KIND_PAYLOAD_INVALID`.
+
+### What it cannot do
+
+Messaging brings no control. Stopping, starting and changing another agent's model or effort stay with you: `dockingbird stop`, `start` and `set` on the host, or `agent_stop` and `agent_set` from your harness.
+
+### Reaching agents on other homes
+
+Two routes exist.
+
+1. Join the homes to one control plane. Each agent whose tools include `bus_send`, started after the join, gets the fleet tools, and `fleet_send` reaches the others by fleet name. `node join` is refused while agents run in the home (`MODE_CHANGE_AGENTS_RUNNING`), so the join needs a moment with the home's agents stopped. See [the control plane](control-plane.md).
+2. Relay through a service you run. Make a service connection whose program runs `dockingbird status` and `dockingbird send` for the other home, give it to the running managing agent with `connect` and `--to AGENT --until ISO`, and run `dockingbird serve NAME`. The agent asks with `bus_request`, which is in the `default` and `full` tool sets and not in `bus`. Declare only the words the relay needs, so the connection carries no stop or start power. See [connections](../guides/connections.md).
+
 ## What it never does
 
 - It never lets an agent reach another agent by any path but the bus. Each agent has its own network, and a proxy refuses every address that is not public.
