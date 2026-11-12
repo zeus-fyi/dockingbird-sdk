@@ -50,8 +50,8 @@ The `bus` tool set, the default for an agent, holds the tools that mark a messag
 | `bus_send` | `reply_required` | a boolean; demands a reply to a `task_request`, `handoff` or `review_request`, so the end of the target's turn does not settle it |
 | `bus_send` | `reply_to` | the 36-character id of the message this one answers; a reply to a marked message settles the sender's delivery of it |
 | `bus_send` | `all`, `swarm`, `role` | sends to a group instead of `to`: every live agent, a swarm, a role, or a role within a swarm |
-| `bus_ack` | `delivery_id`, `expected_version`, `outcome` | records the agent's disposition of a delivery; `outcome` is `accepted`, `responded`, `done`, `declined` or `needs_info`, and `note` takes at most 120 characters |
-| `bus_expect` | `kind`, `sender`, `within_s`, `subject_prefix`, `since` | registers a message the agent expects; `within_s` is 1 to 604,800 seconds; one alert arrives if none comes in time |
+| `bus_ack` | `delivery_id`, `expected_version`, `outcome` | records the agent's disposition of a delivery; `outcome` is `accepted`, `responded`, `done`, `declined` or `needs_info`, and `note` takes at most 120 characters; `accepted` answers with a `next_step` member, and `declined` on an accepted delivery is refused with `VERSION_CONFLICT` |
+| `bus_expect` | `kind`, `sender`, `within_s`, `subject_prefix`, `since` | registers a message the agent expects; `within_s` is 1 to 604,800 seconds; one alert arrives if none comes in time; only a row sent after the registration closes it, unless `since` is earlier |
 | `bus_expectations` | `closed` | lists the agent's open expectations, or every state with `closed` |
 | `bus_expect_withdraw` | `expectation_id` | withdraws an open expectation |
 

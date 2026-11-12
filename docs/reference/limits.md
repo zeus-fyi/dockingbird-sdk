@@ -51,6 +51,7 @@ Every setting here is a `DOCKINGBIRD_` variable. [environment-variables.md](envi
 | Reply deadline of a P1 message | 900 seconds by default, 60 to 86,400 | the same for P1; `P1_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
 | Reply deadline of a P2 message | 14,400 seconds by default, 300 to 604,800 | the same for P2; `P2_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
 | Reply deadline of a P3 message | 86,400 seconds by default, 3,600 to 604,800 | the same for P3; `P3_ACCEPTANCE_DEADLINE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
+| Wait before a `target ended:` alert | 300 seconds, fixed | how long after an agent session's end the sender of a message it left open is alerted; `TARGET_ENDED_GRACE_S` | [reliable-messages.md](../guides/reliable-messages.md#2-what-happens-while-it-is-open) |
 | Recipients of one send | none by default (0), any whole number from 0 | a positive value refuses a send whole when it lists, or a group expands to, more recipients; `RECIPIENTS_MAX` | [reliable-messages.md](../guides/reliable-messages.md) |
 
 P0 must stay below P1, and P1 below P2.
